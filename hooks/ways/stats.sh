@@ -174,7 +174,10 @@ if $JSON_OUT; then
     check_fires: ([.[] | select(.event == "check_fired")] | length),
     by_check: ([.[] | select(.event == "check_fired") | .check] | group_by(.) | map({(.[0]): length}) | add // {}),
     check_avg_distance: ([.[] | select(.event == "check_fired") | .distance | tonumber] | if length > 0 then (add / length) else 0 end),
-    check_anchored: ([.[] | select(.event == "check_fired" and .anchored == "true")] | length)
+    check_anchored: ([.[] | select(.event == "check_fired" and .anchored == "true")] | length),
+    redisclosures: ([.[] | select(.event == "way_redisclosed")] | length),
+    by_redisclosed_way: ([.[] | select(.event == "way_redisclosed") | .way] | group_by(.) | map({(.[0]): length}) | add // {}),
+    redisclose_avg_token_distance: ([.[] | select(.event == "way_redisclosed") | .token_distance | tonumber] | if length > 0 then (add / length) else 0 end)
   }'
   exit 0
 fi
@@ -184,6 +187,7 @@ fi
 TOTAL=$(echo "$EVENTS" | wc -l)
 SESSIONS=$(echo "$EVENTS" | jq -r 'select(.event == "session_start") | .session' | sort -u | wc -l)
 FIRES=$(echo "$EVENTS" | jq -r 'select(.event == "way_fired") | .way' | wc -l)
+REDISCLOSURES=$(echo "$EVENTS" | jq -r 'select(.event == "way_redisclosed") | .way' | wc -l)
 
 # Date range
 FIRST=$(echo "$EVENTS" | head -1 | jq -r '.ts[:10]')
@@ -202,7 +206,11 @@ if [[ -n "$PROJECT_FILTER" ]]; then
   echo "Project: ${PROJECT_FILTER}"
 fi
 echo ""
-echo "Sessions: ${SESSIONS}  |  Way fires: ${FIRES}"
+if [[ $REDISCLOSURES -gt 0 ]]; then
+  echo "Sessions: ${SESSIONS}  |  Way fires: ${FIRES}  |  Re-disclosures: ${REDISCLOSURES}"
+else
+  echo "Sessions: ${SESSIONS}  |  Way fires: ${FIRES}"
+fi
 echo ""
 
 # Top ways
@@ -286,6 +294,23 @@ if [[ $CHECK_FIRES -gt 0 ]]; then
     [[ "$anchored" == "true" ]] && label="anchored"
     printf "  %-10s %3d\n" "$label" "$count"
   done
+  echo ""
+fi
+
+# Re-disclosure stats (ADR-104)
+if [[ $REDISCLOSURES -gt 0 ]]; then
+  echo "Re-disclosures: ${REDISCLOSURES}"
+  echo ""
+  echo "Top re-disclosed ways:"
+  echo "$EVENTS" | jq -r 'select(.event == "way_redisclosed") | .way' | sort | uniq -c | sort -rn | head -10 | while read count way; do
+    printf "  %-30s %3d\n" "$way" "$count"
+  done
+  echo ""
+  echo "Token distance at re-disclosure:"
+  echo "$EVENTS" | jq -r 'select(.event == "way_redisclosed") | .token_distance' | awk '
+    { sum += $1; count++; if ($1 > max) max = $1; if (count == 1 || $1 < min) min = $1 }
+    END { if (count > 0) printf "  avg: %.0fk  min: %.0fk  max: %.0fk  total: %d\n", sum/count/1000, min/1000, max/1000, count }
+  '
   echo ""
 fi
 

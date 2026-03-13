@@ -5,13 +5,14 @@
 # Way paths can be nested: "softwaredev/delivery/github", "awsops/iam", etc.
 # Looks for: {way-path}/way.md and optionally {way-path}/macro.sh
 #
-# STATE MACHINE:
-# ┌─────────────────┬────────────────────────────────────┐
-# │ Marker State    │ Action                             │
-# ├─────────────────┼────────────────────────────────────┤
-# │ not exists      │ output way, create marker          │
-# │ exists          │ no-op (idempotent)                 │
-# └─────────────────┴────────────────────────────────────┘
+# STATE MACHINE (ADR-104: token-gated re-disclosure):
+# ┌─────────────────────────────┬────────────────────────────────────┐
+# │ Marker State                │ Action                             │
+# ├─────────────────────────────┼────────────────────────────────────┤
+# │ not exists                  │ output way, create marker          │
+# │ exists, token dist < thresh │ no-op (way still warm)             │
+# │ exists, token dist >= thresh│ re-disclose, update marker         │
+# └─────────────────────────────┴────────────────────────────────────┘
 #
 # MACRO SUPPORT:
 # If frontmatter contains `macro: prepend` or `macro: append`,
@@ -69,48 +70,73 @@ is_project_trusted() {
 # Marker: scoped to session_id
 MARKER="/tmp/.claude-way-${WAY_MARKER_NAME}-${SESSION_ID:-$(date +%Y%m%d)}"
 
-if [[ ! -f "$MARKER" ]]; then
-  # Extract macro field from frontmatter (prepend or append)
-  MACRO_POS=$(awk '/^---$/{p=!p; next} p && /^macro:/{gsub(/^macro: */, ""); print; exit}' "$WAY_FILE")
+# Token-gated re-disclosure (ADR-104)
+source "${HOME}/.claude/hooks/ways/token-position.sh"
+IS_REDISCLOSURE=false
 
-  # Check for macro script (same directory as way file)
-  MACRO_FILE="${WAY_DIR}/macro.sh"
-  MACRO_OUT=""
-
-  if [[ -n "$MACRO_POS" && -x "$MACRO_FILE" ]]; then
-    # SECURITY: Skip project-local macros unless project is explicitly trusted
-    if $IS_PROJECT_LOCAL && ! is_project_trusted; then
-      echo "**Note**: Project-local macro skipped (add $PROJECT_DIR to ~/.claude/trusted-project-macros to enable)"
-    else
-      # Run macro, capture output
-      MACRO_OUT=$("$MACRO_FILE" 2>/dev/null)
-    fi
+if [[ -f "$MARKER" ]]; then
+  # Marker exists — check if token distance exceeds re-disclosure threshold
+  if token_distance_exceeded "$WAY_MARKER_NAME" "$SESSION_ID"; then
+    IS_REDISCLOSURE=true
+  else
+    exit 0  # Way is still warm, no-op
   fi
+fi
 
-  # Output based on macro position
-  if [[ "$MACRO_POS" == "prepend" && -n "$MACRO_OUT" ]]; then
-    echo "$MACRO_OUT"
-    echo ""
+# First disclosure or re-disclosure — output the way content
+
+# Extract macro field from frontmatter (prepend or append)
+MACRO_POS=$(awk '/^---$/{p=!p; next} p && /^macro:/{gsub(/^macro: */, ""); print; exit}' "$WAY_FILE")
+
+# Check for macro script (same directory as way file)
+MACRO_FILE="${WAY_DIR}/macro.sh"
+MACRO_OUT=""
+
+if [[ -n "$MACRO_POS" && -x "$MACRO_FILE" ]]; then
+  # SECURITY: Skip project-local macros unless project is explicitly trusted
+  if $IS_PROJECT_LOCAL && ! is_project_trusted; then
+    echo "**Note**: Project-local macro skipped (add $PROJECT_DIR to ~/.claude/trusted-project-macros to enable)"
+  else
+    # Run macro, capture output
+    MACRO_OUT=$("$MACRO_FILE" 2>/dev/null)
   fi
+fi
 
-  # Output static content, stripping YAML frontmatter
-  awk 'BEGIN{fm=0} /^---$/{fm++; next} fm!=1' "$WAY_FILE"
+# Output based on macro position
+if [[ "$MACRO_POS" == "prepend" && -n "$MACRO_OUT" ]]; then
+  echo "$MACRO_OUT"
+  echo ""
+fi
 
-  if [[ "$MACRO_POS" == "append" && -n "$MACRO_OUT" ]]; then
-    echo ""
-    echo "$MACRO_OUT"
-  fi
+# Output static content, stripping YAML frontmatter
+awk 'BEGIN{fm=0} /^---$/{fm++; next} fm!=1' "$WAY_FILE"
 
-  touch "$MARKER"
+if [[ "$MACRO_POS" == "append" && -n "$MACRO_OUT" ]]; then
+  echo ""
+  echo "$MACRO_OUT"
+fi
 
-  # Stamp epoch for check distance tracking
-  source "${HOME}/.claude/hooks/ways/epoch.sh"
-  CURRENT_EPOCH=$(cat "/tmp/.claude-epoch-${SESSION_ID}" 2>/dev/null || echo 0)
-  stamp_way_epoch "$WAY_MARKER_NAME" "$SESSION_ID"
+# Write marker with token position (replaces boolean touch)
+get_token_position "$SESSION_ID"
+echo "$TOKEN_POSITION" > "$MARKER"
 
-  # Log event
+# Stamp token position for distance tracking
+stamp_way_tokens "$WAY_MARKER_NAME" "$SESSION_ID"
+
+# Stamp epoch for check distance tracking
+source "${HOME}/.claude/hooks/ways/epoch.sh"
+CURRENT_EPOCH=$(cat "/tmp/.claude-epoch-${SESSION_ID}" 2>/dev/null || echo 0)
+stamp_way_epoch "$WAY_MARKER_NAME" "$SESSION_ID"
+
+# Log event
+if $IS_REDISCLOSURE; then
+  LOG_ARGS=(event=way_redisclosed way="$WAY" domain="$DOMAIN"
+    trigger="$TRIGGER" scope="$SCOPE" project="$PROJECT_DIR" session="$SESSION_ID"
+    token_distance="$TOKEN_DISTANCE" token_position="$TOKEN_POSITION"
+    redisclose_threshold="$REDISCLOSE_TOKENS")
+else
   LOG_ARGS=(event=way_fired way="$WAY" domain="$DOMAIN"
     trigger="$TRIGGER" scope="$SCOPE" project="$PROJECT_DIR" session="$SESSION_ID")
-  [[ -n "$TEAM" ]] && LOG_ARGS+=(team="$TEAM")
-  "${HOME}/.claude/hooks/ways/log-event.sh" "${LOG_ARGS[@]}"
 fi
+[[ -n "$TEAM" ]] && LOG_ARGS+=(team="$TEAM")
+"${HOME}/.claude/hooks/ways/log-event.sh" "${LOG_ARGS[@]}"
