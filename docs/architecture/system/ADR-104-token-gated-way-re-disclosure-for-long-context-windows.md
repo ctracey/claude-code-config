@@ -44,15 +44,17 @@ Token position is read from the transcript using the same method as `context-usa
 
 ### Re-disclosure thresholds
 
-Model-specific intervals based on empirical degradation curves:
+**Percentage-based, not fixed token counts.** Re-disclosure fires when a way has drifted 25% of the context window since its last disclosure. This scales automatically with the model's context size:
 
-| Model | Context window | Re-disclosure interval | Max re-disclosures |
-|-------|---------------|----------------------|-------------------|
+| Model | Context window | 25% interval | Max re-disclosures |
+|-------|---------------|-------------|-------------------|
 | Opus 4.6 | 1M | 250K tokens | ~3-4 per session |
-| Sonnet 4.6 | 200K | 80K tokens | ~2 per session |
-| Haiku 4.5 | 200K | 60K tokens | ~2-3 per session |
+| Sonnet 4.6 | 200K | 50K tokens | ~3 per session |
+| Haiku 4.5 | 200K | 50K tokens | ~3 per session |
 
-These intervals correspond to the point where retrieval accuracy has dropped ~10-15% from the disclosure point — enough to meaningfully affect rule compliance but not so aggressive that it wastes context budget.
+The 25% figure corresponds to the empirical degradation curves: retrieval accuracy drops ~10-15% per quarter-window, which is enough to meaningfully affect rule compliance but not so aggressive that it wastes context budget.
+
+Using percentages means the system automatically adapts when Anthropic ships new context tiers — no hardcoded constants to update.
 
 ### Marker file evolution
 
@@ -78,16 +80,17 @@ if [[ ! -f "$MARKER" ]] || token_distance_exceeded "$MARKER" "$SESSION_ID"; then
 
 ### Model detection
 
-The re-disclosure interval depends on the model. Detection uses the same approach as `context-usage.sh` — read the model field from the transcript:
+The context window size depends on the model. Detection uses the same approach as `context-usage.sh` — read the model field from the transcript, map to window size, then calculate 25%:
 
 ```bash
 MODEL=$(jq -r 'select(.type=="assistant" and .message.model) | .message.model' "$TRANSCRIPT" 2>/dev/null | tail -1)
 case "$MODEL" in
-  *opus-4-6*|*opus-4*)  REDISCLOSE_TOKENS=250000 ;;
-  *sonnet*)             REDISCLOSE_TOKENS=80000 ;;
-  *haiku*)              REDISCLOSE_TOKENS=60000 ;;
-  *)                    REDISCLOSE_TOKENS=80000 ;;  # conservative default
+  *opus-4-6*|*opus-4*)  CONTEXT_WINDOW=1000000 ;;
+  *sonnet*)             CONTEXT_WINDOW=200000 ;;
+  *haiku*)              CONTEXT_WINDOW=200000 ;;
+  *)                    CONTEXT_WINDOW=200000 ;;
 esac
+REDISCLOSE_TOKENS=$(( CONTEXT_WINDOW * 25 / 100 ))
 ```
 
 ### Re-disclosure behavior

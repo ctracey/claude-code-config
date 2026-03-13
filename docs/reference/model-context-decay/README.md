@@ -59,19 +59,23 @@ Sonnet retrieval: ~91%          ~82%          ~73%          ~69%          ~65%
 Way influence:    STRONG ────── WARM ────────── COOL ──────── COLD ──────── FADED
 ```
 
-### Recommended Re-Disclosure Intervals
+### Recommended Re-Disclosure Interval
 
-Based on the degradation curves, ways should become re-eligible when retrieval accuracy has dropped enough to meaningfully affect behavior:
+**25% of context window.** A single percentage-based threshold that scales automatically:
 
-| Model | Re-disclosure interval | Rationale |
-|-------|----------------------|-----------|
-| **Opus 4.6 (1M)** | ~250K tokens | Retrieval drops ~10% per 250K; reasoning stays stable. Re-disclose when the way has lost meaningful retrieval fidelity but before it's forgotten. |
-| **Sonnet 4.6 (200K)** | ~80K tokens | Steeper degradation curve. At 200K window this means ~2 re-disclosures max per session. |
-| **Haiku 4.5 (200K)** | ~60K tokens | Assumed steeper degradation (no benchmark data). Conservative interval. |
+| Model | Window | 25% interval | Max re-disclosures |
+|-------|--------|-------------|-------------------|
+| **Opus 4.6** | 1M | 250K tokens | ~3-4 per session |
+| **Sonnet 4.6** | 200K | 50K tokens | ~3 per session |
+| **Haiku 4.5** | 200K | 50K tokens | ~3 per session |
+
+The 25% figure maps to the empirical degradation knee: retrieval drops ~10-15% per quarter-window across models. This is enough to meaningfully affect rule compliance but not so frequent that it wastes context.
+
+Using a percentage rather than fixed token counts means the system automatically adapts to new context tiers without code changes.
 
 ### Token Budget Consideration
 
-Re-disclosure has a cost: each way injection is ~200-500 tokens. At 250K intervals on a 1M window, that's ~3-4 re-disclosures per way per session. For a session that triggers 5 ways, that's ~6-10K tokens total — well under 1% of the budget.
+Re-disclosure has a cost: each way injection is ~200-500 tokens. At 25% intervals, that's ~3-4 re-disclosures per way per session. For a session that triggers 5 ways, that's ~6-10K tokens total — well under 1% of even a 200K budget.
 
 ## How This Connects to Epochs
 

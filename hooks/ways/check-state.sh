@@ -72,9 +72,21 @@ evaluate_trigger() {
       local threshold=$(awk '/^threshold:/' "$wayfile" | sed 's/^threshold: *//')
       threshold=${threshold:-90}
 
-      # ~4 chars/token, ~155K window = 620K chars
-      # threshold% of 620K
-      local limit=$((620000 * threshold / 100))
+      # Detect model to determine context window size
+      # Read from transcript API data (same approach as context-usage.sh)
+      local model=""
+      local window_chars=620000  # default: 155K tokens × 4 chars/token (200K window)
+      if [[ -f "$TRANSCRIPT" ]]; then
+        model=$(jq -r 'select(.type=="assistant" and .message.model) | .message.model' "$TRANSCRIPT" 2>/dev/null | tail -1)
+        case "$model" in
+          *opus-4-6*|*opus-4*)  window_chars=3800000 ;;  # ~950K usable tokens × 4 chars/token
+          *sonnet*)             window_chars=620000 ;;   # ~155K usable tokens × 4 chars/token
+          *haiku*)              window_chars=620000 ;;
+        esac
+      fi
+
+      # threshold% of window
+      local limit=$((window_chars * threshold / 100))
       local size=$(get_transcript_size)
 
       [[ $size -gt $limit ]]
