@@ -194,5 +194,13 @@
     "ralph-loop@claude-plugins-official": false,
     "gopls-lsp@claude-plugins-official": true
   },
+  "extraKnownMarketplaces": {
+    "knowledge-work-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/knowledge-work-plugins"
+      }
+    }
+  },
   "alwaysThinkingEnabled": true
 }
