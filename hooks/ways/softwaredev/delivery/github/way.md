@@ -39,6 +39,7 @@ We use PRs for all changes, including solo projects. A PR without reviewers stil
 
 - **Solo/pair**: Lightweight PRs — a title and a few bullets is enough
 - **Team**: Full PR with context, reviewers, and linked issues
+- **Team (3+ contributors)**: Consider enabling [Claude Code Review](https://claude.com/blog/code-review) — automated multi-agent PR analysis that catches bugs skimmed reviews miss. $15-25/review, Team/Enterprise plans, org spending caps available
 
 ## When User Mentions GitHub
 

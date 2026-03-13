@@ -8,6 +8,11 @@ allowed-tools: Bash, Read, Grep, Glob
 
 Deliver current work to main. Assess the current state and pick up from wherever the user is.
 
+## Arguments
+
+- `/ship` — default flow, adapts review gate to repo flavor
+- `/ship full-sail` — skip the review pause (solo/pair repos only; team repos still pause)
+
 ## Assess First
 
 Run these in parallel to determine current position in the flow:
@@ -18,6 +23,19 @@ git branch --show-current       # On main or a feature branch?
 git log --oneline main..HEAD    # Commits ahead of main?
 git remote show origin 2>&1     # Remote tracking state?
 ```
+
+Also check repo flavor for review gating:
+
+```bash
+# Active contributors in last 90 days
+git log --since="90 days ago" --format='%aN' | sort -u | wc -l
+```
+
+- **≤2 active**: Solo/pair — lightweight PRs, review pause optional
+- **3+ active**: Team — review pause mandatory, suggest reviewers
+
+If the GitHub way has already injected context (look for `**Context**: Team project` or
+`**Context**: Solo/pair project` in the conversation), use that instead of re-checking.
 
 ## Flow Steps (skip what's already done)
 
@@ -59,11 +77,18 @@ EOF
 Keep the title under 70 characters. Summary should be 1-3 bullets.
 For small/obvious changes, the test plan can be brief.
 
-### 5. Review (scope-dependent)
+### 5. Review Gate
 
-- **Trivial** (typos, config, single-file): skip review, merge directly
+**Team repos (3+ active contributors):**
+- Always pause here. State the change scope and suggest reviewers.
+- Do NOT proceed to merge without explicit user approval.
+- Exception: `/ship full-sail` is rejected for team repos — tell the user why.
+
+**Solo/pair repos (≤2 active contributors):**
+- **Trivial** (typos, config, single-file): merge directly
 - **Small** (1-3 files, clear intent): quick self-review of the diff is enough
-- **Significant** (architecture, multi-file, behavioral): suggest the user review or request a reviewer
+- **Significant** (architecture, multi-file, behavioral): suggest the user review
+- `/ship full-sail` skips the pause entirely for any change size
 
 State your assessment and let the user decide.
 
@@ -91,6 +116,7 @@ git branch -d <branch>
 ## Key Principles
 
 - **Don't ask permission for each step** — assess state, propose the full remaining flow, then execute
-- **Pause only at decision points**: commit message wording, PR description, review scope
+- **Pause only at decision points**: commit message wording, PR description, review gate
 - **If already mid-flow**, pick up from current state — don't restart
 - **One commit is fine** for most changes; only split if there are genuinely separate concerns
+- **Repo flavor drives review**, not just change size — a one-line fix in a team repo still pauses
