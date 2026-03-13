@@ -28,6 +28,13 @@ from pathlib import Path
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
 HOME = str(Path.home())
 
+def term_width():
+    """Get terminal width, default 80."""
+    try:
+        return os.get_terminal_size().columns
+    except (ValueError, OSError):
+        return 80
+
 # ── Colors ──────────────────────────────────────────────────────────────────
 
 USE_COLOR = sys.stdout.isatty()
@@ -200,15 +207,21 @@ def cmd_list(args):
         print("No matching projects found.")
         return
 
+    # Dynamic column layout based on terminal width
+    tw = term_width()
+    # Fixed columns: 2 indent + sessions(8) + size(6) + age(7) + mem(3) + spacing(4) = 30
+    fixed = 30
+    path_w = max(20, tw - fixed)
+
     # Header
     print(f"\n{bold('Claude Code Projects')}  ({len(projects)} shown)\n")
-    print(f"  {'Project':<42} {'Sessions':>8} {'Size':>6} {'Last':>7} {'Mem':>3}")
-    print(f"  {'─' * 42} {'─' * 8} {'─' * 6} {'─' * 7} {'─' * 3}")
+    print(f"  {'Project':<{path_w}} {'Sess':>4} {'Size':>6} {'Last':>7} {'M':>1}")
+    print(f"  {'─' * path_w} {'─' * 4} {'─' * 6} {'─' * 7} {'─' * 1}")
 
     for p in projects:
         path = p["path"]
-        if len(path) > 40:
-            path = "…" + path[-39:]
+        if len(path) > path_w:
+            path = "…" + path[-(path_w - 1):]
 
         sess = str(p["sessions"]) if p["sessions"] else dim(str(p["jsonl_files"]) + "t") if p["jsonl_files"] else dim("–")
         size = fmt_bytes(p["jsonl_bytes"]) if p["jsonl_bytes"] else dim("–")
@@ -225,7 +238,7 @@ def cmd_list(args):
         elif age:
             age = dim(age)
 
-        print(f"  {path:<42} {sess:>8} {size:>6} {age:>7} {mem:>3}")
+        print(f"  {path:<{path_w}} {sess:>4} {size:>6} {age:>7} {mem:>1}")
 
     print()
 
