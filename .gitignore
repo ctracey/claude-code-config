@@ -99,6 +99,10 @@
 !tools/way-match/snowball/
 !tools/way-match/snowball/*
 
+# Standalone tools (user-facing CLI utilities)
+!tools/
+!tools/*
+
 # Built binaries (checked in, cross-platform APE)
 !bin/
 !bin/*
