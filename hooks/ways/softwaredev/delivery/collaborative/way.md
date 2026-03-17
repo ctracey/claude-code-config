@@ -32,3 +32,5 @@ Do not commit until the user explicitly confirms they are ready. They need the o
 ## Branch and PR Pattern
 
 One branch, one PR. Each completed task is a commit on that branch. The PR accumulates commits as tasks complete and represents the full change when done.
+
+Never commit directly to main. Create the branch before any implementation begins.
