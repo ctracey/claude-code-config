@@ -137,9 +137,59 @@ ls /tmp/.claude-think-*.json 2>/dev/null
 
 ---
 
+## Part B2: Think Strategy Skill Session Lifecycle
+
+### Step 10 — Skill creates session registration
+
+> **CLAUDE**: Clean up any leftover state, then invoke the `/think-tree` skill. After it registers, verify the session file exists:
+
+```bash
+rm -f /tmp/.claude-think-session 2>/dev/null
+```
+
+> **USER**: Type exactly: `/think-tree`
+
+> **CLAUDE**: After the skill begins and registers, check the session file:
+
+```bash
+cat /tmp/.claude-think-session 2>/dev/null
+```
+
+**Expected**: The file contains `tree-of-thoughts`. The skill registered its session before beginning work.
+
+---
+
+### Step 11 — Overlapping session is blocked
+
+> **USER**: Type exactly: `/think-stepback`
+
+> **CLAUDE**: The step-back skill should detect the active tree-of-thoughts session and ask whether to finish or abandon it first. Report whether the skill blocked or proceeded.
+
+**Expected**: The skill detects `/tmp/.claude-think-session` contains `tree-of-thoughts` and does NOT start a new session. It asks the user to finish or abandon the active session first.
+
+---
+
+### Step 12 — Session cleanup on completion or abandon
+
+> **CLAUDE**: Simulate abandoning the session by running the cleanup:
+
+```bash
+rm -f /tmp/.claude-think-session /tmp/.claude-way-meta-think-* 2>/dev/null
+```
+
+> Then verify both are gone:
+
+```bash
+ls /tmp/.claude-think-session /tmp/.claude-way-meta-think-* 2>/dev/null; echo "exit: $?"
+```
+
+**Expected**: Both files are removed. Exit code is non-zero (files don't exist). The think way marker is also cleared, meaning the think way can fire again for new problems in this session.
+
+---
+
 ## Part C: Negative Tests
 
-### Step 10 — No false positive on unrelated prompt
+### Step 13 — No false positive on unrelated prompt
 
 > **USER**: Type exactly: `how many legs does an octopus have?`
 
@@ -149,7 +199,7 @@ ls /tmp/.claude-think-*.json 2>/dev/null
 
 ---
 
-### Step 11 — Way does not re-fire on related prompt
+### Step 14 — Way does not re-fire on related prompt
 
 > **USER**: Type exactly: `let's explore multiple options for the database schema`
 
@@ -161,7 +211,7 @@ ls /tmp/.claude-think-*.json 2>/dev/null
 
 ## Part D: Summary
 
-### Step 12 — Compile results
+### Step 15 — Compile results
 
 > **CLAUDE**: Compile a summary table:
 >
@@ -176,11 +226,15 @@ ls /tmp/.claude-think-*.json 2>/dev/null
 > | 7 | Think way fires | Strategy menu injected | ? |
 > | 8 | No auto-activation | No state file created | ? |
 > | 9 | Think way session-gated | Way does not re-fire | ? |
-> | 10 | Negative test | Nothing fires | ? |
-> | 11 | Way does not re-fire | Marker prevents repeat | ? |
+> | 10 | Skill session registration | Session file created with strategy name | ? |
+> | 11 | Overlapping session blocked | Second skill refuses to start | ? |
+> | 12 | Session cleanup | Session + way marker removed | ? |
+> | 13 | Negative test | Nothing fires | ? |
+> | 14 | Way does not re-fire | Marker prevents repeat | ? |
 >
 > Report pass/fail count and observations about:
 > - Whether progressive disclosure trees deliver the right content at the right depth
 > - Whether anti-rationalization tables appear at the expected specificity level
 > - Whether the think strategies way fires and is session-gated correctly
+> - Whether think skill session lifecycle prevents overlapping sessions and cleans up correctly
 > - Whether tree disclosure metrics capture parent-child relationships
