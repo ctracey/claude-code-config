@@ -1,7 +1,7 @@
 ---
 description: structured reasoning, thinking frameworks, cognitive scaffolding for complex decisions
 vocabulary: explore options approaches trade-off balance alternatives stuck principle abstract reasoning framework systematic
-threshold: 3.0
+threshold: 2.0
 scope: agent, subagent
 ---
 # Think Strategies

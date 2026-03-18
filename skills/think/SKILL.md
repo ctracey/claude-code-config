@@ -33,3 +33,25 @@ Select and invoke a structured reasoning framework. Each strategy is a separate 
 4. Follow all stages in order before concluding
 
 Strategy definitions live in `~/.claude/hooks/ways/meta/think/strategies/`.
+
+## Session Lifecycle
+
+Think sessions have a lifecycle: **start → work stages → complete (or abandon)**.
+
+**Before starting a new session:**
+
+```bash
+# Check for active think session
+cat /tmp/.claude-think-session 2>/dev/null
+```
+
+- If a session is active, ask the user: finish it or abandon it first
+- Do NOT start a new think session while one is active
+
+**Abandoning a session** (user says "never mind", "skip it", changes topic):
+
+```bash
+rm -f /tmp/.claude-think-session /tmp/.claude-way-meta-think-*"${CLAUDE_SESSION_ID:+-$CLAUDE_SESSION_ID}" 2>/dev/null
+```
+
+After completion or abandonment, the think way can fire again for new problems.
