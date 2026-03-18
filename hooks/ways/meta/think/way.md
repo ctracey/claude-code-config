@@ -39,4 +39,14 @@ Most problems resolve at level 1. The strategies exist for when they don't.
 | Stuck, need first principles | Step-Back | `/think-stepback` |
 | Investigation or debugging | ReAct | `/think-react` |
 
-Each strategy is a step-by-step scaffold that surfaces your reasoning visibly. If during a strategy you encounter unknowns that your tools can't resolve, the remaining resource is the human — ask them directly.
+Each strategy is a step-by-step scaffold that surfaces your reasoning visibly.
+
+## Engaging the Human
+
+During any strategy, if you encounter unknowns that your tools can't resolve, use `AskUserQuestion` to engage the human. Your job is to **frame the unknown precisely** — not "what should I do?" but:
+
+- "I've narrowed this to X or Y. Here's what I can't determine — which is true in your context?"
+- "This depends on [specific constraint] that I don't have visibility into."
+- "I've identified three approaches with these trade-offs. Which trade-off is acceptable?"
+
+Your reasoning speed and breadth does the framing work. The human's context and ground truth fills the gap. That exchange — the agent framing, the human resolving — is the actual collaboration.
