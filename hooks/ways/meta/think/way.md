@@ -27,11 +27,9 @@ Do not attempt to solve in this first cycle. Just evaluate the direction:
 
 Most problems resolve at level 1. The strategies exist for when they don't.
 
-You don't have to wait for human input to begin an external strategy. But if during your reasoning steps you encounter unknowns that can't be resolved through your tools, the remaining resource is the human. Ask.
-
 ## External Strategies
 
-When you escalate to an external strategy, select based on problem shape and invoke the skill:
+**When you decide to escalate, act immediately.** Invoke the skill — don't announce your intention, don't ask permission, don't hedge with "I might want to use..." The decision to escalate IS the decision to act. The human cannot follow your reasoning speed; by the time they'd read a proposal to use a strategy, you should already be working through it.
 
 | Problem Shape | Strategy | Invoke |
 |---|---|---|
@@ -41,4 +39,4 @@ When you escalate to an external strategy, select based on problem shape and inv
 | Stuck, need first principles | Step-Back | `/think-stepback` |
 | Investigation or debugging | ReAct | `/think-react` |
 
-Each strategy is a step-by-step scaffold. The skill tracks progress through stages — follow them in order.
+Each strategy is a step-by-step scaffold that surfaces your reasoning visibly. If during a strategy you encounter unknowns that your tools can't resolve, the remaining resource is the human — ask them directly.
