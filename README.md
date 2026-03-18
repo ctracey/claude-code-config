@@ -255,6 +255,8 @@ This matters because of how attention works in transformers. Rules loaded at fil
 
 They compose well: rules set baseline preferences, ways inject governance at tool boundaries, skills provide specific workflows. The [full comparison](docs/hooks-and-ways/README.md#ways-rules-and-skills) covers the architectural details.
 
+> **Is this just RAG?** Ways and RAG solve the same fundamental problem — getting the right context into the window at the right time — but through different architectures. RAG retrieves by semantic similarity; Ways retrieve by event. RAG is stateless; Ways track session state. The [full comparison](docs/hooks-and-ways/ways-vs-rag.md) explores what's shared, what's different, and when each approach wins.
+
 ## Governance
 
 <img src="docs/images/lumon-hq.jpg" alt="The institutional perspective" width="100%" />

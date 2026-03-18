@@ -226,10 +226,11 @@ See [provenance.md](provenance.md) for the full traceability system — manifest
 If you want to understand the system:
 1. **This file** — you're here
 2. **[rationale.md](rationale.md)** — why this exists
-3. **[context-decay.md](context-decay.md)** — the attention decay model and injection topology
-4. **[context-decay-formal-foundations.md](context-decay-formal-foundations.md)** — formal proofs, control theory, human operator modeling
-5. **[../hooks-and-ways.md](../hooks-and-ways.md)** — how it works (reference)
-6. **Domain docs** — the policy for each group of ways
+3. **[ways-vs-rag.md](ways-vs-rag.md)** — how Ways relate to RAG (and where they diverge)
+4. **[context-decay.md](context-decay.md)** — the attention decay model and injection topology
+5. **[context-decay-formal-foundations.md](context-decay-formal-foundations.md)** — formal proofs, control theory, human operator modeling
+6. **[../hooks-and-ways.md](../hooks-and-ways.md)** — how it works (reference)
+7. **Domain docs** — the policy for each group of ways
 
 If you want to add or modify ways:
 1. **[extending.md](extending.md)** — how to create ways
