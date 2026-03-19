@@ -79,6 +79,8 @@ threshold: 90             # percentage (0-100)
 
 ## Creating a New Way
 
+**Before creating, check what exists.** Scan `~/.claude/hooks/ways/` and `$PROJECT/.claude/ways/` for ways in the same domain. Extending an existing way is cheaper and less noisy than creating a new one. Only create something new after confirming nothing existing covers it.
+
 1. Create directory in:
    - Global: `~/.claude/hooks/ways/{domain}/{wayname}/`
    - Project: `$PROJECT/.claude/ways/{domain}/{wayname}/`
