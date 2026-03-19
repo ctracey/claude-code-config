@@ -41,6 +41,14 @@ When a functional milestone is reached (feature works end-to-end, task group com
 
 This ensures working code ships clean, not just working. But it should not become a bottleneck — the maturity pass is a quick polish, not a second project.
 
+### Refactoring task structure
+
+Before writing code for a refactor step, check which ways apply to the type of file being created. The guidance exists to prevent rework.
+
+When extracting code into a new module: create it, colocate its assets (styles, tests, types — whatever the ecosystem expects), wire it into the consumer, and verify. These are one task, not four. A module that isn't consumed isn't done.
+
+Verification (tests pass, build succeeds, behaviour unchanged) is part of every extraction task, not a separate step. Don't create standalone "run tests" or "verify build" tasks in refactor todos.
+
 ## Branch and PR Pattern
 
 One branch, one PR. Each completed task is a commit on that branch. The PR accumulates commits as tasks complete and represents the full change when done.
