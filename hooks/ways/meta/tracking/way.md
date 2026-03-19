@@ -49,3 +49,6 @@ For complex, multi-session work, create files in `.claude/`:
 
 **Cleanup:**
 When all items complete, recommend deleting the file. Git history preserves it. Don't let completed files accumulate.
+
+## Related
+- Cleanup prompt at commit time → `softwaredev/delivery/commits` (Post-Commit Cleanup)
