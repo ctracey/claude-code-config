@@ -38,5 +38,14 @@ For complex, multi-session work, create files in `.claude/`:
 - [ ] Phase 4: Regeneration
 ```
 
+**Refactor numbering:** When a refactor task is created while working on a specific task, prefix it with that task number. General refactors unrelated to a specific task stay unprefixed.
+
+```
+- [x] 5. Design system
+  - [x] 5.R1. Extract data model        # spawned by task 5
+  - [x] 5.R2. Phase component           # spawned by task 5
+- [ ] R1. General cleanup                # not tied to a task
+```
+
 **Cleanup:**
 When all items complete, recommend deleting the file. Git history preserves it. Don't let completed files accumulate.
