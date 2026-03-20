@@ -95,9 +95,63 @@ The key principle: **frontmatter is for matching, body is for injection, and the
 
 **Schema addition:** `locale:` field in `frontmatter-schema.yaml`. The linter validates locale codes and checks that Tier 2 stubs (frontmatter-only files) have a corresponding file with a body.
 
-**Binary changes:** Snowball ships stemmers for 20+ languages. The binary gains a `--language` flag that selects the stemmer. Stopwords become a per-language array (Snowball provides these). The corpus JSONL gains a `locale` field so IDF is computed within-locale.
+**Binary changes — coupled rebuild required:** The stemmer, stopwords, and corpus are tightly coupled and must be rebuilt together when locale support lands. Currently all three are baked into the binary (English Porter2 stemmer as `#include`, stopwords as a C array, seed corpus as `BUILTIN_WAYS[]`). Phase 3 externalizes them:
+
+- **Stemmers:** Snowball ships stemmers for 20+ languages. The binary links multiple Snowball stemmer modules and selects at runtime via `--language`. This is a compile-time decision — each supported language adds ~5-10KB to the binary.
+- **Stopwords:** Move from a hardcoded C array to per-language stopword files in `tools/way-match/stopwords/` (e.g., `en.txt`, `es.txt`, `fr.txt`). These are small, source-auditable text files — same trust tier as the C source. The binary loads the appropriate file at startup based on `--language`, falling back to the baked-in English list if the file is absent.
+- **Corpus:** The `ways-corpus.jsonl` gains a `locale` field per entry. IDF is computed within-locale — Spanish term frequencies don't contaminate English IDF and vice versa. The corpus generator reads `locale:` from each way file's frontmatter.
+
+All three components are rebuilt together. The supported language set is not declared in a config — it's discovered from what exists. The corpus generator scans all `way-*.md` files, collects the set of locale codes in use (from filenames: `way-en.md` → `en`, `way-es.md` → `es`), and the Makefile includes the corresponding Snowball stemmers and stopword files. Adding a new language is: add `way-{lang}.md` files with frontmatter, run the rebuild. The build system discovers the language, the linter validates the pieces, the binary includes the stemmer.
 
 **Scope:** Most ways stay English-only (Tier 1 with potential polyglot vocabulary). Tier 2 and 3 only exist where someone writes them. The system degrades gracefully — no locale file means English, which is the current behavior.
+
+### Phase 3 testing: Cross-language scoring validation
+
+Multilingual way testing is fundamentally different from monolingual testing. You cannot translate an English test prompt and score it — you must generate an *independently natural* prompt expressing the same intent in the target language. "check the dependencies for vulnerabilities" and "verificar las dependencias por vulnerabilidades" are parallel expressions of the same intent, not translations of each other's vocabulary terms.
+
+**Why this matters:** BM25 scores depend on vocabulary term overlap after stemming. The English stemmer reduces "vulnerabilities" to "vulner" and matches against "vulnerability" in the vocabulary. The Spanish stemmer reduces "vulnerabilidades" to "vulnerabil" and must match against Spanish vocabulary terms. These are completely independent scoring paths. A mechanically translated test prompt might use words that don't appear in the target vocabulary, producing misleading low scores that reflect bad test design, not bad vocabulary.
+
+**Binary requirement:** The `--language` flag must select the correct Snowball stemmer and stopword list per invocation. Scoring English vocabulary with the Spanish stemmer (or vice versa) produces garbage. Each test invocation declares its language:
+
+```
+way-match pair --language en --description "..." --vocabulary "..." \
+  --query "check dependencies for vulnerabilities" --threshold 2.0
+
+way-match pair --language es --description "..." --vocabulary "..." \
+  --query "verificar las dependencias por vulnerabilidades" --threshold 2.0
+```
+
+**Cross-language delta report:** The linter compares scores across languages for the same way. English is the baseline. Delta measures how well each locale's vocabulary is tuned relative to the English vocabulary:
+
+```
+=== Cross-Language Delta: softwaredev/code/security ===
+
+  Language  Prompt                                          Score  Delta
+  en        check dependencies for vulnerabilities          4.20   baseline
+  es        verificar las dependencias por vulnerabilidades  3.85   -0.35
+  fr        vérifier les dépendances pour vulnérabilités    2.10   -2.10 ⚠
+
+  Assessment: French vocabulary needs tuning (delta > 1.0)
+```
+
+A delta within ~1.0 of the baseline indicates comparable vocabulary coverage. A delta beyond 1.0 indicates the target language vocabulary has gaps — missing terms, insufficient synonyms, or stemmer mismatch.
+
+**Autonomous test prompt generation:** Claude generates parallel test prompts because it's multilingual. But the test design must be structured: "express this intent naturally in language X" — not "translate this English prompt." The distinction is critical because natural phrasing in each language uses different words, different idioms, different sentence structures. A French user asking about security doesn't think in translated English — they think in French. The test prompts must reflect that.
+
+**Test fixture format extension:** The existing JSONL test fixtures gain a `language` field:
+
+```jsonl
+{"prompt":"check dependencies for vulnerabilities","expected_way":"security","language":"en"}
+{"prompt":"verificar las dependencias por vulnerabilidades","expected_way":"security","language":"es"}
+{"prompt":"vérifier les dépendances pour vulnérabilités","expected_way":"security","language":"fr"}
+```
+
+The test harness groups fixtures by language, runs each group with the appropriate `--language` flag, and reports per-language accuracy alongside the cross-language delta.
+
+**Linter integration:** `lint-ways.sh --strict` gains locale checks:
+- For each `way-{lang}.md`, verify the language code is valid
+- For Tier 2 stubs (frontmatter only), verify a body file exists
+- If test fixtures exist for multiple languages, run cross-language delta and flag deltas > 1.0
 
 ## Consequences
 
