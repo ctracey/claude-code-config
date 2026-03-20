@@ -203,6 +203,16 @@ Concretely:
 
 The test harness enforces this: it tracks false positive rate as a hard constraint (must be 0) while accuracy can vary. Sparsity is how you maintain 0 FP as the vocabulary grows.
 
+### Intentional co-fire: sparsity's inverse
+
+Sparsity is the default — keep ways apart. But sometimes you *want* two ways to fire together. A project-scoped way and a user-scoped way might both be relevant when someone says "create a PR." A GitHub way and a custom Jira way might both need to fire when someone says "ship this ticket."
+
+Rather than writing a third way that combines both concerns (more content to maintain, more context consumed), you can plant shared vocabulary terms in both ways so that BM25 naturally co-fires them on the same prompt. Two small ways that each contribute their piece is lighter than one large way that tries to cover everything.
+
+This is a deliberate vocabulary manipulation — the opposite of sharpening. You're *reducing* the distance between two ways for specific prompts where both are genuinely needed. The key discipline is that the shared terms should be narrow: "pull request", "ship", "PR" — not broad terms like "code" or "deploy" that would create accidental overlap on unrelated prompts.
+
+The `/ways-tests crowding` command distinguishes these cases. When it reports two ways co-firing, it flags whether the overlap looks accidental (similar scores on a prompt neither should own) or intentional (both score well on a prompt both should serve). The worked example's cross-way ranking shows this: a "healthy co-fire" is when two ways both match but serve complementary purposes.
+
 ## Tools Reference
 
 | Command | Purpose |
