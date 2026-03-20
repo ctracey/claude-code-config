@@ -425,6 +425,29 @@ When presenting results, always include an **assessment** that interprets the nu
 - **False negative**: Target way doesn't fire for a prompt it clearly should — vocabulary gap
 - **False positive**: Way fires strongly for a prompt it shouldn't own — vocabulary too broad
 
+## Authoring Techniques
+
+### Intentional co-fire
+
+The default goal is sparsity — keep ways apart so each prompt activates exactly the right one. But sometimes two ways should fire together for the same prompt. A project-scoped way and a user-scoped way might both be relevant for "create a PR." A GitHub way and a custom Jira way might both need to fire for "ship this ticket."
+
+Rather than writing a third way that combines both (more content, more maintenance, more context consumed), plant a small number of shared vocabulary terms in both ways so BM25 co-fires them naturally. Two small ways each contributing their piece is lighter than one large way covering everything.
+
+**Discipline:** The shared terms must be narrow — "pull request", "ship", "PR" — not broad terms like "code" or "deploy" that create accidental overlap elsewhere. Use `/ways-tests crowding` to verify the co-fire only happens on the intended prompts.
+
+**When crowding mode reports overlap**, distinguish:
+- **Accidental**: similar scores on prompts neither should own → sharpen vocabularies apart
+- **Intentional**: both score well on prompts both should serve → mark as healthy co-fire
+
+### Sparsity as overfitting guard
+
+Adding vocabulary to fix a miss works locally but risks overfitting globally. Every added term is a surface for false matches against other ways.
+
+- **15 precise terms beat 40 general terms.** Prefer domain-specific words over common ones.
+- **Don't chase every synonym.** One well-chosen term per concept. Don't add "deployed", "released", "landed", "merged" when "shipped" alone fixes the miss.
+- **Threshold is a second lever.** Raising threshold cuts weak false matches without losing strong true matches.
+- **Accept some misses.** 90% recall with 0 FP beats 100% recall with 5% FP. The 0 FP constraint is hard; recall is soft.
+
 ## Notes
 
 - The `way-match` binary must exist at `~/.claude/bin/way-match`. If missing, report that BM25 is unavailable and suggest building it.

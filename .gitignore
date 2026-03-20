@@ -79,7 +79,12 @@
 
 # Scripts (shared utilities for hooks, macros, skills)
 !scripts/
-!scripts/*.sh
+!scripts/ansi-chart.py
+!scripts/context-usage.sh
+!scripts/doc-graph.sh
+!scripts/install.sh
+!scripts/project-pulse
+!scripts/task-dashboard.py
 
 # Governance traceability (separable)
 !governance-report

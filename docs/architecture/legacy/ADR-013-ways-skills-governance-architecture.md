@@ -1,8 +1,15 @@
-# ADR-013: Ways, Skills, and Governance Architecture
+---
+status: Accepted
+date: 2026-02-09
+deciders:
+  - aaronsb
+  - claude
+related:
+  - ADR-004
+  - ADR-005
+---
 
-Status: Proposed
-Date: 2026-02-09
-Deciders: @aaron, @claude
+# ADR-013: Ways, Skills, and Governance Architecture
 
 ## Context
 
