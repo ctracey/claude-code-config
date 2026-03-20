@@ -130,7 +130,11 @@ BM25 is a bag-of-words model — it tokenizes on whitespace, stems individual to
 
 The complete coverage requirement (all ways, all stubs) is necessary but not sufficient. Before committing to a language, the cross-language delta test must demonstrate that BM25 + the available stemmer produces scores within acceptable range of the English baseline. If the delta is consistently > 2.0 across test prompts, the language is not feasible with BM25 and should not be offered — partial matching that misses half the prompts is worse than English-only.
 
-For logographic languages (Chinese, Japanese, Thai), the honest answer is: BM25 cannot support them without a tokenizer replacement. This is the strongest argument for eventually moving to embeddings — embedding models handle all languages natively because they don't depend on whitespace tokenization. But that's a future architectural decision (see Alternatives Considered), not a Phase 3 concern. Phase 3 targets languages where BM25 works.
+For logographic languages (Chinese, Japanese, Thai), the honest answer is: BM25 cannot support them without a tokenizer replacement. This matters because **the model itself is fully multilingual** — Claude can generate nuanced, culturally-aware Japanese (poetry, technical prose, idiomatic expressions) with deep competence. The gap is not model capability, it's matching infrastructure. A user typing "雨ごとに師の技を証す" (a poetic Japanese phrase about a master craftsman's legacy) receives zero BM25 tokens — the tokenizer sees one string with no whitespace. The way never fires. Claude could interpret and respond to that prompt perfectly, but the guidance system is blind to it.
+
+This asymmetry — a hyperlingual model behind a monolingual matching system — is the strongest honest argument for embeddings. Not as a general replacement for BM25 (which works well for the languages it works for), but as the path to matching what the model already understands. Embedding models operate on meaning, not whitespace. They handle "雨ごとに師の技を証す" and "check dependencies for vulnerabilities" through the same mechanism.
+
+But that's a future architectural decision (see Alternatives Considered), not a Phase 3 concern. Phase 3 targets languages where BM25 works. The logographic gap is documented here so the decision to revisit has a recorded rationale when the time comes.
 
 ### Phase 3 testing: Cross-language scoring validation
 
