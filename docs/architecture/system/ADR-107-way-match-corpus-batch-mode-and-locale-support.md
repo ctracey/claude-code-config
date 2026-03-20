@@ -64,22 +64,40 @@ The `pair` command remains available for single-way testing (used by `/ways-test
 
 ### Phase 3: Locale-aware ways
 
-Introduce locale variants alongside `way.md`:
+Locale support separates two concerns: **matching** (frontmatter vocabulary in the user's language) and **injection** (the way body Claude reads). These don't have to come from the same file.
+
+Three tiers of localization, from cheapest to most complete:
+
+**Tier 1 — Polyglot frontmatter, single-language body.** One file (`way.md` or `way-en.md`) contains vocabulary lines for multiple languages alongside the English body. A Spanish user's prompt matches on Spanish vocabulary terms, but the injected guidance is English. Zero additional files. Just add vocabulary terms in other languages to the existing frontmatter.
+
+**Tier 2 — Language-specific matchers, shared body.** `way-en.md` has the full body. `way-es.md` has only frontmatter with Spanish vocabulary — no body. The scanner matches on `way-es.md`'s frontmatter but injects `way-en.md`'s body. The stub says "I know how to match in this language" but defers to the English file for content. Cheap to add — a frontmatter-only file per language.
+
+**Tier 3 — Fully translated.** Both `way-en.md` and `way-fr.md` have frontmatter AND body in their respective languages. Full localization. Most expensive to maintain — the body content must be kept in sync across translations.
 
 ```
 hooks/ways/softwaredev/code/security/
-  way.md        # default (English)
-  way-es.md     # Spanish
-  way-fr.md     # French
+  way-en.md     # English: full frontmatter + body (Tier 3 base)
+  way-es.md     # Spanish: frontmatter only, no body (Tier 2 stub)
+  way-fr.md     # French: full frontmatter + body (Tier 3 translation)
 ```
 
-**Schema addition:** `locale:` field in `frontmatter-schema.yaml`. The linter validates that locale files have valid locale codes and matching structure.
+**Scanner logic:**
 
-**Scanner behavior:** Check Claude Code's `language` setting (available via environment or settings.json). Select `way-{locale}.md` if it exists, fall back to `way.md`. A Spanish-speaking user gets `way-es.md` with Spanish description/vocabulary; the stemmer uses Snowball's Spanish module.
+```
+1. Determine configured language from Claude Code settings
+2. Look for way-{lang}.md in each way directory
+3. If found and has body → match on its frontmatter, inject its body (Tier 3)
+4. If found but no body → match on its frontmatter, inject way-en.md body (Tier 2)
+5. If not found → match on way.md / way-en.md as today (Tier 1 / default)
+```
 
-**Binary changes:** Snowball ships stemmers for 20+ languages. The binary gains a `--language` flag that selects the stemmer. Stopwords become a per-language array (Snowball provides these too). The corpus JSONL gains a `locale` field so IDF is computed within-locale.
+The key principle: **frontmatter is for matching, body is for injection, and they can come from different files.** A way directory can have one file serving all roles, or several files dividing the work. The scanner combines the right frontmatter with the right body based on what exists.
 
-**Scope:** We only build locale variants for ways that have volunteer translators. Most ways stay English-only. The system degrades gracefully — no locale file means English, which is the current behavior.
+**Schema addition:** `locale:` field in `frontmatter-schema.yaml`. The linter validates locale codes and checks that Tier 2 stubs (frontmatter-only files) have a corresponding file with a body.
+
+**Binary changes:** Snowball ships stemmers for 20+ languages. The binary gains a `--language` flag that selects the stemmer. Stopwords become a per-language array (Snowball provides these). The corpus JSONL gains a `locale` field so IDF is computed within-locale.
+
+**Scope:** Most ways stay English-only (Tier 1 with potential polyglot vocabulary). Tier 2 and 3 only exist where someone writes them. The system degrades gracefully — no locale file means English, which is the current behavior.
 
 ## Consequences
 
