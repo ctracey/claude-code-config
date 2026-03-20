@@ -1,8 +1,8 @@
 ---
-description: Place tests predictably per language convention — mirrored trees, co-location, or inline modules
-vocabulary: test spec unit integration structure directory mirror layout folder organize pytest rspec phpunit _test.go cfg test fixture conftest testutil scaffold boilerplate project setup init template refactor reorganize restructure clean up maturity where should tree monorepo testing strategy test plan coverage test placement pipeline ci github actions test runner tsconfig jest config pytest.ini build exclude onboard walkthrough codebase tour source java php rust code package review quality elixir ruby python go typescript javascript csharp dotnet maven gradle minitest helper helpers
+description: Test placement conventions per language ecosystem — ensures tests land in the right location during implementation, quality reviews, refactoring, and scaffolding
+vocabulary: test tree mirror directory layout placement co-locate colocate separate test path test directory fixture conftest testutil helper monorepo test organization scaffold project structure file structure code quality review refactor improve clean up
 threshold: 1.5
-pattern: test|spec|\.test\.|\.spec\.|__tests__
+pattern: test|spec|\.test\.|\.spec\.|__tests__|scaffold|project.?structure|file.?structure|code.?quality|review.?(code|quality)|refactor
 files: \.(test|spec)\.(js|jsx|ts|tsx|py|rs|go)$|Test\.java$|_spec\.rb$|_test\.rb$|Test\.php$|_test\.exs$|Tests\.cs$|_test\.go$
 scope: agent, subagent
 ---
@@ -94,3 +94,6 @@ Tests should be predictably located following the ecosystem's convention. For la
 ## Why
 
 Mixing test files into source directories clutters imports, bloats builds (requiring test exclusions), and makes it harder to reason about what ships vs. what verifies — in ecosystems where separation is the norm. In ecosystems where co-location is idiomatic, a separate tree fights tooling and conventions for no benefit.
+
+## Related
+- Test placement checked during quality reviews → `softwaredev/code/quality`
