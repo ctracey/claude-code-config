@@ -1,5 +1,5 @@
 ---
-status: Proposed
+status: Accepted
 date: 2025-12-30
 deciders:
   - aaronsb
