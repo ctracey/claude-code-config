@@ -30,11 +30,12 @@ Did anything unexpected happen this session? A gotcha, a pattern that broke assu
 - Decisions made and their rationale
 - **Which ways helped and when** — reference the way path, note the context where it was useful beyond its static triggers
 
-**Not worth recording:**
+**Not worth recording — escalate instead:**
 - Generic knowledge you already have
 - One-off context that won't recur
 - Anything already captured in CLAUDE.md or project docs
 - Way content — never duplicate a way's guidance, just reference it
+- **Workflow conventions and process rules** — if the user teaches a repeatable convention (naming schemes, cleanup triggers, format rules), that's a way, not a memory. Memory records preferences and context; ways encode process that should fire at the right moment. Before saving, ask: "does this have a trigger context?" If yes, it belongs in a way.
 
 ## Memory as Way References
 

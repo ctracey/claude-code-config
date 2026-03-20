@@ -30,6 +30,28 @@ After completing each task, provide this summary — then stop and wait:
 
 Do not begin the next task. Do not suggest what comes next. Wait for the user to respond.
 
+## Milestone Maturity Check
+
+When a functional milestone is reached (feature works end-to-end, task group complete):
+
+1. **Announce the milestone** — tell the user the feature is working and you're now doing a quick maturity pass
+2. **Stage the changes** — `git add` the working state so there's a clear baseline (do not commit — commits require user approval)
+3. **Assess code maturity** — review the working code for quality, structure, and adherence to project ways
+4. **Capture refactoring actions** — save findings to `.claude/todo-refactor-<TASKNAME>.md` with specific, actionable items. Prefix refactor steps with `R` (R1, R2…) to distinguish from feature task numbers in the main task list
+5. **Check in if the list is significant** — if there are more than a few items, or any items require structural changes, present the list to the user. Frame it as a trade-off: what's worth fixing now vs. accepting as tech debt to keep delivering. The user's appetite for this varies by project — let them decide
+6. **Work through the refactoring** — keep this rapid and focused. Quick wins, not deep rewrites
+7. **Handoff again** — deliver the post-task handoff summary so the user can review the cleaned-up state
+
+This ensures working code ships clean, not just working. But it should not become a bottleneck — the maturity pass is a quick polish, not a second project.
+
+### Refactoring task structure
+
+Before writing code for a refactor step, check which ways apply to the type of file being created. The guidance exists to prevent rework.
+
+When extracting code into a new module: create it, colocate its assets (styles, tests, types — whatever the ecosystem expects), wire it into the consumer, and verify. These are one task, not four. A module that isn't consumed isn't done.
+
+Verification (tests pass, build succeeds, behaviour unchanged) is part of every extraction task, not a separate step. Don't create standalone "run tests" or "verify build" tasks in refactor todos.
+
 ## Branch and PR Pattern
 
 One branch, one PR. Each completed task is a commit on that branch. The PR accumulates commits as tasks complete and represents the full change when done.

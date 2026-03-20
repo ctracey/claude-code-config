@@ -54,3 +54,7 @@ Scopes match the area of change: `ways`, `hooks`, `adr`, `docs`, `config`, `gove
 - Skip "Co-Authored-By" and emoji trailers
 - Focus commit message on the "why" not the "what"
 - Keep commits atomic - one logical change per commit
+
+## Post-Commit Cleanup
+
+After the user accepts changes and confirms a commit, check for `.claude/todo-*.md` files where all tasks are complete. If found, ask the user if they want to remove the file — git history preserves it.

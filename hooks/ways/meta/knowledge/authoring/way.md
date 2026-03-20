@@ -79,6 +79,8 @@ threshold: 90             # percentage (0-100)
 
 ## Creating a New Way
 
+**Before creating, check what exists.** Scan `~/.claude/hooks/ways/` and `$PROJECT/.claude/ways/` for ways in the same domain. Extending an existing way is cheaper and less noisy than creating a new one. Only create something new after confirming nothing existing covers it.
+
 1. Create directory in:
    - Global: `~/.claude/hooks/ways/{domain}/{wayname}/`
    - Project: `$PROJECT/.claude/ways/{domain}/{wayname}/`
@@ -88,6 +90,19 @@ threshold: 90             # percentage (0-100)
 3. Optionally add `macro.sh` for dynamic context
 
 **That's it.** No config files to update. Project ways override global ways with the same path. Ways can nest arbitrarily: `{domain}/{parent}/{child}/way.md`.
+
+## Placing Guidance: Trigger-First
+
+Guidance lives where it **triggers**, not where it's **about**. Content about tracking that fires at commit time belongs in the commits way, not the tracking way. Lead with "when does this fire?" to find the right home.
+
+To keep topic discoverability for humans, add cross-references from the topic-side way:
+
+```markdown
+## Related
+- Cleanup of completed tracking files at commit time → `softwaredev/delivery/commits`
+```
+
+This keeps triggers sharp (no cross-firing) while letting humans browsing by topic find the full picture.
 
 ## Writing Ways Well
 
