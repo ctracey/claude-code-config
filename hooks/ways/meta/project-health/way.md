@@ -5,7 +5,7 @@ description: >
   maintaining relevance as an opinionated framework.
 vocabulary: >
   upstream changelog release version claude-code update
-  adr status reconcile drift stale dormant
+  adr status reconcile drift stale dormant shipped implemented current behind
   project pulse health review audit
   what's new recently changed since last
   relevance feature gap opportunity
