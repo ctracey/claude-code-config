@@ -80,6 +80,7 @@
 # Scripts (shared utilities for hooks, macros, skills)
 !scripts/
 !scripts/*.sh
+!scripts/project-pulse
 
 # Governance traceability (separable)
 !governance-report
