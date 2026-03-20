@@ -1,9 +1,9 @@
 ---
 description: Place tests predictably per language convention — mirrored trees, co-location, or inline modules
-vocabulary: test spec unit integration structure directory mirror layout folder organize pytest rspec phpunit _test.go cfg test fixture conftest testutil scaffold boilerplate project setup init template refactor reorganize restructure clean up maturity where should tree monorepo testing strategy test plan coverage test placement pipeline ci github actions test runner tsconfig jest config pytest.ini build exclude onboard walkthrough codebase tour source java php rust code package
+vocabulary: test spec unit integration structure directory mirror layout folder organize pytest rspec phpunit _test.go cfg test fixture conftest testutil scaffold boilerplate project setup init template refactor reorganize restructure clean up maturity where should tree monorepo testing strategy test plan coverage test placement pipeline ci github actions test runner tsconfig jest config pytest.ini build exclude onboard walkthrough codebase tour source java php rust code package review quality elixir ruby python go typescript javascript csharp dotnet maven gradle minitest helper helpers
 threshold: 1.5
-pattern: test|spec|\.test\.|\.spec\.|__tests__|scaffold|structure|refactor
-files: \.(test|spec)\.(js|jsx|ts|tsx|py|rs|go)$|Test\.java$|_spec\.rb$|_test\.rb$|Test\.php$|_test\.exs$|Tests\.cs$
+pattern: test|spec|\.test\.|\.spec\.|__tests__
+files: \.(test|spec)\.(js|jsx|ts|tsx|py|rs|go)$|Test\.java$|_spec\.rb$|_test\.rb$|Test\.php$|_test\.exs$|Tests\.cs$|_test\.go$
 scope: agent, subagent
 ---
 # Test Structure
