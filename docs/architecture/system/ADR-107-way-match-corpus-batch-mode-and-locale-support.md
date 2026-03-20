@@ -109,6 +109,29 @@ All three components are rebuilt together. The supported language set is not dec
 
 **Scope:** Most ways stay English-only. Tier 1 and 2 only exist where someone commits to full-corpus coverage for a language. The system degrades gracefully — no locale file means English, which is the current behavior.
 
+### Phase 3 language feasibility: BM25 is not equally effective across languages
+
+BM25 is a bag-of-words model — it tokenizes on whitespace, stems individual tokens, and scores term overlap. This works well for languages that share certain structural properties with English. It works poorly or not at all for languages that don't. This is an architectural limitation, not a tuning problem.
+
+**Languages well-suited to BM25 (Snowball stemmers available, whitespace-tokenized):**
+
+- **Romance languages** (Spanish, French, Portuguese, Italian, Romanian) — similar morphology to English, good Snowball stemmers, whitespace-delimited. The closest fit. Vocabulary terms map naturally. Expected cross-language delta: low.
+- **Germanic languages** (German, Dutch, Swedish, Norwegian, Danish) — Snowball stemmers exist, but **compound nouns** are a challenge. German "Sicherheitslücke" (security vulnerability) is one whitespace token. BM25 sees it as a single term that won't match "Sicherheit" or "Lücke" individually. Compound splitting is needed as a pre-processing step — Snowball doesn't do this. Expected delta: moderate, with compound-splitting mitigation.
+- **Slavic languages** (Russian) — Snowball stemmer exists for Russian. Rich morphology (6 cases, 3 genders, extensive conjugation) means many surface forms per root. Good stemming is critical — a missed declension is a missed match. Expected delta: moderate if stemmer is strong.
+
+**Languages where BM25 is structurally challenged:**
+
+- **Agglutinative languages** (Turkish, Finnish, Hungarian, Korean) — single words carry what English expresses in phrases. Turkish "güvenlik açıklarını kontrol et" compresses meaning into fewer, longer tokens with suffix chains. The stemmer must strip multiple layers of suffixes correctly. Snowball has stemmers for some (Finnish, Turkish) but quality varies. Expected delta: high, requires extensive vocabulary to compensate.
+- **Logographic and non-whitespace languages** (Chinese, Japanese, Thai) — no word boundaries by whitespace. The tokenizer (`split on whitespace + punctuation`) fails completely. Chinese "检查依赖项的漏洞" is one string with no spaces. You need a segmenter (jieba for Chinese, MeCab for Japanese, ICU for Thai) before BM25 can operate at all. This is not a stemmer swap — it's a fundamental tokenizer change. **BM25 as currently architected cannot support these languages.**
+- **High-context languages** (Japanese, Korean in practice) — cultural communication style uses fewer explicit terms, relying on context the model understands but BM25 cannot score. Prompts may be shorter, reducing term overlap signal.
+- **Arabic and Hebrew** — right-to-left, root-pattern morphology (not prefix/suffix like Indo-European). Standard stemmers extract 3-consonant roots, but the process is more complex than Snowball's suffix stripping. Snowball has an Arabic stemmer (experimental). Expected delta: high, needs specialist validation.
+
+**What this means for language commitments:**
+
+The complete coverage requirement (all ways, all stubs) is necessary but not sufficient. Before committing to a language, the cross-language delta test must demonstrate that BM25 + the available stemmer produces scores within acceptable range of the English baseline. If the delta is consistently > 2.0 across test prompts, the language is not feasible with BM25 and should not be offered — partial matching that misses half the prompts is worse than English-only.
+
+For logographic languages (Chinese, Japanese, Thai), the honest answer is: BM25 cannot support them without a tokenizer replacement. This is the strongest argument for eventually moving to embeddings — embedding models handle all languages natively because they don't depend on whitespace tokenization. But that's a future architectural decision (see Alternatives Considered), not a Phase 3 concern. Phase 3 targets languages where BM25 works.
+
 ### Phase 3 testing: Cross-language scoring validation
 
 Multilingual way testing is fundamentally different from monolingual testing. You cannot translate an English test prompt and score it — you must generate an *independently natural* prompt expressing the same intent in the target language. "check the dependencies for vulnerabilities" and "verificar las dependencias por vulnerabilidades" are parallel expressions of the same intent, not translations of each other's vocabulary terms.
