@@ -39,9 +39,13 @@ check_when_preconditions() {
 }
 
 # Detect semantic matcher: BM25 binary → gzip NCD → none
-# Sets: SEMANTIC_ENGINE, WAY_MATCH_BIN
+# Sets: SEMANTIC_ENGINE, WAY_MATCH_BIN, CORPUS_PATH
 detect_semantic_engine() {
   WAY_MATCH_BIN="${HOME}/.claude/bin/way-match"
+  CORPUS_PATH=""
+  local corpus_file="${WAYS_DIR}/ways-corpus.jsonl"
+  [[ -f "$corpus_file" ]] && CORPUS_PATH="$corpus_file"
+
   if [[ -x "$WAY_MATCH_BIN" ]]; then
     SEMANTIC_ENGINE="bm25"
   elif command -v gzip >/dev/null 2>&1 && command -v bc >/dev/null 2>&1; then
@@ -68,11 +72,14 @@ match_way_prompt() {
   if [[ -n "$description" && -n "$vocabulary" ]]; then
     case "$SEMANTIC_ENGINE" in
       bm25)
+        local corpus_args=()
+        [[ -n "$CORPUS_PATH" ]] && corpus_args=(--corpus "$CORPUS_PATH")
         if "$WAY_MATCH_BIN" pair \
             --description "$description" \
             --vocabulary "$vocabulary" \
             --query "$prompt" \
-            --threshold "${threshold:-2.0}" 2>/dev/null; then
+            --threshold "${threshold:-2.0}" \
+            "${corpus_args[@]}" 2>/dev/null; then
           MATCH_CHANNEL="semantic"
           return 0
         fi

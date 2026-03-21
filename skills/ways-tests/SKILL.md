@@ -36,6 +36,12 @@ When the user gives a short name like "security" instead of a full path:
 
 ## Score Mode
 
+**Before any scoring operation**, regenerate the corpus so IDF is current:
+
+```bash
+bash ~/.claude/tools/way-match/generate-corpus.sh
+```
+
 Use the `way-match` binary at `~/.claude/bin/way-match`:
 
 ```bash
@@ -44,12 +50,14 @@ description=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^descriptio
 vocabulary=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^vocabulary:/{gsub(/^vocabulary: */,"");print;exit}' "$wayfile")
 threshold=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^threshold:/{gsub(/^threshold: */,"");print;exit}' "$wayfile")
 
-# Score with BM25
+# Score with BM25 (--corpus for correct IDF across all ways)
+CORPUS="$HOME/.claude/hooks/ways/ways-corpus.jsonl"
 ~/.claude/bin/way-match pair \
   --description "$description" \
   --vocabulary "$vocabulary" \
   --query "$prompt" \
-  --threshold "${threshold:-2.0}"
+  --threshold "${threshold:-2.0}" \
+  --corpus "$CORPUS"
 # Exit code: 0 = match, 1 = no match
 # Stderr: "match: score=X.XXXX threshold=Y.YYYY"
 ```
