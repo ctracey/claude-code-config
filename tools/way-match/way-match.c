@@ -368,18 +368,31 @@ static const struct { const char *id; const char *desc; const char *vocab; } BUI
 };
 
 static int cmd_pair(const char *description, const char *vocabulary,
-                    const char *query, double threshold) {
+                    const char *query, double threshold,
+                    const char *corpus_path) {
     Corpus *corpus = calloc(1, sizeof(Corpus));
     if (!corpus) { fprintf(stderr, "error: out of memory\n"); return 1; }
 
-    /* Load built-in ways as corpus for IDF computation */
-    for (int i = 0; BUILTIN_WAYS[i].id; i++) {
-        Document *doc = &corpus->docs[corpus->count];
-        snprintf(doc->id, sizeof(doc->id), "%s", BUILTIN_WAYS[i].id);
-        strncpy(doc->description, BUILTIN_WAYS[i].desc, sizeof(doc->description) - 1);
-        strncpy(doc->vocabulary, BUILTIN_WAYS[i].vocab, sizeof(doc->vocabulary) - 1);
-        index_document(doc);
-        corpus->count++;
+    /* Load corpus for IDF computation.
+     * If --corpus is provided, load external JSONL (correct IDF across all ways).
+     * Otherwise fall back to BUILTIN_WAYS[] (legacy 7-doc IDF). */
+    if (corpus_path) {
+        if (load_corpus_jsonl(corpus_path, corpus) != 0) {
+            fprintf(stderr, "warning: failed to load corpus %s, using builtin\n",
+                    corpus_path);
+            corpus->count = 0;
+        }
+    }
+    if (corpus->count == 0) {
+        /* Fallback: built-in ways */
+        for (int i = 0; BUILTIN_WAYS[i].id; i++) {
+            Document *doc = &corpus->docs[corpus->count];
+            snprintf(doc->id, sizeof(doc->id), "%s", BUILTIN_WAYS[i].id);
+            strncpy(doc->description, BUILTIN_WAYS[i].desc, sizeof(doc->description) - 1);
+            strncpy(doc->vocabulary, BUILTIN_WAYS[i].vocab, sizeof(doc->vocabulary) - 1);
+            index_document(doc);
+            corpus->count++;
+        }
     }
 
     /* Find or add the target document */
@@ -771,7 +784,7 @@ static void usage(void) {
         "way-match %s — BM25 semantic matcher for the ways system\n"
         "\n"
         "Usage:\n"
-        "  way-match pair    --description DESC --vocabulary VOCAB --query Q [--threshold T]\n"
+        "  way-match pair    --description DESC --vocabulary VOCAB --query Q [--threshold T] [--corpus FILE]\n"
         "  way-match score   --corpus FILE --query Q [--threshold T]\n"
         "  way-match suggest --file FILE [--min-freq N]\n"
         "\n"
@@ -877,7 +890,7 @@ int main(int argc, char **argv) {
             stemmer_cleanup();
             return 1;
         }
-        result = cmd_pair(description, vocabulary, query, threshold);
+        result = cmd_pair(description, vocabulary, query, threshold, corpus_path);
 
     } else if (strcmp(command, "score") == 0) {
         if (!corpus_path || !query) {

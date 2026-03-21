@@ -35,6 +35,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# ── Corpus regeneration ──────────────────────────────────────────
+# Regenerate ways-corpus.jsonl before linting so IDF is current.
+# Only runs if the generator script exists.
+CORPUS_GEN="${HOME}/.claude/tools/way-match/generate-corpus.sh"
+if [[ -x "$CORPUS_GEN" && "$MODE" == "lint" ]]; then
+    bash "$CORPUS_GEN" "$WAYS_DIR" "$WAYS_DIR/ways-corpus.jsonl" 2>/dev/null
+fi
+
 # ── Schema loading ────────────────────────────────────────────────
 # Extract valid field names and enum values from frontmatter-schema.yaml
 # Uses awk to avoid dependency on specific yq version

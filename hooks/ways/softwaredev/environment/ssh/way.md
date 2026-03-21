@@ -1,6 +1,6 @@
 ---
 description: SSH remote access, key management, secure file transfer, non-interactive authentication
-vocabulary: ssh remote key agent scp rsync bastion jumphost tunnel forwarding batchmode noninteractive
+vocabulary: ssh remote key scp rsync bastion jumphost tunnel forwarding batchmode noninteractive
 threshold: 2.0
 pattern: ssh|remote.?server|remote.?host|sshpass
 commands: ^ssh\ |^scp\ |^rsync.*:|\bsshpass\b

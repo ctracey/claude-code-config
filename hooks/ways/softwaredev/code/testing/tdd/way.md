@@ -1,6 +1,6 @@
 ---
-description: test-driven development, writing tests first, red-green-refactor cycle
-vocabulary: tdd red green refactor test first before implementation write tests before code failing test
+description: test-driven development, TDD red-green-refactor cycle, failing test first
+vocabulary: tdd red green refactor test first implementation failing
 threshold: 2.5
 scope: agent, subagent
 ---
