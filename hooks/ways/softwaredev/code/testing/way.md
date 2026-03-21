@@ -1,5 +1,5 @@
 ---
-description: writing tests, test coverage, test structure, what to test
+description: test coverage, test structure, assertions, fixtures, what and how to test
 vocabulary: test coverage assertion framework spec fixture describe expect verify unit integration
 commands: npm\ test|yarn\ test|jest|pytest|cargo\ test|go\ test|rspec
 threshold: 1.8
