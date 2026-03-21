@@ -4,6 +4,26 @@
 
 WAYS_DIR="${HOME}/.claude/hooks/ways"
 
+# --- Skills context load indicator ---
+# Skills front-load instructions into early context (ROPE position 0-N).
+# Research on positional encoding shows early-context pollution degrades
+# retrieval and instruction-following. Keep the count low.
+skill_count=0
+if command -v claude >/dev/null 2>&1; then
+  skill_count=$(claude plugin list 2>/dev/null | grep -c '✔ enabled' || echo 0)
+fi
+
+if [[ "$skill_count" -gt 0 ]]; then
+  if [[ "$skill_count" -le 5 ]]; then
+    echo "Skills loaded: ${skill_count} — context cost is low. No action needed."
+  elif [[ "$skill_count" -le 12 ]]; then
+    echo "Skills loaded: ${skill_count} — context cost is moderate. Tell the user: \"You have ${skill_count} skills loaded. Each one adds instructions to early context, which can degrade response quality. Run \`claude plugin list\` to review and \`claude plugin disable <name>\` for any you're not actively using.\""
+  else
+    echo "Skills loaded: ${skill_count} — context cost is HIGH. You MUST inform the user before doing any other work: \"You have ${skill_count} skills loaded. This many front-loaded instructions degrades model performance — early context pollution reduces instruction-following and retrieval accuracy. Please run \`claude plugin list\` and disable skills you aren't actively using. Aim for 5 or fewer.\""
+  fi
+  echo ""
+fi
+
 echo "## Available Ways"
 echo ""
 
