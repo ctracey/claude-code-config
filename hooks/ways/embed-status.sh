@@ -48,7 +48,7 @@ MODEL_EXISTS=false
 MODEL_SIZE=""
 if [[ -f "$MODEL" ]]; then
   MODEL_EXISTS=true
-  MODEL_SIZE=$(ls -lh "$MODEL" 2>/dev/null | awk '{print $5}')
+  MODEL_SIZE=$(du -h "$MODEL" 2>/dev/null | cut -f1 || ls -lh "$MODEL" | awk '{print $5}')
 fi
 
 # --- Corpus ---
@@ -57,13 +57,11 @@ CORPUS_EXISTS=false
 CORPUS_WAYS=0
 CORPUS_EMBEDDED=0
 CORPUS_SIZE=""
-CORPUS_MTIME=""
 if [[ -f "$CORPUS" ]]; then
   CORPUS_EXISTS=true
   CORPUS_WAYS=$(wc -l < "$CORPUS")
   CORPUS_EMBEDDED=$(grep -c '"embedding"' "$CORPUS" 2>/dev/null || echo 0)
-  CORPUS_SIZE=$(ls -lh "$CORPUS" 2>/dev/null | awk '{print $5}')
-  CORPUS_MTIME=$(stat -c '%Y' "$CORPUS" 2>/dev/null || stat -f '%m' "$CORPUS" 2>/dev/null || echo 0)
+  CORPUS_SIZE=$(du -h "$CORPUS" 2>/dev/null | cut -f1 || ls -lh "$CORPUS" | awk '{print $5}')
 fi
 
 # --- Active engine ---
@@ -101,6 +99,11 @@ elif command -v shasum &>/dev/null; then
 fi
 
 # --- Project-local ways ---
+# Claude Code encodes project paths in ~/.claude/projects/ by replacing / with -
+# but this encoding is lossy (paths with hyphens can't be decoded). Instead of
+# guessing, we scan each encoded project dir for a .claude/ways/ breadcrumb:
+# each project dir may contain a CLAUDE.md or settings that hint at the real path,
+# but the reliable approach is to try candidate paths.
 PROJECTS_DIR="${HOME}/.claude/projects"
 PROJECT_COUNT=0
 PROJECT_WAYS=0
@@ -109,15 +112,18 @@ PROJECT_LIST=""
 if [[ -d "$PROJECTS_DIR" ]]; then
   while IFS= read -r projdir; do
     encoded=$(basename "$projdir")
-    # Decode: replace leading - with /, then remaining - with /
-    decoded=$(echo "$encoded" | sed 's/^-/\//; s/-/\//g')
 
-    if [[ -d "${decoded}/.claude/ways" ]]; then
-      count=$(find "${decoded}/.claude/ways" -name "way.md" -type f 2>/dev/null | wc -l)
+    # Try simple decode first (works when path has no hyphens in dir names)
+    candidate=$(echo "$encoded" | sed 's/^-/\//; s/-/\//g')
+
+    # Check if decoded path has .claude/ways/ — skip silently if not found
+    # (lossy encoding means some paths won't decode correctly)
+    if [[ -d "${candidate}/.claude/ways" ]]; then
+      count=$(find "${candidate}/.claude/ways" -name "way.md" -type f 2>/dev/null | wc -l)
       if [[ $count -gt 0 ]]; then
         PROJECT_COUNT=$((PROJECT_COUNT + 1))
         PROJECT_WAYS=$((PROJECT_WAYS + count))
-        PROJECT_LIST="${PROJECT_LIST}${decoded}:${count}
+        PROJECT_LIST="${PROJECT_LIST}${candidate}:${count}
 "
       fi
     fi
@@ -147,6 +153,7 @@ if $JSON; then
     "size": "$CORPUS_SIZE"
   },
   "global_ways": $GLOBAL_WAY_COUNT,
+  "semantic_ways": $SEMANTIC_WAY_COUNT,
   "global_hash": "$GLOBAL_HASH",
   "projects": {
     "count": $PROJECT_COUNT,
