@@ -5,6 +5,7 @@
 # Full install:  make install  (hooks + semantic matching + corpus)
 # Update:        make update   (pull + setup)
 
+.DEFAULT_GOAL := help
 .PHONY: setup install update test test-all clean help
 
 # --- Primary targets ---
@@ -42,7 +43,7 @@ update:
 # --- Supporting targets ---
 
 hooks-executable:
-	@chmod +x hooks/**/*.sh hooks/*.sh 2>/dev/null || true
+	@find hooks -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
 	@echo "Hooks marked executable."
 
 # --- Tests ---

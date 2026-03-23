@@ -85,8 +85,9 @@ fi
 check_prereqs() {
   local missing=()
 
-  command -v git &>/dev/null || missing+=("git")
-  command -v jq &>/dev/null  || missing+=("jq")
+  command -v git &>/dev/null  || missing+=("git")
+  command -v jq &>/dev/null   || missing+=("jq")
+  command -v make &>/dev/null  || missing+=("make")
 
   if [[ ${#missing[@]} -gt 0 ]]; then
     echo -e "${RED}Missing prerequisites:${RESET} ${missing[*]}"
@@ -137,7 +138,8 @@ if [[ "$BOOTSTRAP" == "true" ]]; then
   done
 
   cd "$CLONE"
-  exec bash "$CLONE/scripts/install.sh" "${FORWARD_ARGS[@]}"
+  bash "$CLONE/scripts/install.sh" "${FORWARD_ARGS[@]}"
+  exit $?
 fi
 
 # --- Detect source ---
@@ -252,7 +254,7 @@ if [[ -d "$DEST" ]]; then
   echo -e "${YELLOW}Clobber mode.${RESET} Backing up to ${CYAN}${BACKUP}${RESET}"
   echo ""
 
-  # One more gate
+  # Confirmation gate — interactive requires typing "clobber", non-interactive warns loudly
   if [[ -t 0 ]]; then
     echo -e "  This will ${RED}replace${RESET} everything in ~/.claude/ with a fresh install."
     echo -e "  Your backup will be at: ${BACKUP}"
@@ -262,6 +264,10 @@ if [[ -d "$DEST" ]]; then
       echo -e "  ${GREEN}Aborted.${RESET} Nothing changed."
       exit 1
     fi
+    echo ""
+  else
+    echo -e "  ${YELLOW}WARNING: Non-interactive clobber.${RESET} Backing up and replacing ~/.claude/"
+    echo -e "  Backup: ${BACKUP}"
     echo ""
   fi
 
@@ -285,7 +291,7 @@ fi
 git -C "$DEST" remote set-url origin "$UPSTREAM_URL" 2>/dev/null || true
 
 # Make hooks executable
-chmod +x "$DEST"/hooks/**/*.sh "$DEST"/hooks/*.sh 2>/dev/null || true
+find "$DEST/hooks" -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}Installed.${RESET}"
