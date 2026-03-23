@@ -66,8 +66,8 @@ mkdir -p "$OUTPUT_DIR"
 
 # Find the latest way-embed release
 if [[ "$RELEASE_TAG" == "latest" ]]; then
-  RELEASE_TAG=$(gh release list --repo "$GH_REPO" --limit 20 2>/dev/null \
-    | awk '/way-embed-v/{print $1; exit}')
+  RELEASE_TAG=$(gh release list --repo "$GH_REPO" --limit 20 --json tagName --jq '.[].tagName' 2>/dev/null \
+    | grep '^way-embed-v' | head -1)
   if [[ -z "$RELEASE_TAG" ]]; then
     echo "No way-embed release found. Build from source:" >&2
     echo "  cd ~/.claude/tools/way-embed && make setup" >&2
