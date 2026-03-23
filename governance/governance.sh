@@ -31,10 +31,18 @@ SCANNER="${SCRIPT_DIR}/provenance-scan.py"
 VERIFIER="${SCRIPT_DIR}/provenance-verify.sh"
 STATS_FILE="${HOME}/.claude/stats/events.jsonl"
 
+# Colors (disabled for non-terminal or --json)
+if [[ -t 1 ]]; then
+  GREEN='\033[0;32m' YELLOW='\033[1;33m' RED='\033[0;31m'
+  CYAN='\033[0;36m' DIM='\033[2m' BOLD='\033[1m' RESET='\033[0m'
+else
+  GREEN='' YELLOW='' RED='' CYAN='' DIM='' BOLD='' RESET=''
+fi
+
 # Check dependencies
 for cmd in jq python3; do
   if ! command -v "$cmd" &>/dev/null; then
-    echo "Error: $cmd is required but not installed." >&2
+    echo -e "${RED}Error:${RESET} $cmd is required but not installed." >&2
     exit 1
   fi
 done
@@ -109,22 +117,22 @@ if [[ "$MODE" == "trace" ]]; then
     exit 0
   fi
 
-  echo "Provenance Trace: $TRACE_WAY"
-  echo "$(printf '=%.0s' $(seq 1 $((20 + ${#TRACE_WAY}))))"
   echo ""
-  echo "File: $(echo "$WAY_DATA" | jq -r '.path')"
+  echo -e "${BOLD}Provenance Trace: ${CYAN}${TRACE_WAY}${RESET}"
+  echo ""
+  echo -e "  File: ${DIM}$(echo "$WAY_DATA" | jq -r '.path')${RESET}"
   echo ""
 
   if [[ -z "$HAS_PROV" ]]; then
-    echo "  (no provenance metadata)"
+    echo -e "  ${YELLOW}(no provenance metadata)${RESET}"
     exit 0
   fi
 
-  echo "Policy sources:"
+  echo -e "${BOLD}Policy sources:${RESET}"
   echo "$WAY_DATA" | jq -r '.provenance.policy[]? | "  \(.type): \(.uri)"'
   echo ""
 
-  echo "Controls:"
+  echo -e "${BOLD}Controls:${RESET}"
   echo "$WAY_DATA" | jq -r '.provenance.controls[]? |
     if type == "object" then
       "  \(.id)\n\(.justifications // [] | map("    ✓ \(.)") | join("\n"))"
@@ -134,12 +142,16 @@ if [[ "$MODE" == "trace" ]]; then
   echo ""
 
   VERIFIED=$(echo "$WAY_DATA" | jq -r '.provenance.verified // "not set"')
-  echo "Verified: $VERIFIED"
+  if [[ "$VERIFIED" == "not set" ]]; then
+    echo -e "  Verified: ${YELLOW}${VERIFIED}${RESET}"
+  else
+    echo -e "  Verified: ${GREEN}${VERIFIED}${RESET}"
+  fi
   echo ""
 
   RATIONALE=$(echo "$WAY_DATA" | jq -r '.provenance.rationale // empty')
   if [[ -n "$RATIONALE" ]]; then
-    echo "Rationale:"
+    echo -e "${BOLD}Rationale:${RESET}"
     echo "  $RATIONALE" | fmt -w 78
   fi
 
@@ -177,7 +189,7 @@ if [[ "$MODE" == "control" ]]; then
     exit 0
   fi
 
-  echo "Controls matching '$CONTROL_PATTERN':"
+  echo -e "${BOLD}Controls matching${RESET} '${CYAN}${CONTROL_PATTERN}${RESET}':"
   echo ""
   echo "$MANIFEST_DATA" | jq -r --arg p "$CONTROL_PATTERN" \
     '.coverage.by_control | to_entries[] | select(.key | ascii_downcase | contains($p | ascii_downcase)) |
@@ -210,7 +222,7 @@ if [[ "$MODE" == "policy" ]]; then
     exit 0
   fi
 
-  echo "Policies matching '$POLICY_PATTERN':"
+  echo -e "${BOLD}Policies matching${RESET} '${CYAN}${POLICY_PATTERN}${RESET}':"
   echo ""
   echo "$MANIFEST_DATA" | jq -r --arg p "$POLICY_PATTERN" \
     '.coverage.by_policy | to_entries[] | select(.key | ascii_downcase | contains($p | ascii_downcase)) |
@@ -230,8 +242,8 @@ if [[ "$MODE" == "gaps" ]]; then
   TOTAL=$(echo "$MANIFEST_DATA" | jq '.ways_scanned')
   WITHOUT=$(echo "$MANIFEST_DATA" | jq '.ways_without_provenance')
 
-  echo "Ways Without Provenance ($WITHOUT of $TOTAL)"
-  echo "=============================="
+  echo ""
+  echo -e "${BOLD}Ways Without Provenance${RESET} ${YELLOW}(${WITHOUT} of ${TOTAL})${RESET}"
   echo ""
   echo "$MANIFEST_DATA" | jq -r '.coverage.without_provenance[]' | while read -r way; do
     printf "  %s\n" "$way"
@@ -258,11 +270,12 @@ if [[ "$MODE" == "stale" ]]; then
   fi
 
   COUNT=$(echo "$STALE" | jq 'length')
-  echo "Stale Provenance (verified > $STALE_DAYS days ago, cutoff: $CUTOFF)"
+  echo ""
+  echo -e "${BOLD}Stale Provenance${RESET} ${DIM}(verified > ${STALE_DAYS} days ago, cutoff: ${CUTOFF})${RESET}"
   echo ""
 
   if [[ "$COUNT" -eq 0 ]]; then
-    echo "  All provenance dates are current."
+    echo -e "  ${GREEN}All provenance dates are current.${RESET}"
   else
     echo "$STALE" | jq -r '.[] | "  \(.way)  (verified: \(.verified))"'
   fi
@@ -300,14 +313,14 @@ if [[ "$MODE" == "active" ]]; then
   TOTAL_GOVERNED=$(echo "$MANIFEST_DATA" | jq '.ways_with_provenance')
   TOTAL_WAYS=$(echo "$MANIFEST_DATA" | jq '.ways_scanned')
 
-  echo "Active Governance Report"
-  echo "========================"
   echo ""
-  echo "Governed ways: $TOTAL_GOVERNED of $TOTAL_WAYS"
+  echo -e "${BOLD}Active Governance Report${RESET}"
+  echo ""
+  echo -e "  Governed ways: ${GREEN}${TOTAL_GOVERNED}${RESET} of ${TOTAL_WAYS}"
   echo ""
 
-  echo "Way                          Fires  Controls"
-  echo "---                          -----  --------"
+  printf "  ${BOLD}%-28s %5s  %s${RESET}\n" "Way" "Fires" "Controls"
+  printf "  ${DIM}%-28s %5s  %s${RESET}\n" "---" "-----" "--------"
 
   while read -r way; do
     [[ -z "$way" ]] && continue
@@ -315,17 +328,17 @@ if [[ "$MODE" == "active" ]]; then
     CTRL_COUNT=$(echo "$MANIFEST_DATA" | jq --arg w "$way" '[.ways[$w].provenance.controls[]?] | length')
 
     if [[ "$FIRES" -gt 0 ]]; then
-      STATUS="active"
+      STATUS="${GREEN}active${RESET}"
     else
-      STATUS="dormant"
+      STATUS="${DIM}dormant${RESET}"
     fi
 
-    printf "  %-28s %5d  %d controls (%s)\n" "$way" "$FIRES" "$CTRL_COUNT" "$STATUS"
+    printf "  %-28s %5d  %d controls (${STATUS})\n" "$way" "$FIRES" "$CTRL_COUNT"
   done <<< "$GOVERNED"
 
   # Show ungoverned ways that fire frequently
   echo ""
-  echo "Ungoverned ways (top by fire count):"
+  echo -e "${BOLD}Ungoverned ways${RESET} ${DIM}(top by fire count):${RESET}"
   UNGOVERNED=$(echo "$MANIFEST_DATA" | jq -r '.coverage.without_provenance[]')
   UNGOV_STATS=""
 
@@ -338,7 +351,7 @@ if [[ "$MODE" == "active" ]]; then
   if [[ -n "$UNGOV_STATS" ]]; then
     echo -e "$UNGOV_STATS" | sort -rn | head -5 | while read -r fires way; do
       [[ -z "$way" ]] && continue
-      printf "  %-28s %5d fires (no provenance)\n" "$way" "$fires"
+      printf "  %-28s %5d fires ${YELLOW}(no provenance)${RESET}\n" "$way" "$fires"
     done
   else
     echo "  (no firing data for ungoverned ways)"
@@ -371,11 +384,11 @@ if [[ "$MODE" == "matrix" ]]; then
     exit 0
   fi
 
-  echo "Governance Traceability Matrix"
-  echo "=============================="
   echo ""
-  printf "%-28s %-50s %s\n" "WAY" "CONTROL" "JUSTIFICATION"
-  printf "%-28s %-50s %s\n" "---" "-------" "-------------"
+  echo -e "${BOLD}Governance Traceability Matrix${RESET}"
+  echo ""
+  printf "  ${BOLD}%-28s %-50s %s${RESET}\n" "WAY" "CONTROL" "JUSTIFICATION"
+  printf "  ${DIM}%-28s %-50s %s${RESET}\n" "---" "-------" "-------------"
 
   echo "$MANIFEST_DATA" | jq -r '
     .ways | to_entries[] |
@@ -398,7 +411,7 @@ if [[ "$MODE" == "matrix" ]]; then
   echo ""
   TOTAL_J=$(echo "$MANIFEST_DATA" | jq '[.ways[].provenance? // empty | .controls[]? | select(type == "object") | .justifications[]?] | length')
   TOTAL_C=$(echo "$MANIFEST_DATA" | jq '[.ways[].provenance? // empty | .controls[]?] | length')
-  echo "Total: $TOTAL_C control claims, $TOTAL_J justifications"
+  echo -e "  ${DIM}Total: ${TOTAL_C} control claims, ${TOTAL_J} justifications${RESET}"
   exit 0
 fi
 
@@ -409,8 +422,8 @@ if [[ "$MODE" == "lint" ]]; then
   ERRORS=0
   WARNINGS=0
 
-  $JSON_OUT || echo "Governance Lint Report"
-  $JSON_OUT || echo "====================="
+  $JSON_OUT || echo ""
+  $JSON_OUT || echo -e "${BOLD}Governance Lint Report${RESET}"
   $JSON_OUT || echo ""
 
   WAYS_DIR="${HOME}/.claude/hooks/ways"
@@ -493,16 +506,20 @@ if [[ "$MODE" == "lint" ]]; then
   if [[ -n "$LINT_RESULTS" ]]; then
     echo -e "$LINT_RESULTS" | while IFS='|' read -r level way msg; do
       [[ -z "$level" ]] && continue
-      printf "  %-6s [%-28s] %s\n" "$level" "$way" "$msg"
+      if [[ "$level" == "ERROR" ]]; then
+        printf "  ${RED}%-6s${RESET} [%-28s] %s\n" "$level" "$way" "$msg"
+      else
+        printf "  ${YELLOW}%-6s${RESET} [%-28s] %s\n" "$level" "$way" "$msg"
+      fi
     done
     echo ""
   fi
 
   if [[ "$ERRORS" -eq 0 && "$WARNINGS" -eq 0 ]]; then
-    echo "All provenance checks passed."
+    echo -e "  ${GREEN}All provenance checks passed.${RESET}"
   else
-    echo "Results: $ERRORS error(s), $WARNINGS warning(s)"
-    [[ "$ERRORS" -gt 0 ]] && echo "Lint FAILED — errors must be resolved."
+    echo -e "  Results: ${RED}${ERRORS} error(s)${RESET}, ${YELLOW}${WARNINGS} warning(s)${RESET}"
+    [[ "$ERRORS" -gt 0 ]] && echo -e "  ${RED}Lint FAILED — errors must be resolved.${RESET}"
   fi
   exit $(( ERRORS > 0 ? 1 : 0 ))
 fi
