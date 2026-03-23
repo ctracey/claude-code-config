@@ -6,7 +6,7 @@
 # Update:        make update   (pull + setup)
 
 .DEFAULT_GOAL := help
-.PHONY: setup install update test test-all clean help
+.PHONY: setup install update test test-all corpus clean help
 
 # --- Primary targets ---
 

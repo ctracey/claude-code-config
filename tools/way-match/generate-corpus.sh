@@ -4,13 +4,13 @@
 # Scans for way.md files with description+vocabulary frontmatter,
 # extracts fields, and emits one JSON line per way.
 #
-# This is an authoring-time tool. The output file is a build artifact
-# committed to the repo — runtime scanners read it but never write it.
+# Output is a generated cache in XDG_CACHE_HOME — not tracked in git.
+# Runtime scanners read it; regen happens via `make setup` or `make test`.
 #
 # Usage: generate-corpus.sh [--quiet] [ways-dir] [output-file]
 #   --quiet:     suppress progress output (for use in test/lint pipelines)
 #   ways-dir:    directory to scan (default: ~/.claude/hooks/ways)
-#   output-file: where to write JSONL (default: <ways-dir>/ways-corpus.jsonl)
+#   output-file: where to write JSONL (default: ~/.cache/claude-ways/user/ways-corpus.jsonl)
 
 QUIET=false
 [[ "${1:-}" == "--quiet" ]] && { QUIET=true; shift; }

@@ -51,7 +51,7 @@ vocabulary=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^vocabulary:
 threshold=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^threshold:/{gsub(/^threshold: */,"");print;exit}' "$wayfile")
 
 # Score with BM25 (--corpus for correct IDF across all ways)
-CORPUS="$HOME/.claude/hooks/ways/ways-corpus.jsonl"
+CORPUS="${XDG_CACHE_HOME:-$HOME/.cache}/claude-ways/user/ways-corpus.jsonl"
 ~/.claude/bin/way-match pair \
   --description "$description" \
   --vocabulary "$vocabulary" \
