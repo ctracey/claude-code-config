@@ -12,6 +12,14 @@
 STATS_FILE="${HOME}/.claude/stats/events.jsonl"
 PROJECTS_DIR="${HOME}/.claude/projects"
 
+# Colors (disabled for non-terminal or --json)
+if [[ -t 1 ]]; then
+  GREEN='\033[0;32m' YELLOW='\033[1;33m' RED='\033[0;31m'
+  CYAN='\033[0;36m' DIM='\033[2m' BOLD='\033[1m' RESET='\033[0m'
+else
+  GREEN='' YELLOW='' RED='' CYAN='' DIM='' BOLD='' RESET=''
+fi
+
 # Normalize a filesystem path to Claude project directory name
 # /home/aaron/.claude → -home-aaron--claude
 normalize_path() {
@@ -53,8 +61,8 @@ done
 # Projects mode: per-project dashboard from Claude's project dirs
 # ============================================================
 if $PROJECTS_MODE; then
-  echo "Claude Projects Overview"
-  echo "========================"
+  echo ""
+  echo -e "${BOLD}Claude Projects Overview${RESET}"
   echo ""
 
   # Collect events if available
@@ -133,7 +141,7 @@ if $PROJECTS_MODE; then
   done
   with_memory=$(find "${PROJECTS_DIR}" -path "*/memory/MEMORY.md" -size +0c 2>/dev/null | wc -l)
 
-  echo "Total: ${total_projects} projects, ${with_sessions} with sessions, ${with_memory} with memory"
+  echo -e "${DIM}Total: ${total_projects} projects, ${with_sessions} with sessions, ${with_memory} with memory${RESET}"
   exit 0
 fi
 
@@ -193,28 +201,29 @@ REDISCLOSURES=$(echo "$EVENTS" | jq -r 'select(.event == "way_redisclosed") | .w
 FIRST=$(echo "$EVENTS" | head -1 | jq -r '.ts[:10]')
 LAST=$(echo "$EVENTS" | tail -1 | jq -r '.ts[:10]')
 
-echo "Ways of Working - Usage Stats"
-echo "=============================="
+echo ""
+echo -e "${BOLD}Ways of Working — Usage Stats${RESET}"
+echo ""
 if [[ -n "$DAYS" ]]; then
-  echo "Period: last ${DAYS} days"
+  echo -e "  Period:  ${DIM}last ${DAYS} days${RESET}"
 elif [[ "$FIRST" != "$LAST" ]]; then
-  echo "Period: ${FIRST} → ${LAST}"
+  echo -e "  Period:  ${DIM}${FIRST} → ${LAST}${RESET}"
 else
-  echo "Date: ${FIRST}"
+  echo -e "  Date:    ${DIM}${FIRST}${RESET}"
 fi
 if [[ -n "$PROJECT_FILTER" ]]; then
-  echo "Project: ${PROJECT_FILTER}"
+  echo -e "  Project: ${CYAN}${PROJECT_FILTER}${RESET}"
 fi
 echo ""
 if [[ $REDISCLOSURES -gt 0 ]]; then
-  echo "Sessions: ${SESSIONS}  |  Way fires: ${FIRES}  |  Re-disclosures: ${REDISCLOSURES}"
+  echo -e "  Sessions: ${GREEN}${SESSIONS}${RESET}  |  Way fires: ${GREEN}${FIRES}${RESET}  |  Re-disclosures: ${YELLOW}${REDISCLOSURES}${RESET}"
 else
-  echo "Sessions: ${SESSIONS}  |  Way fires: ${FIRES}"
+  echo -e "  Sessions: ${GREEN}${SESSIONS}${RESET}  |  Way fires: ${GREEN}${FIRES}${RESET}"
 fi
 echo ""
 
 # Top ways
-echo "Top ways:"
+echo -e "${BOLD}Top ways:${RESET}"
 WAY_COUNTS=$(echo "$EVENTS" | jq -r 'select(.event == "way_fired") | .way' | sort | uniq -c | sort -rn | head -10)
 if [[ -z "$WAY_COUNTS" ]]; then
   echo "  (none yet)"
@@ -223,13 +232,13 @@ else
   echo "$WAY_COUNTS" | while read count way; do
     bar_len=$((count * 20 / (MAX > 0 ? MAX : 1)))
     bar=$(printf '█%.0s' $(seq 1 $bar_len 2>/dev/null) || echo "█")
-    printf "  %-30s %3d  %s\n" "$way" "$count" "$bar"
+    printf "  %-30s %3d  ${CYAN}%s${RESET}\n" "$way" "$count" "$bar"
   done
 fi
 echo ""
 
 # By scope (dynamic - shows whatever scopes exist in data)
-echo "By scope:"
+echo -e "${BOLD}By scope:${RESET}"
 echo "$EVENTS" | jq -r 'select(.event == "way_fired") | .scope // "unknown"' | sort | uniq -c | sort -rn | while read count scope; do
   [[ -z "$scope" ]] && continue
   printf "  %-12s %3d\n" "$scope" "$count"
@@ -239,7 +248,7 @@ echo ""
 # By team (if any team events exist)
 TEAM_EVENTS=$(echo "$EVENTS" | jq -r 'select(.event == "way_fired" and .team != null and .team != "") | .team')
 if [[ -n "$TEAM_EVENTS" ]]; then
-  echo "By team:"
+  echo -e "${BOLD}By team:${RESET}"
   echo "$TEAM_EVENTS" | sort | uniq -c | sort -rn | while read count team; do
     [[ -z "$team" ]] && continue
     printf "  %-30s %3d fires\n" "$team" "$count"
@@ -248,7 +257,7 @@ if [[ -n "$TEAM_EVENTS" ]]; then
 fi
 
 # By trigger
-echo "By trigger:"
+echo -e "${BOLD}By trigger:${RESET}"
 echo "$EVENTS" | jq -r 'select(.event == "way_fired") | .trigger' | sort | uniq -c | sort -rn | while read count trigger; do
   [[ -z "$trigger" ]] && continue
   pct=$((count * 100 / (FIRES > 0 ? FIRES : 1)))
@@ -257,7 +266,7 @@ done
 echo ""
 
 # By project (use display names)
-echo "By project:"
+echo -e "${BOLD}By project:${RESET}"
 echo "$EVENTS" | jq -r 'select(.event == "way_fired") | .project' | sort | uniq -c | sort -rn | head -5 | while read count project; do
   [[ -z "$project" ]] && continue
   display="${project/#$HOME/~}"
@@ -275,9 +284,9 @@ echo ""
 # Check stats
 CHECK_FIRES=$(echo "$EVENTS" | jq -r 'select(.event == "check_fired") | .check' | wc -l)
 if [[ $CHECK_FIRES -gt 0 ]]; then
-  echo "Check fires: ${CHECK_FIRES}"
+  echo -e "${BOLD}Check fires:${RESET} ${CHECK_FIRES}"
   echo ""
-  echo "Top checks:"
+  echo -e "${BOLD}Top checks:${RESET}"
   echo "$EVENTS" | jq -r 'select(.event == "check_fired") | .check' | sort | uniq -c | sort -rn | head -10 | while read count check; do
     printf "  %-30s %3d\n" "$check" "$count"
   done
@@ -299,9 +308,9 @@ fi
 
 # Re-disclosure stats (ADR-104)
 if [[ $REDISCLOSURES -gt 0 ]]; then
-  echo "Re-disclosures: ${REDISCLOSURES}"
+  echo -e "${BOLD}Re-disclosures:${RESET} ${YELLOW}${REDISCLOSURES}${RESET}"
   echo ""
-  echo "Top re-disclosed ways:"
+  echo -e "${BOLD}Top re-disclosed ways:${RESET}"
   echo "$EVENTS" | jq -r 'select(.event == "way_redisclosed") | .way' | sort | uniq -c | sort -rn | head -10 | while read count way; do
     printf "  %-30s %3d\n" "$way" "$count"
   done
@@ -320,5 +329,6 @@ YESTERDAY=$(date -u -d "1 day ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
 if [[ -n "$YESTERDAY" ]]; then
   RECENT_SESSIONS=$(echo "$EVENTS" | jq -r "select(.ts >= \"$YESTERDAY\" and .event == \"session_start\") | .session" | sort -u | wc -l)
   RECENT_FIRES=$(echo "$EVENTS" | jq -r "select(.ts >= \"$YESTERDAY\" and .event == \"way_fired\") | .way" | wc -l)
-  echo "Last 24h: ${RECENT_SESSIONS} sessions, ${RECENT_FIRES} way fires"
+  echo ""
+  echo -e "${DIM}Last 24h: ${RECENT_SESSIONS} sessions, ${RECENT_FIRES} way fires${RESET}"
 fi
