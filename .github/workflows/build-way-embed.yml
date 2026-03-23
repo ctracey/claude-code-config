@@ -6,6 +6,10 @@ on:
     paths:
       - 'tools/way-embed/**'
       - '.github/workflows/build-way-embed.yml'
+  pull_request:
+    paths:
+      - 'tools/way-embed/**'
+      - '.github/workflows/build-way-embed.yml'
   workflow_dispatch:
 
 jobs:
@@ -38,7 +42,7 @@ jobs:
       - name: Build way-embed
         working-directory: tools/way-embed
         run: |
-          mkdir -p build
+          mkdir -p build ../../bin
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           cmake --build . --target way-embed -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)

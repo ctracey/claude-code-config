@@ -83,15 +83,21 @@ release-build: $(PLATFORM_BIN)
 	@echo "Built $(PLATFORM_BIN) for release"
 	@ls -lh $(PLATFORM_BIN)
 
-# Create the release (run once, after all platforms have built)
+# Expected platform binaries for release
+RELEASE_PLATFORMS = linux-x86_64 linux-aarch64 darwin-x86_64 darwin-arm64
+RELEASE_BINS = $(addprefix ../../bin/way-embed-,$(RELEASE_PLATFORMS))
+
+# Create the release (run after CI builds all platforms)
 release:
 	@echo "Publishing $(RELEASE_TAG) to $(GH_REPO)..."
-	@ls -lh ../../bin/way-embed-* $(MODEL) 2>/dev/null
+	@echo "Expected binaries:"; for b in $(RELEASE_BINS); do \
+		[ -f "$$b" ] && ls -lh "$$b" || echo "  MISSING: $$b"; \
+	done
 	gh release create $(RELEASE_TAG) \
 		--repo $(GH_REPO) \
 		--title "way-embed $(VERSION)" \
 		--notes-file $(SRCDIR)RELEASE.md \
-		../../bin/way-embed-* $(MODEL)
+		$(wildcard $(RELEASE_BINS)) $(MODEL)
 	@echo "Published: https://github.com/$(GH_REPO)/releases/tag/$(RELEASE_TAG)"
 
 clean:
