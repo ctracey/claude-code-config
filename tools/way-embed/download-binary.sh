@@ -19,7 +19,8 @@ PLATFORM="${OS}-${ARCH}"
 GH_REPO="aaronsb/claude-code-config"
 RELEASE_TAG="${WAY_EMBED_RELEASE:-latest}"
 BIN_NAME="way-embed-${PLATFORM}"
-OUTPUT_DIR="${HOME}/.claude/bin"
+XDG_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}"
+OUTPUT_DIR="${XDG_CACHE}/claude-ways/user"
 
 # Parse args
 while [[ $# -gt 0 ]]; do
