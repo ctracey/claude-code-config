@@ -23,6 +23,9 @@ WAYS_DIR="${HOME}/.claude/hooks/ways"
 source "${WAYS_DIR}/match-way.sh"
 detect_semantic_engine
 
+# Clean up embedding cache on exit (ephemeral per-prompt eval cycle)
+[[ -n "${EMBED_CACHE:-}" ]] && trap 'rm -f "$EMBED_CACHE" 2>/dev/null' EXIT
+
 # Detect teammate spawn (Task tool with team_name parameter)
 TEAM_NAME=$(echo "$INPUT" | jq -r '.tool_input.team_name // empty')
 IS_TEAMMATE=false

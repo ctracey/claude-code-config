@@ -114,15 +114,22 @@ match_way_prompt() {
   case "$SEMANTIC_ENGINE" in
     embedding)
       # Lazy batch: run once per prompt eval, cache for subsequent lookups.
-      # way-embed match scores ALL corpus ways in one call (~22ms total).
+      # way-embed match scores ALL corpus ways in one call (~20ms total).
+      # Atomic write: only create cache file if way-embed succeeds, so a
+      # transient failure doesn't silently degrade to regex-only matching.
       if [[ -n "$EMBED_CACHE" && ! -f "$EMBED_CACHE" ]]; then
-        "$WAY_EMBED_BIN" match \
+        local _tmp="${EMBED_CACHE}.tmp"
+        if "$WAY_EMBED_BIN" match \
             --corpus "$CORPUS_PATH" \
             --model "$MODEL_PATH" \
-            --query "$prompt" > "$EMBED_CACHE" 2>/dev/null
+            --query "$prompt" > "$_tmp" 2>/dev/null; then
+          mv "$_tmp" "$EMBED_CACHE"
+        else
+          rm -f "$_tmp"
+        fi
       fi
-      # Look up this way's id in cached batch results
-      if [[ -n "$way_id" && -f "$EMBED_CACHE" ]] && grep -q "^${way_id}	" "$EMBED_CACHE"; then
+      # Look up this way's id in cached batch results (fixed-string grep)
+      if [[ -n "$way_id" && -f "$EMBED_CACHE" ]] && grep -qF "${way_id}	" "$EMBED_CACHE"; then
         MATCH_CHANNEL="semantic"
         return 0
       fi
