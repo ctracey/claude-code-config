@@ -6,7 +6,7 @@
 # Update:        make update   (pull + setup)
 
 .DEFAULT_GOAL := help
-.PHONY: setup install update test test-all clean help
+.PHONY: setup install update test test-all corpus clean help
 
 # --- Primary targets ---
 
@@ -48,7 +48,7 @@ hooks-executable:
 
 # --- Tests ---
 
-test:
+test: corpus
 	bash tools/way-embed/test-embedding.sh
 
 test-bm25:
@@ -65,7 +65,7 @@ test-all: test test-bm25 test-integration
 # --- Corpus ---
 
 corpus:
-	bash tools/way-match/generate-corpus.sh
+	@bash tools/way-match/generate-corpus.sh --quiet
 
 # --- Clean ---
 
