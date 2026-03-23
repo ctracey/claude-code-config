@@ -4,6 +4,7 @@
 # Track these directories
 !.gitignore
 !CLAUDE.md
+!Makefile
 !README.md
 !LICENSE
 !CONTRIBUTING.md
