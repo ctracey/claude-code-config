@@ -1,6 +1,6 @@
 ---
 name: ways-tests
-description: Score way matching, analyze vocabulary, and validate frontmatter. Use when testing how well a way matches prompts, checking for vocabulary gaps, or validating way files.
+description: Score way matching (embedding and BM25), analyze vocabulary, and validate frontmatter. Use when testing how well a way matches prompts, checking cosine similarity or BM25 scores, inspecting the embedding engine status, or validating way files.
 allowed-tools: Bash, Read, Glob, Grep, Edit
 ---
 
@@ -25,7 +25,161 @@ Test how well a way matches sample prompts, analyze vocabulary for gaps, and val
 /ways-tests crowding "prompt"             # Detect vocabulary crowding across all ways
 /ways-tests compare <path1> <path2>       # Side-by-side tree metrics comparison
 /ways-tests metrics                       # Show tree disclosure metrics for current session
+/ways-tests embed-status                  # Embedding engine health dashboard
+/ways-tests embed-score <way> "prompt"   # Cosine similarity score for one way
+/ways-tests embed-score-all "prompt"     # Cosine similarity ranking across all ways
 ```
+
+## Engine Hierarchy
+
+The matching pipeline has three tiers. Always report which tier is active before presenting scores — the numbers mean different things across tiers:
+
+```
+Tier 1 — Embedding (primary, ~20ms batch)
+  way-embed match: cosine similarity, 0–1 scale
+  Threshold field: embed_threshold (per-way, default: 0.35)
+  Fires when: cosine(query, way) >= embed_threshold
+
+Tier 2 — BM25 (fallback when way-embed or model missing)
+  way-match pair: TF-IDF relevance score, unbounded scale
+  Threshold field: threshold (per-way, default: 2.0)
+  Fires when: BM25_score >= threshold
+
+Tier 3 — NCD (last resort when way-match also missing)
+  gzip-based normalized compression distance, 0–1 scale
+  Fixed threshold: 0.58 (not per-way tunable)
+  Fires when: distance <= 0.58
+```
+
+To check which tier is active: `bash ~/.claude/hooks/ways/embed-status.sh`
+
+## Embed-Status Mode
+
+Show the full embedding engine health dashboard:
+
+```bash
+bash ~/.claude/hooks/ways/embed-status.sh
+# or with JSON output:
+bash ~/.claude/hooks/ways/embed-status.sh --json
+```
+
+Reports:
+- Active engine (embedding/bm25/ncd) and whether it was forced or auto-detected
+- Binary path and version (`way-embed v0.1.0`)
+- Model path and size (`minilm-l6-v2.gguf`)
+- Corpus state: total ways, how many have pre-computed embeddings, size
+- Manifest freshness (staleness detection)
+- Per-project: inclusion marker state, staleness, embedded count
+
+**If engine reports `bm25 (auto)` or `ncd (auto)`**, the embedding tier is degraded. Diagnose:
+- Binary missing → `make setup` in `~/.claude`
+- Model missing → `make setup` downloads it to `~/.cache/claude-ways/user/`
+- Corpus missing or stale → `make corpus` (or `bash ~/.claude/tools/way-match/generate-corpus.sh`)
+
+## Embedding Score Mode
+
+Score a way using the embedding engine directly.
+
+**Step 1 — Ensure corpus is fresh:**
+
+```bash
+bash ~/.claude/tools/way-match/generate-corpus.sh
+```
+
+This regenerates `~/.cache/claude-ways/user/ways-corpus.jsonl`. The corpus includes pre-computed embeddings for all semantic ways (`description` + `vocabulary` fields present). Run this after adding or editing any way.
+
+**Step 2 — Score all ways against a prompt (batch, ~20ms):**
+
+```bash
+WAY_EMBED="${HOME}/.cache/claude-ways/user/way-embed"
+CORPUS="${XDG_CACHE_HOME:-$HOME/.cache}/claude-ways/user/ways-corpus.jsonl"
+MODEL="${XDG_CACHE_HOME:-$HOME/.cache}/claude-ways/user/minilm-l6-v2.gguf"
+
+"$WAY_EMBED" match \
+  --corpus "$CORPUS" \
+  --model  "$MODEL" \
+  --query  "your prompt here"
+```
+
+Output is `id<TAB>score` for each way whose cosine similarity meets its `embed_threshold`. Example:
+
+```
+softwaredev/security	0.6821
+softwaredev/api	0.5104
+itops/runbooks	0.4312
+```
+
+**Step 3 — Score a single way (look up by id):**
+
+Ways are identified in the corpus by their path relative to the ways root (e.g., `softwaredev/security`). After running the batch command, grep for the target id:
+
+```bash
+"$WAY_EMBED" match \
+  --corpus "$CORPUS" \
+  --model  "$MODEL" \
+  --query  "your prompt here" | grep -F "softwaredev/security"
+```
+
+**Overriding per-way threshold for exploration:**
+
+```bash
+"$WAY_EMBED" match \
+  --corpus "$CORPUS" \
+  --model  "$MODEL" \
+  --query  "your prompt here" \
+  --threshold 0.1    # show everything above 0.1 cosine similarity
+```
+
+Use `--threshold 0.1` to see the full similarity landscape when debugging misses.
+
+### Interpreting Cosine Similarity Scores
+
+| Range | Meaning |
+|-------|---------|
+| >= 0.7 | Strong match — semantically close |
+| 0.5–0.7 | Moderate match — related domain |
+| 0.35–0.5 | Weak match — at or near default threshold |
+| < 0.35 | Below default threshold — no match |
+
+The default `embed_threshold` is **0.35**. Per-way overrides live in the way's frontmatter:
+
+```yaml
+---
+description: "..."
+vocabulary: "..."
+embed_threshold: 0.45   # raise to require stronger match
+---
+```
+
+Raise `embed_threshold` to suppress weak false positives. Lower it (toward 0.25) for broader catch on niche topics. The `threshold` field (BM25 scale) is still read when the engine falls back to BM25.
+
+### Embedding Cross-Way Ranking
+
+When using `embed-score` on a single way, also run the full batch and present the top results as a ranked table — same pattern as BM25 score mode:
+
+```
+=== "add a make target for linting" ===
+
+Engine: embedding (auto)
+
+Target: softwaredev/environment/makefile
+  Cosine: 0.5821  embed_threshold: 0.35  Result: MATCH
+
+Cross-way ranking (top by cosine similarity):
+  Cosine  Thr   Match  Way
+  ------  ----  -----  ---
+  0.5821  0.35  YES    softwaredev/environment/makefile  ← target
+  0.4102  0.35  YES    softwaredev/docs/standards
+  0.2891  0.35  no     softwaredev/environment/deps
+  ...
+
+Assessment: Clean win. Target leads by 0.17 cosine points.
+```
+
+Flag these patterns:
+- **Overlap**: Two ways both match with cosine scores within 0.05 of each other → potential conflict
+- **False dominance**: Another way has a higher cosine than the target → vocabulary or description may need tuning
+- **Healthy co-fire**: Both match but serve complementary purposes → note as expected
 
 ## Resolving Way Paths
 
@@ -34,7 +188,9 @@ When the user gives a short name like "security" instead of a full path:
 2. Then check `~/.claude/hooks/ways/` recursively for `*/security/way.md`
 3. If multiple matches, list them and ask the user to pick
 
-## Score Mode
+## Score Mode (BM25 Fallback)
+
+Use BM25 scoring when the embedding engine is unavailable (`way-embed` or the model file is missing), or when you want to inspect BM25 signal independently for vocabulary tuning.
 
 **Before any scoring operation**, regenerate the corpus so IDF is current:
 
@@ -97,7 +253,9 @@ Flag these patterns:
 
 ## Score-All Mode
 
-For each way.md file found (project-local + global), extract description+vocabulary and run `way-match pair`. Display results as a ranked table:
+**With embedding active**: run `way-embed match` once — it scores the query against all pre-computed corpus embeddings in a single batch call (~20ms). No per-way loop needed. Output is already ranked by cosine similarity.
+
+**With BM25 fallback**: for each way.md file found (project-local + global), extract description+vocabulary and run `way-match pair`. Display results as a ranked table:
 
 ```
 Score   Threshold  Match  Way
@@ -484,6 +642,10 @@ Adding vocabulary to fix a miss works locally but risks overfitting globally. Ev
 
 ## Notes
 
+- **Always report the active engine tier** before presenting scores — cosine (0–1) and BM25 (unbounded) are not comparable across tiers.
+- The `way-embed` binary lives at `~/.cache/claude-ways/user/way-embed` (downloaded) or `~/.claude/bin/way-embed` (built from source). If missing, report that embedding is unavailable and suggest `make setup` in `~/.claude`.
 - The `way-match` binary must exist at `~/.claude/bin/way-match`. If missing, report that BM25 is unavailable and suggest building it.
+- The `embed_threshold` frontmatter field (float, default `0.35`) sets the per-way cosine cutoff. The `threshold` field (float, default `2.0`) sets the per-way BM25 cutoff. Both live in the same frontmatter block; the active engine reads the right one.
+- Corpus regeneration (`generate-corpus.sh`) bakes fresh embeddings into the JSONL. After editing any way's `description` or `vocabulary`, regen is required for embedding scores to reflect the change.
 - When displaying results, use human-readable format, not raw machine output.
 - Check scoring uses `awk` for floating-point math.
