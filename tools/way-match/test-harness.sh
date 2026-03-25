@@ -174,6 +174,7 @@ while IFS= read -r line; do
   bm25_result="skip"
 
   # --- Scorer evaluation ---
+  # Fixture IDs use slashes (softwaredev/code/testing), corpus uses hyphens
   if $is_negative; then
     local_result="TN"
     for way_id in "${WAY_IDS[@]}"; do
@@ -186,7 +187,8 @@ while IFS= read -r line; do
     matched=0
     missed=""
     for exp in "${expected_list[@]}"; do
-      if bm25_matches_way "$prompt" "$exp"; then
+      exp_id=$(echo "$exp" | tr '/' '-')
+      if bm25_matches_way "$prompt" "$exp_id"; then
         matched=$((matched + 1))
       else
         missed+="${exp##*-} "
@@ -200,7 +202,8 @@ while IFS= read -r line; do
       local_result="MISS"
     fi
   else
-    if bm25_matches_way "$prompt" "${expected_list[0]}"; then
+    exp_id=$(echo "${expected_list[0]}" | tr '/' '-')
+    if bm25_matches_way "$prompt" "$exp_id"; then
       local_result="TP"
     else
       local_result="FN"
