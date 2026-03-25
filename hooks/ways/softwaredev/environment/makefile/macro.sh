@@ -46,8 +46,12 @@ if [[ -z "$HAS_DEFAULT_HELP" ]]; then
   echo "**Do this now before running any make commands.**"
 fi
 
-# Try to get targets from make help (timeout quickly)
-HELP_OUTPUT=$(cd "$PROJECT_DIR" && timeout 3 make --no-print-directory help 2>/dev/null)
+# Try to get targets from make help (timeout quickly, with macOS fallback)
+if command -v timeout >/dev/null 2>&1; then
+  HELP_OUTPUT=$(cd "$PROJECT_DIR" && timeout 3 make --no-print-directory help 2>/dev/null)
+else
+  HELP_OUTPUT=$(cd "$PROJECT_DIR" && make --no-print-directory help 2>/dev/null)
+fi
 
 if [[ -n "$HELP_OUTPUT" && ${#HELP_OUTPUT} -lt 2000 ]]; then
   echo ""
