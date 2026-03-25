@@ -68,7 +68,7 @@ threshold: 90             # percentage (0-100)
 - `description:` - Natural language reference text for what this way covers
 - `vocabulary:` - Space-separated domain keywords users would say
 - `threshold:` - BM25 score threshold (default 2.0, higher = stricter)
-- Degradation: BM25 binary → gzip NCD fallback → skip
+- Degradation: embedding → BM25 binary → skip
 
 **State-based:**
 - `trigger:` - State condition type (`context-threshold`, `file-exists`, `session-start`)

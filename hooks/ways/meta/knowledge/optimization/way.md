@@ -62,12 +62,12 @@ Ideal outcome: one way scores well above threshold, others score well below. If 
 
 ## Which Ways Use Semantic Matching
 
-Only ways with both `description:` and `vocabulary:` frontmatter fields use BM25/NCD semantic matching. Ways with `match: regex`, `files:`, or `commands:` triggers don't need vocabulary optimization — they match on patterns.
+Only ways with both `description:` and `vocabulary:` frontmatter fields use semantic matching. Ways with `match: regex`, `files:`, or `commands:` triggers don't need vocabulary optimization — they match on patterns.
 
 ## Thresholds
 
+- **Embedding threshold** (frontmatter `embed_threshold:`): Cosine similarity, 0–1 scale. Default set per-way in corpus.
 - **BM25 threshold** (frontmatter `threshold:`): Score scale, higher = better match. Default 2.0. Range typically 1.5-5.0.
-- **NCD threshold** (hardcoded 0.58 in check-prompt.sh): Distance scale, lower = more similar. Not tunable per-way — it's a fallback for when the BM25 binary isn't available.
 
 Lowering BM25 threshold increases recall (more matches) but risks false positives. The test harness tracks FP rate — **0 FP is the hard constraint**.
 

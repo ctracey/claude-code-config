@@ -11,7 +11,7 @@
 #
 # Ways are nested: domain/wayname/way.md (e.g., softwaredev/delivery/github/way.md)
 # Matching is ADDITIVE: pattern (regex/keyword) and semantic are OR'd.
-# Semantic matching degrades: BM25 binary → gzip NCD → skip.
+# Semantic matching: embedding → BM25 binary → skip.
 # Project-local ways are scanned first (and take precedence).
 
 INPUT=$(cat)

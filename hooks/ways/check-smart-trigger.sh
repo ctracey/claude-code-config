@@ -49,11 +49,8 @@ collect_candidates() {
     # Check if pattern matches
     local matched=false
     if [[ "$match_mode" == "semantic" ]]; then
-      local vocabulary=$(get_field "vocabulary")
-      local threshold=$(get_field "threshold")
-      if "${WAYS_DIR}/semantic-match.sh" "$PROMPT" "$description" "$vocabulary" "$threshold" 2>/dev/null; then
-        matched=true
-      fi
+      # TODO: wire up match_way_prompt from match-way.sh when this script is activated
+      continue
     elif [[ -n "$pattern" && "$PROMPT" =~ $pattern ]]; then
       matched=true
     fi

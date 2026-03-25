@@ -12,7 +12,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 WAYS_DIR="$SCRIPT_DIR/../../hooks/ways"
 BM25_BINARY="$SCRIPT_DIR/../../bin/way-match"
-NCD_SCRIPT="$SCRIPT_DIR/../../hooks/ways/semantic-match.sh"
 
 if [[ ! -x "$BM25_BINARY" ]]; then
   echo "error: bin/way-match not found" >&2
@@ -110,7 +109,6 @@ TEST_CASES=(
 
 # --- Run tests ---
 bm25_tp=0 bm25_fp=0 bm25_tn=0 bm25_fn=0
-ncd_tp=0 ncd_fp=0 ncd_tn=0 ncd_fn=0
 total=0
 
 echo -e "${BOLD}--- Scoring each prompt against all semantic ways ---${NC}"
@@ -137,14 +135,6 @@ for test_case in "${TEST_CASES[@]}"; do
       if [ "$(echo "$score >= $thresh" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
         bm25_matches+=("$local_id")
       fi
-    fi
-  done
-
-  # Score against all ways with NCD (uses fixed NCD threshold, not BM25 threshold)
-  ncd_matches=()
-  for i in $(seq 0 $((${#WAY_IDS[@]} - 1))); do
-    if bash "$NCD_SCRIPT" "$prompt" "${WAY_DESCS[$i]}" "${WAY_VOCABS[$i]}" "0.55" 2>/dev/null; then
-      ncd_matches+=("${WAY_IDS[$i]}")
     fi
   done
 
@@ -177,38 +167,8 @@ for test_case in "${TEST_CASES[@]}"; do
     fi
   fi
 
-  # Evaluate NCD
-  ncd_ok=false
-  if [[ "$expected" == "NONE" ]]; then
-    if [[ ${#ncd_matches[@]} -eq 0 ]]; then
-      ncd_tn=$((ncd_tn + 1)); ncd_ok=true
-    else
-      ncd_fp=$((ncd_fp + 1))
-    fi
-  else
-    all_found=true
-    for exp in "${expected_list[@]}"; do
-      found=false
-      for m in "${ncd_matches[@]}"; do
-        [[ "$m" == "$exp" ]] && found=true && break
-      done
-      [[ "$found" == false ]] && all_found=false
-    done
-    if [[ "$all_found" == true ]]; then
-      ncd_tp=$((ncd_tp + 1)); ncd_ok=true
-    else
-      ncd_fn=$((ncd_fn + 1))
-    fi
-  fi
-
   # Output
   printf "%-3d " "$total"
-
-  if [[ "$ncd_ok" == true ]]; then
-    printf "${GREEN}NCD:OK  ${NC} "
-  else
-    printf "${RED}NCD:FAIL${NC} "
-  fi
 
   if [[ "$bm25_ok" == true ]]; then
     printf "${GREEN}BM25:OK  ${NC} "
@@ -244,17 +204,5 @@ echo ""
 echo -e "${BOLD}=== Integration Results ($total tests) ===${NC}"
 echo ""
 
-ncd_correct=$((ncd_tp + ncd_tn))
 bm25_correct=$((bm25_tp + bm25_tn))
-
-echo "NCD (gzip):  TP=$ncd_tp FP=$ncd_fp TN=$ncd_tn FN=$ncd_fn  accuracy=$ncd_correct/$total"
-echo "BM25:        TP=$bm25_tp FP=$bm25_fp TN=$bm25_tn FN=$bm25_fn  accuracy=$bm25_correct/$total"
-echo ""
-
-if [[ $bm25_correct -gt $ncd_correct ]]; then
-  echo -e "${GREEN}BM25 wins: +$((bm25_correct - ncd_correct)) correct${NC}"
-elif [[ $ncd_correct -gt $bm25_correct ]]; then
-  echo -e "${RED}NCD wins: +$((ncd_correct - bm25_correct)) correct${NC}"
-else
-  echo "Tie"
-fi
+echo "BM25:  TP=$bm25_tp FP=$bm25_fp TN=$bm25_tn FN=$bm25_fn  accuracy=$bm25_correct/$total"

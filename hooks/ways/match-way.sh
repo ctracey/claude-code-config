@@ -38,8 +38,8 @@ check_when_preconditions() {
   return 0
 }
 
-# Detect semantic matcher: embedding → BM25 binary → gzip NCD → none
-# Respects "semantic_engine" in ways.json: "auto" (default), "embedding", "bm25", "ncd"
+# Detect semantic matcher: embedding → BM25 binary → none
+# Respects "semantic_engine" in ways.json: "auto" (default), "embedding", "bm25"
 # Sets: SEMANTIC_ENGINE, WAY_MATCH_BIN, WAY_EMBED_BIN, MODEL_PATH, CORPUS_PATH, EMBED_CACHE
 detect_semantic_engine() {
   local xdg_cache="${XDG_CACHE_HOME:-$HOME/.cache}/claude-ways/user"
@@ -89,19 +89,10 @@ detect_semantic_engine() {
     return 1
   }
 
-  _try_ncd() {
-    if command -v gzip >/dev/null 2>&1 && command -v bc >/dev/null 2>&1; then
-      SEMANTIC_ENGINE="ncd"
-      return 0
-    fi
-    return 1
-  }
-
   case "$forced_engine" in
-    embedding) _try_embedding || _try_bm25 || _try_ncd || SEMANTIC_ENGINE="none" ;;
-    bm25)      _try_bm25 || _try_ncd || SEMANTIC_ENGINE="none" ;;
-    ncd)       _try_ncd || SEMANTIC_ENGINE="none" ;;
-    *)         _try_embedding || _try_bm25 || _try_ncd || SEMANTIC_ENGINE="none" ;;
+    embedding) _try_embedding || _try_bm25 || SEMANTIC_ENGINE="none" ;;
+    bm25)      _try_bm25 || SEMANTIC_ENGINE="none" ;;
+    *)         _try_embedding || _try_bm25 || SEMANTIC_ENGINE="none" ;;
   esac
 }
 
@@ -152,19 +143,6 @@ match_way_prompt() {
             --query "$prompt" \
             --threshold "${threshold:-2.0}" \
             "${corpus_args[@]}" 2>/dev/null; then
-          MATCH_CHANNEL="semantic"
-          return 0
-        fi
-      fi
-      ;;
-    ncd)
-      if [[ -n "$description" && -n "$vocabulary" ]]; then
-        # NCD fallback uses a fixed threshold (distance 0-1, lower = more similar).
-        # This is intentionally NOT derived from frontmatter thresholds, which are
-        # on the BM25 score scale (higher = better match). The two scales don't map
-        # cleanly: BM25 threshold 2.0 ≠ NCD distance 0.58. The fixed value 0.58 was
-        # tuned against the test fixture corpus for acceptable recall without false positives.
-        if "${WAYS_DIR}/semantic-match.sh" "$prompt" "$description" "$vocabulary" "0.58" 2>/dev/null; then
           MATCH_CHANNEL="semantic"
           return 0
         fi

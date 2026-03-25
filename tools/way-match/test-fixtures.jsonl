@@ -40,12 +40,12 @@
 {"prompt": "write a README for this project", "expected": "softwaredev/docs", "match": true, "category": "direct"}
 {"prompt": "add a mermaid diagram to the documentation", "expected": "softwaredev/docs", "match": true, "category": "direct"}
 {"prompt": "speed up the SQL queries", "expected": "softwaredev/code/performance", "match": true, "category": "synonym", "note": "optimization prompt - performance not design"}
-{"prompt": "harden the login endpoints against brute force", "expected": "softwaredev/code/security", "match": true, "category": "synonym", "note": "NCD likely misses: harden not in vocabulary"}
-{"prompt": "the app crashes when you submit the form", "expected": "softwaredev/environment/debugging", "match": true, "category": "synonym", "note": "NCD likely misses: crash/submit not in debugging vocabulary"}
-{"prompt": "verify the service handles bad input gracefully", "expected": "softwaredev/code/testing", "match": true, "category": "synonym", "note": "NCD likely misses: verify/gracefully not in testing vocabulary"}
-{"prompt": "set up the connection string for postgres", "expected": "softwaredev/environment/config", "match": true, "category": "synonym", "note": "NCD likely misses: connection string is config concept but not in vocabulary"}
-{"prompt": "how do the microservices talk to each other", "expected": "softwaredev/architecture/design", "match": true, "category": "synonym", "note": "NCD likely misses: microservices/talk are design concepts but informal"}
-{"prompt": "make the API respond with proper error codes", "expected": "softwaredev/docs/api", "match": true, "category": "synonym", "note": "NCD may match via api but error codes is the real signal"}
+{"prompt": "harden the login endpoints against brute force", "expected": "softwaredev/code/security", "match": true, "category": "synonym", "note": "harden not in vocabulary, relies on semantic matching"}
+{"prompt": "the app crashes when you submit the form", "expected": "softwaredev/environment/debugging", "match": true, "category": "synonym", "note": "crash/submit not in debugging vocabulary"}
+{"prompt": "verify the service handles bad input gracefully", "expected": "softwaredev/code/testing", "match": true, "category": "synonym", "note": "verify/gracefully not in testing vocabulary"}
+{"prompt": "set up the connection string for postgres", "expected": "softwaredev/environment/config", "match": true, "category": "synonym", "note": "connection string is config concept but not in vocabulary"}
+{"prompt": "how do the microservices talk to each other", "expected": "softwaredev/architecture/design", "match": true, "category": "synonym", "note": "microservices/talk are design concepts but informal"}
+{"prompt": "make the API respond with proper error codes", "expected": "softwaredev/docs/api", "match": true, "category": "synonym", "note": "error codes is the real signal, not just api keyword"}
 {"prompt": "what's the weather today", "expected": null, "match": false, "category": "negative"}
 {"prompt": "hello", "expected": null, "match": false, "category": "negative"}
 {"prompt": "tell me a joke about programmers", "expected": null, "match": false, "category": "negative"}

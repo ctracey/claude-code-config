@@ -46,7 +46,7 @@ verify: $(ALL_SRC)
 	fi
 	@rm -f /tmp/way-match-verify
 
-# Run test harness (comparative BM25 vs NCD)
+# Run test harness (BM25)
 test: $(BIN)
 	bash tools/way-match/test-harness.sh --verbose
 
@@ -54,15 +54,7 @@ test: $(BIN)
 test-integration: $(BIN)
 	bash tools/way-match/test-integration.sh
 
-# Run test harness, BM25 only
-test-bm25: $(BIN)
-	bash tools/way-match/test-harness.sh --bm25-only --verbose
-
-# Run NCD baseline only (no binary needed)
-test-ncd:
-	bash tools/way-match/test-harness.sh --ncd-only --verbose
-
 clean:
 	rm -f $(BIN)
 
-.PHONY: local verify test test-integration test-bm25 test-ncd clean
+.PHONY: local verify test test-integration clean

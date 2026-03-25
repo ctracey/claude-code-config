@@ -116,11 +116,6 @@ scan_checks() {
           MATCH_SCORE=$(echo "$pair_out" | sed -n 's/.*score=\([0-9.]*\).*/\1/p')
           MATCH_SCORE="${MATCH_SCORE:-0}"
           ;;
-        ncd)
-          if "${HOME}/.claude/hooks/ways/semantic-match.sh" "$query" "$description" "$vocabulary" "0.58" 2>/dev/null; then
-            MATCH_SCORE="2.5"
-          fi
-          ;;
       esac
     fi
 
