@@ -59,14 +59,12 @@ Runs on **Linux** and **macOS**. The hooks are all bash and lean on standard POS
 | `jq` | JSON parsing (hook inputs, configs, API responses) | **Must install** |
 | `cc` | Build BM25 matcher from source (`make local`) | Usually pre-installed; see below |
 | `cmake` + `c++` | Build embedding engine from source (`make -C tools/way-embed`) | Optional — only if using embedding engine |
-| `gzip` | Legacy NCD fallback (only if BM25 binary missing) | Usually pre-installed |
-| `bc` | Math for legacy NCD fallback | Usually pre-installed (not in Arch `base`) |
 | `python3` | Governance traceability tooling | Stdlib only — no pip packages |
 | [`gh`](https://cli.github.com/) | GitHub API (update checks, repo macros) | Recommended, not required — degrades gracefully |
 
 Standard utilities (`bash`, `awk`, `sed`, `grep`, `find`, `timeout`, `tr`, `sort`, `wc`, `date`) are assumed present via coreutils.
 
-**Semantic matching** uses a three-tier engine: **embedding** (all-MiniLM-L6-v2, 98% accuracy) → **BM25** (91% accuracy) → **NCD** (legacy gzip fallback). Auto-detected at runtime — the best available engine is used. The BM25 binary at `bin/way-match` is checked in as a cross-platform APE. The embedding engine requires a separate build and model download:
+**Semantic matching** uses a two-tier engine: **embedding** (all-MiniLM-L6-v2, 98% accuracy) → **BM25** (91% accuracy). Auto-detected at runtime — the best available engine is used. The BM25 binary at `bin/way-match` is checked in as a cross-platform APE. The embedding engine requires a separate build and model download:
 
 ```bash
 make setup   # download binary + model (21MB), generate corpus, verify
@@ -130,7 +128,7 @@ Ways config lives in `~/.claude/ways.json`:
 | Field | Purpose |
 |-------|---------|
 | `disabled` | Array of domain names to skip (e.g., `["itops", "softwaredev"]`) |
-| `semantic_engine` | `"auto"` (default), `"embedding"`, `"bm25"`, or `"ncd"` — force a specific engine |
+| `semantic_engine` | `"auto"` (default), `"embedding"`, or `"bm25"` — force a specific engine |
 
 Disabled domains are completely ignored — no pattern matching, no output. The `semantic_engine` override is useful for testing or when the embedding engine causes issues — set to `"bm25"` to fall back.
 

@@ -55,7 +55,7 @@ threshold: 2.0
 
 Semantic matching uses the BM25 binary (`~/.claude/bin/way-match`), which is checked into the repo. It scores description+vocabulary against the prompt with Porter2 stemming and IDF weighting.
 
-If the binary is missing, a legacy gzip NCD fallback (`semantic-match.sh`) provides degraded matching — lower accuracy and higher false-positive rate (see [test results](../../tests/way-match/results.md)). If neither is available, semantic matching is silently skipped and pattern matching still works.
+If neither the embedding engine nor BM25 binary is available, semantic matching is silently skipped and pattern matching still works. Run `make setup` to install both.
 
 ### Vocabulary design
 

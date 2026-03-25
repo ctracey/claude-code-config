@@ -1,6 +1,6 @@
 # Way-Match Test Results
 
-Typical output from the BM25 vs NCD scorer comparison tests. These results document the current baseline and illustrate the behavioral differences between the two matching engines.
+**Historical**: These results compare BM25 vs NCD (gzip) from when NCD was the baseline matcher. NCD has since been removed — the matching engine is now embedding → BM25 → regex-only. These results are preserved as a record of why NCD was retired.
 
 Last run: 2026-02-17
 

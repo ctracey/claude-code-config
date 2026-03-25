@@ -33,7 +33,7 @@ jobs:
       - name: Verify binary runs
         run: bin/way-match --version
 
-      - name: Run test harness (BM25 vs NCD)
+      - name: Run test harness (BM25)
         run: bash tools/way-match/test-harness.sh --verbose
 
       - name: Run test harness (BM25 accuracy gate)

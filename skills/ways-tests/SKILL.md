@@ -45,10 +45,6 @@ Tier 2 — BM25 (fallback when way-embed or model missing)
   Threshold field: threshold (per-way, default: 2.0)
   Fires when: BM25_score >= threshold
 
-Tier 3 — NCD (last resort when way-match also missing)
-  gzip-based normalized compression distance, 0–1 scale
-  Fixed threshold: 0.58 (not per-way tunable)
-  Fires when: distance <= 0.58
 ```
 
 To check which tier is active: `bash ~/.claude/hooks/ways/embed-status.sh`
@@ -64,14 +60,14 @@ bash ~/.claude/hooks/ways/embed-status.sh --json
 ```
 
 Reports:
-- Active engine (embedding/bm25/ncd) and whether it was forced or auto-detected
+- Active engine (embedding/bm25/none) and whether it was forced or auto-detected
 - Binary path and version (`way-embed v0.1.0`)
 - Model path and size (`minilm-l6-v2.gguf`)
 - Corpus state: total ways, how many have pre-computed embeddings, size
 - Manifest freshness (staleness detection)
 - Per-project: inclusion marker state, staleness, embedded count
 
-**If engine reports `bm25 (auto)` or `ncd (auto)`**, the embedding tier is degraded. Diagnose:
+**If engine reports `bm25 (auto)` or `none (auto)`**, the embedding tier is degraded. Diagnose:
 - Binary missing → `make setup` in `~/.claude`
 - Model missing → `make setup` downloads it to `~/.cache/claude-ways/user/`
 - Corpus missing or stale → `make corpus` (or `bash ~/.claude/tools/way-match/generate-corpus.sh`)

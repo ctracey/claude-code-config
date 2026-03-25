@@ -19,7 +19,7 @@ No configuration files to update. No registration step. The discovery scripts sc
 | A broad concept users describe variously | `description:` + `vocabulary:` (BM25 semantic matching) |
 | A session condition, not content | `trigger:` with `context-threshold`, `file-exists`, or `session-start` |
 
-Matching is additive — pattern and semantic are OR'd. A way can have both a `pattern:` and `description:` + `vocabulary:`; either channel can fire it. Semantic matching uses BM25 (`bin/way-match`). A legacy NCD fallback exists if the binary is missing.
+Matching is additive — pattern and semantic are OR'd. A way can have both a `pattern:` and `description:` + `vocabulary:`; either channel can fire it. Semantic matching uses embeddings (`way-embed`) with BM25 (`bin/way-match`) as fallback.
 
 ### Writing effective guidance
 

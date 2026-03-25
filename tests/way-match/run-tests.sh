@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run BM25 vs NCD scorer tests from the tests/ directory.
+# Run BM25 scorer tests from the tests/ directory.
 # Wraps tools/way-match/test-harness.sh and test-integration.sh.
 #
 # Usage: tests/way-match/run-tests.sh [fixture|integration|all] [--verbose]
@@ -23,7 +23,7 @@ case "$MODE" in
     bash "$INTEGRATION" $EXTRA_ARGS
     ;;
   all)
-    echo "=== Fixture Tests (BM25 vs NCD, synthetic corpus) ==="
+    echo "=== Fixture Tests (BM25, synthetic corpus) ==="
     echo ""
     bash "$HARNESS" --verbose $EXTRA_ARGS
     echo ""

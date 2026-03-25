@@ -90,7 +90,7 @@ if [[ "$ENGINE" == "auto" ]]; then
   elif [[ -x "${HOME}/.claude/bin/way-match" ]]; then
     ENGINE="bm25 (auto)"
   else
-    ENGINE="ncd (auto)"
+    ENGINE="none (auto)"
   fi
 fi
 

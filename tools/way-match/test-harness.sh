@@ -1,11 +1,11 @@
 #!/bin/bash
-# Test harness for way-match: compares BM25 binary vs gzip NCD baseline
-# Usage: ./test-harness.sh [--ncd-only] [--bm25-only] [--verbose]
+# Test harness for way-match: runs BM25 binary against test fixtures
+# Usage: ./test-harness.sh [--verbose]
 #
-# Runs test fixtures against both scorers and reports:
+# Runs test fixtures against the BM25 scorer and reports:
 # - Per-test pass/fail
-# - Match matrix (TP, FP, TN, FN per scorer)
-# - Head-to-head comparison (BM25 wins, NCD wins, ties)
+# - Match matrix (TP, FP, TN, FN)
+# - Co-activation results
 #
 # Compatible with bash 3.2+ (macOS default)
 # Credit: bash 3.2 compat identified by @0x3dge (PR #38)
@@ -14,7 +14,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FIXTURES="$SCRIPT_DIR/test-fixtures.jsonl"
-NCD_SCRIPT="$SCRIPT_DIR/../../hooks/ways/semantic-match.sh"
 BM25_BINARY="$SCRIPT_DIR/../../bin/way-match"
 
 # Way corpus: parallel indexed arrays (bash 3.2 compatible — no associative arrays)
@@ -96,21 +95,17 @@ way_index() {
 }
 
 # --- Options ---
-RUN_NCD=true
-RUN_BM25=true
 VERBOSE=false
 
 for arg in "$@"; do
   case "$arg" in
-    --ncd-only)  RUN_BM25=false ;;
-    --bm25-only) RUN_NCD=false ;;
     --verbose)   VERBOSE=true ;;
   esac
 done
 
-if [[ "$RUN_BM25" == true ]] && [[ ! -x "$BM25_BINARY" ]]; then
-  echo "note: bin/way-match not found, running NCD only"
-  RUN_BM25=false
+if [[ ! -x "$BM25_BINARY" ]]; then
+  echo "error: bin/way-match not found" >&2
+  exit 1
 fi
 
 if [[ ! -f "$FIXTURES" ]]; then
@@ -119,26 +114,9 @@ if [[ ! -f "$FIXTURES" ]]; then
 fi
 
 # --- Counters ---
-ncd_tp=0 ncd_fp=0 ncd_tn=0 ncd_fn=0
 bm25_tp=0 bm25_fp=0 bm25_tn=0 bm25_fn=0
-bm25_wins=0 ncd_wins=0 ties=0
 coact_full=0 coact_partial=0 coact_miss=0 coact_total=0
 total=0
-
-# --- NCD scorer ---
-ncd_matches_way() {
-  local prompt="$1" way_id="$2"
-  local idx; idx=$(way_index "$way_id") || return 1
-  local desc="${WAY_DESCS[$idx]}"
-  local vocab="${WAY_VOCABS[$idx]}"
-  local ncd_thresh="0.58"
-
-  if bash "$NCD_SCRIPT" "$prompt" "$desc" "$vocab" "$ncd_thresh" 2>/dev/null; then
-    return 0
-  else
-    return 1
-  fi
-}
 
 # --- BM25 scorer ---
 bm25_matches_way() {
@@ -159,54 +137,6 @@ bm25_matches_way() {
   fi
 }
 
-# --- Score a prompt against all ways, return best match ---
-# For BM25: scores all ways, returns highest-scoring match.
-# For NCD: binary scorer (no score output), returns first match.
-find_best_match() {
-  local scorer="$1" prompt="$2"
-
-  if [[ "$scorer" == "bm25" ]]; then
-    local best_way="none" best_score="0"
-    for i in $(seq 0 $((${#WAY_IDS[@]} - 1))); do
-      local way_id="${WAY_IDS[$i]}"
-      local stderr_out
-      stderr_out=$("$BM25_BINARY" pair \
-        --description "${WAY_DESCS[$i]}" \
-        --vocabulary "${WAY_VOCABS[$i]}" \
-        --query "$prompt" \
-        --threshold "0" 2>&1 >/dev/null)
-      local score
-      score=$(echo "$stderr_out" | sed -n 's/match: score=\([0-9.]*\).*/\1/p')
-      if [[ -n "$score" ]] && command -v bc >/dev/null 2>&1; then
-        if (( $(echo "$score > $best_score" | bc -l) )); then
-          best_score="$score"
-          best_way="$way_id"
-        fi
-      fi
-    done
-    # Verify best actually meets its threshold
-    if [[ "$best_way" != "none" ]]; then
-      local bidx; bidx=$(way_index "$best_way") || true
-      local thresh="${WAY_THRESHS[$bidx]}"
-      if command -v bc >/dev/null 2>&1 && (( $(echo "$best_score < $thresh" | bc -l) )); then
-        best_way="none"
-      fi
-    fi
-    echo "$best_way"
-    return 0
-  fi
-
-  # NCD fallback: binary match, return first
-  for way_id in "${WAY_IDS[@]}"; do
-    if "${scorer}_matches_way" "$prompt" "$way_id"; then
-      echo "$way_id"
-      return 0
-    fi
-  done
-  echo "none"
-  return 0
-}
-
 # --- Colors ---
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -217,7 +147,7 @@ NC='\033[0m'
 # --- Run tests ---
 echo "=== Way-Match Test Harness ==="
 echo "Fixtures: $FIXTURES"
-echo "Scorers:  $([ "$RUN_NCD" == true ] && echo "NCD") $([ "$RUN_BM25" == true ] && echo "BM25")"
+echo "Scorer:   BM25"
 echo ""
 
 while IFS= read -r line; do
@@ -241,136 +171,77 @@ while IFS= read -r line; do
   total=$((total + 1))
   $is_coact && coact_total=$((coact_total + 1))
 
-  ncd_result="skip"
   bm25_result="skip"
 
-  # --- Scorer evaluation function ---
-  # Usage: eval_scorer <scorer_name> <prompt> <expected_list...>
-  # Sets: ${scorer}_result variable
-  eval_scorer() {
-    local scorer="$1" prompt="$2"
-    shift 2
-    local exp_list=("$@")
-    local result=""
-
-    if $is_negative; then
-      # Negative test: check no way matches
-      local any_match=false
-      for way_id in "${WAY_IDS[@]}"; do
-        if "${scorer}_matches_way" "$prompt" "$way_id"; then
-          any_match=true
-          result="FP:$way_id"
-          break
-        fi
-      done
-      if [[ "$any_match" == false ]]; then
-        result="TN"
+  # --- Scorer evaluation ---
+  # Fixture IDs use slashes (softwaredev/code/testing), corpus uses hyphens
+  if $is_negative; then
+    local_result="TN"
+    for way_id in "${WAY_IDS[@]}"; do
+      if bm25_matches_way "$prompt" "$way_id"; then
+        local_result="FP:$way_id"
+        break
       fi
-    elif $is_coact; then
-      # Co-activation: check ALL expected ways match
-      local matched=0
-      local missed=""
-      for exp in "${exp_list[@]}"; do
-        if "${scorer}_matches_way" "$prompt" "$exp"; then
-          matched=$((matched + 1))
-        else
-          missed+="${exp##*-} "
-        fi
-      done
-      if [[ $matched -eq ${#exp_list[@]} ]]; then
-        result="FULL"
-      elif [[ $matched -gt 0 ]]; then
-        result="PARTIAL:${missed% }"
+    done
+  elif $is_coact; then
+    matched=0
+    missed=""
+    for exp in "${expected_list[@]}"; do
+      exp_id=$(echo "$exp" | tr '/' '-')
+      if bm25_matches_way "$prompt" "$exp_id"; then
+        matched=$((matched + 1))
       else
-        result="MISS"
+        missed+="${exp##*-} "
       fi
+    done
+    if [[ $matched -eq ${#expected_list[@]} ]]; then
+      local_result="FULL"
+    elif [[ $matched -gt 0 ]]; then
+      local_result="PARTIAL:${missed% }"
     else
-      # Single-expected: check the one expected way matches
-      if "${scorer}_matches_way" "$prompt" "${exp_list[0]}"; then
-        result="TP"
-      else
-        result="FN"
-      fi
+      local_result="MISS"
     fi
-
-    echo "$result"
-  }
-
-  # NCD scoring
-  if [[ "$RUN_NCD" == true ]]; then
-    ncd_result=$(eval_scorer "ncd" "$prompt" "${expected_list[@]+"${expected_list[@]}"}")
-    case "$ncd_result" in
-      TP|FULL) ncd_tp=$((ncd_tp + 1)) ;;
-      TN)      ncd_tn=$((ncd_tn + 1)) ;;
-      FN|MISS) ncd_fn=$((ncd_fn + 1)) ;;
-      FP:*)      ncd_fp=$((ncd_fp + 1)) ;;
-      PARTIAL:*) ncd_fn=$((ncd_fn + 1)) ;;
-    esac
+  else
+    exp_id=$(echo "${expected_list[0]}" | tr '/' '-')
+    if bm25_matches_way "$prompt" "$exp_id"; then
+      local_result="TP"
+    else
+      local_result="FN"
+    fi
   fi
 
-  # BM25 scoring
-  if [[ "$RUN_BM25" == true ]]; then
-    bm25_result=$(eval_scorer "bm25" "$prompt" "${expected_list[@]+"${expected_list[@]}"}")
+  bm25_result="$local_result"
+  case "$bm25_result" in
+    TP|FULL) bm25_tp=$((bm25_tp + 1)) ;;
+    TN)      bm25_tn=$((bm25_tn + 1)) ;;
+    FN|MISS) bm25_fn=$((bm25_fn + 1)) ;;
+    FP:*)      bm25_fp=$((bm25_fp + 1)) ;;
+    PARTIAL:*) bm25_fn=$((bm25_fn + 1)) ;;
+  esac
+
+  # Track co-activation detail
+  if $is_coact; then
     case "$bm25_result" in
-      TP|FULL) bm25_tp=$((bm25_tp + 1)) ;;
-      TN)      bm25_tn=$((bm25_tn + 1)) ;;
-      FN|MISS) bm25_fn=$((bm25_fn + 1)) ;;
-      FP:*)      bm25_fp=$((bm25_fp + 1)) ;;
-      PARTIAL:*) bm25_fn=$((bm25_fn + 1)) ;;
+      FULL)      coact_full=$((coact_full + 1)) ;;
+      PARTIAL:*) coact_partial=$((coact_partial + 1)) ;;
+      MISS)      coact_miss=$((coact_miss + 1)) ;;
     esac
-    # Track co-activation detail for BM25
-    if $is_coact; then
-      case "$bm25_result" in
-        FULL)      coact_full=$((coact_full + 1)) ;;
-        PARTIAL:*) coact_partial=$((coact_partial + 1)) ;;
-        MISS)      coact_miss=$((coact_miss + 1)) ;;
-      esac
-    fi
-  fi
-
-  # Head-to-head
-  if [[ "$RUN_NCD" == true ]] && [[ "$RUN_BM25" == true ]]; then
-    ncd_correct=false
-    bm25_correct=false
-    [[ "$ncd_result" == "TP" || "$ncd_result" == "TN" || "$ncd_result" == "FULL" ]] && ncd_correct=true
-    [[ "$bm25_result" == "TP" || "$bm25_result" == "TN" || "$bm25_result" == "FULL" ]] && bm25_correct=true
-
-    if [[ "$bm25_correct" == true ]] && [[ "$ncd_correct" == false ]]; then
-      bm25_wins=$((bm25_wins + 1))
-    elif [[ "$ncd_correct" == true ]] && [[ "$bm25_correct" == false ]]; then
-      ncd_wins=$((ncd_wins + 1))
-    else
-      ties=$((ties + 1))
-    fi
   fi
 
   # Output — show failures always, everything in verbose
   show=false
   if [[ "$VERBOSE" == true ]]; then show=true; fi
-  case "$ncd_result" in FN|MISS|FP:*|PARTIAL:*) show=true ;; esac
   case "$bm25_result" in FN|MISS|FP:*|PARTIAL:*) show=true ;; esac
 
   if $show; then
     printf "%-3s " "$total"
     printf "[%-12s] " "$category"
 
-    # NCD result
-    if [[ "$RUN_NCD" == true ]]; then
-      case "$ncd_result" in
-        TP|TN|FULL)       printf "${GREEN}NCD:%-10s${NC} " "$ncd_result" ;;
-        FN|MISS)           printf "${RED}NCD:%-10s${NC} " "$ncd_result" ;;
-        FP:*|PARTIAL:*)    printf "${YELLOW}NCD:%-10s${NC} " "$ncd_result" ;;
-      esac
-    fi
-
-    # BM25 result
-    if [[ "$RUN_BM25" == true ]]; then
-      case "$bm25_result" in
-        TP|TN|FULL)       printf "${GREEN}BM25:%-10s${NC} " "$bm25_result" ;;
-        FN|MISS)           printf "${RED}BM25:%-10s${NC} " "$bm25_result" ;;
-        FP:*|PARTIAL:*)    printf "${YELLOW}BM25:%-10s${NC} " "$bm25_result" ;;
-      esac
-    fi
+    case "$bm25_result" in
+      TP|TN|FULL)       printf "${GREEN}BM25:%-10s${NC} " "$bm25_result" ;;
+      FN|MISS)           printf "${RED}BM25:%-10s${NC} " "$bm25_result" ;;
+      FP:*|PARTIAL:*)    printf "${YELLOW}BM25:%-10s${NC} " "$bm25_result" ;;
+    esac
 
     printf "%s" "$prompt"
     [[ -n "$note" ]] && printf " ${CYAN}(%s)${NC}" "$note"
@@ -384,22 +255,9 @@ echo ""
 echo "=== Results ($total tests) ==="
 echo ""
 
-if [[ "$RUN_NCD" == true ]]; then
-  ncd_correct=$((ncd_tp + ncd_tn))
-  ncd_total=$((ncd_tp + ncd_fp + ncd_tn + ncd_fn))
-  echo "NCD (gzip):  TP=$ncd_tp FP=$ncd_fp TN=$ncd_tn FN=$ncd_fn  accuracy=$ncd_correct/$ncd_total"
-fi
-
-if [[ "$RUN_BM25" == true ]]; then
-  bm25_correct=$((bm25_tp + bm25_tn))
-  bm25_total=$((bm25_tp + bm25_fp + bm25_tn + bm25_fn))
-  echo "BM25:        TP=$bm25_tp FP=$bm25_fp TN=$bm25_tn FN=$bm25_fn  accuracy=$bm25_correct/$bm25_total"
-fi
-
-if [[ "$RUN_NCD" == true ]] && [[ "$RUN_BM25" == true ]]; then
-  echo ""
-  echo "Head-to-head: BM25 wins=$bm25_wins  NCD wins=$ncd_wins  ties=$ties"
-fi
+bm25_correct=$((bm25_tp + bm25_tn))
+bm25_total=$((bm25_tp + bm25_fp + bm25_tn + bm25_fn))
+echo "BM25:  TP=$bm25_tp FP=$bm25_fp TN=$bm25_tn FN=$bm25_fn  accuracy=$bm25_correct/$bm25_total"
 
 if [[ $coact_total -gt 0 ]]; then
   echo ""

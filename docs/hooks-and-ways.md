@@ -43,7 +43,7 @@ All trigger evaluation scripts respect the `scope:` frontmatter field - ways wit
 
 - **`check-task-pre.sh`** - PreToolUse:Task hook (Phase 1). Reads the Task tool's `prompt` parameter, scans ways with `scope: subagent`, matches using `match-way.sh` (same additive logic as `check-prompt.sh`). Writes matched way paths to `/tmp/.claude-subagent-stash-{session_id}/`. Never blocks Task creation.
 - **`inject-subagent.sh`** - SubagentStart hook (Phase 2). Reads the oldest stash file, claims it atomically, emits way content as JSON `hookSpecificOutput.additionalContext`. Bypasses markers entirely - subagents get fresh context regardless of what the parent triggered.
-- **`match-way.sh`** - Shared matching function sourced by `check-prompt.sh` and `check-task-pre.sh`. Provides `detect_semantic_engine()` and `match_way_prompt()` (additive pattern OR semantic). Three-tier semantic engine: embedding (all-MiniLM-L6-v2) → BM25 → NCD. See [Semantic Matching](#semantic-matching).
+- **`match-way.sh`** - Shared matching function sourced by `check-prompt.sh` and `check-task-pre.sh`. Provides `detect_semantic_engine()` and `match_way_prompt()` (additive pattern OR semantic). Two-tier semantic engine: embedding (all-MiniLM-L6-v2) → BM25. See [Semantic Matching](#semantic-matching).
 
 ### IRC Communication
 
@@ -190,9 +190,8 @@ Three-tier engine, auto-detected at runtime:
 |------|--------|--------|-------------|
 | 1 | **Embedding** | `bin/way-embed` + GGUF model | all-MiniLM-L6-v2 sentence embeddings. Pre-computed 384-dim vectors in corpus. One spawn per prompt (~20ms), cosine similarity against all ways. |
 | 2 | **BM25** | `bin/way-match` | Okapi BM25 with Porter2 stemming. Scores description+vocabulary per-way. |
-| 3 | **NCD** | `gzip` + `bc` | Normalized compression distance. Legacy fallback, no binary needed. |
 
-The scanner calls `detect_semantic_engine()` which checks for each tier's prerequisites (binary exists, model file present, corpus has embeddings). First available tier wins. Removing a binary downgrades automatically.
+The scanner calls `detect_semantic_engine()` which checks for each tier's prerequisites (binary exists, model file present, corpus has embeddings). First available tier wins. If neither is available, semantic matching is skipped and pattern matching still works.
 
 **Embedding engine** (ADR-108): Solves BM25's stem-collision problem — "SSH agent" and "AI agent" share the same BM25 stem but have distant embedding vectors. The first `match_way_prompt()` call per prompt runs `way-embed match` once (scoring all 58 ways), caches results at `${XDG_CACHE_HOME}/claude-ways/projects/<encoded-path>/embed-results.tsv`, and subsequent calls grep the cache. Cache is cleaned up on scanner exit.
 

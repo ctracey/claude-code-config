@@ -29,7 +29,7 @@
 #define MAX_LINE      8192
 
 /* ========================================================================
- * Stopwords — same list as semantic-match.sh
+ * Stopwords — common English words excluded from scoring
  * ======================================================================== */
 
 static const char *STOPWORDS[] = {
@@ -791,7 +791,7 @@ static void usage(void) {
         "Pair mode:\n"
         "  Score a single description+vocabulary against a query.\n"
         "  Exit 0 if match (score >= threshold), 1 if no match.\n"
-        "  Drop-in replacement for semantic-match.sh.\n"
+        "  Scores description+vocabulary against a query.\n"
         "\n"
         "Score mode:\n"
         "  Score all documents in a JSONL corpus against a query.\n"
