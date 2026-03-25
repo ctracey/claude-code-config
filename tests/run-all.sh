@@ -26,7 +26,7 @@ run_suite() {
   fi
 }
 
-# Way-match fixture tests (BM25 vs NCD)
+# Way-match fixture tests (BM25)
 run_suite "Way-Match Fixture Tests" bash "$REPO_ROOT/tools/way-match/test-harness.sh" ${VERBOSE:+--verbose}
 
 # Way-match integration tests (real way files)
