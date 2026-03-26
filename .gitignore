@@ -1,6 +1,10 @@
 # Ignore everything by default
 *
 
+# Todo tracking files (task breakdowns, plans, notes, changelogs — treated as specs/docs)
+!.claude/
+!.claude/todo-pr-*.md
+
 # Track these directories
 !.gitignore
 !CLAUDE.md

@@ -1,0 +1,7 @@
+# Developer-local files (not committed)
+settings.local.json
+memory/
+projects/
+plans/
+
+# Ways and CLAUDE.md ARE committed (shared team knowledge)

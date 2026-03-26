@@ -32,14 +32,27 @@ For complex, multi-session work, create files in `.claude/`:
 ```markdown
 # ADR-081 Implementation: Source Lifecycle
 
-## Completed
-- [x] Phase 1: Pre-ingestion storage
-- [x] Phase 2: Offset tracking
+## Tasks
 
-## Remaining
-- [ ] Phase 3: Deduplication
-- [ ] Phase 4: Regeneration
+- [-] **1. Parent task**
+  - [x] 1.1. Subtask one
+  - [ ] 1.2. Subtask two
+
+- [ ] **2. Another parent task**
+  - [ ] 2.1. Subtask one
 ```
+
+**Task status markers:**
+
+| Marker | Meaning |
+|--------|---------|
+| `[ ]`  | Not started |
+| `[-]`  | In progress (one or more subtasks started or done, but not all done) |
+| `[x]`  | Done (all subtasks complete) |
+
+**Parent task rules:**
+- When subtasks exist, the parent status reflects them: any subtask in progress → parent is `[-]`; all subtasks done → parent is `[x]`
+- If a parent has no subtasks, mark it directly
 
 **Cleanup:**
 When all items complete, recommend deleting the file. Git history preserves it. Don't let completed files accumulate.
