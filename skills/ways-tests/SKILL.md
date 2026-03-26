@@ -22,6 +22,8 @@ Test how well a way matches sample prompts, analyze vocabulary for gaps, and val
 /ways-tests check-all "context"           # Rank all checks against context
 /ways-tests tree <path>                   # Analyze progressive disclosure tree structure
 /ways-tests budget <path>                 # Token cost analysis for a way tree
+/ways-tests jaccard <tree>                # Sibling vocabulary isolation for a tree
+/ways-tests jaccard <way1> <way2>         # Vocabulary overlap between two specific ways
 /ways-tests crowding "prompt"             # Detect vocabulary crowding across all ways
 /ways-tests compare <path1> <path2>       # Side-by-side tree metrics comparison
 /ways-tests metrics                       # Show tree disclosure metrics for current session
@@ -337,6 +339,7 @@ The linter checks:
 - Incomplete pairs (description without vocabulary, or vice versa)
 - `when:` block validation (unknown sub-fields, path existence)
 - check.md structure (`## anchor` and `## check` sections)
+- Sibling vocabulary isolation (Jaccard > 0.15 warning, > 0.25 error)
 
 The linter does NOT flag absence of optional fields. A way without `when:`, `macro:`, or `provenance:` is correct — these fields are additive. Only flag what's wrong, not what's missing-but-optional.
 
@@ -404,16 +407,7 @@ Assessment: Thresholds increase with depth (1.8→2.0→2.5). Good.
 
 - **Threshold inversion**: Child has lower threshold than parent → fires more easily than its parent, breaks progressive disclosure
 - **Flat threshold**: Parent and child share exact threshold → no progressive narrowing
-- **Vocabulary overlap**: Sibling ways with Jaccard similarity > 0.15 → competing triggers
-
-To compute **sibling vocabulary Jaccard**: for each pair of sibling way.md files at the same directory level, split vocabulary into word sets, compute `|A ∩ B| / |A ∪ B|`.
-
-```bash
-# Extract vocabulary words from two sibling ways
-vocab_a=$(awk '...' way_a.md)  # frontmatter extraction
-vocab_b=$(awk '...' way_b.md)
-# Compute Jaccard in awk or python
-```
+- **Vocabulary overlap**: Sibling ways with Jaccard similarity > 0.15 → competing triggers. Run `bash ~/.claude/tools/way-tree-analyze.sh jaccard <tree>` to compute pairwise scores and include results in the tree report. See **Jaccard Mode** for details on presentation and thresholds.
 
 - **Orphan ways**: A way.md in a subdirectory where no parent directory has a way.md → no progressive disclosure root
 - **Deep trees**: Depth > 4 levels → likely over-decomposed
@@ -476,6 +470,75 @@ tokens=$(strip_frontmatter "$wayfile" | wc -c | awk '{printf "%.0f", $1/4}')
 - **Path > 1500 tokens**: Path exceeds target, content may need trimming
 - **Worst-case > 5000 tokens**: Tree is heavy, may crowd context on broad prompts
 - **Single way dominates**: One way accounts for >40% of tree's total tokens
+
+## Jaccard Mode
+
+Measure vocabulary isolation between sibling ways. Siblings are ways that share the same parent directory.
+
+### Two forms
+
+**Tree-wide**: Compute pairwise Jaccard for all sibling groups in a tree.
+
+```bash
+bash ~/.claude/tools/way-tree-analyze.sh jaccard <tree>
+```
+
+The tool outputs tab-delimited PAIR lines: `PAIR\tway_a\tway_b\tscore`
+
+**Specific pair**: Compare two individual ways. Extract vocabulary from each way's frontmatter and compute Jaccard inline:
+
+```python
+python3 -c "
+a = set('vocab_a_words'.split())
+b = set('vocab_b_words'.split())
+print(f'{len(a & b) / len(a | b):.2f}' if (a | b) else '0.00')
+"
+```
+
+### What to Report
+
+```
+=== Sibling Vocabulary Isolation: meta/trust ===
+
+Pair                                    Jaccard  Shared Terms
+delegation <-> voice                    0.000    (none)
+delegation <-> autonomy                 0.000    (none)
+voice <-> autonomy                      0.000    (none)
+
+Assessment: Perfect isolation. No vocabulary overlap between siblings.
+```
+
+When there is overlap:
+
+```
+=== Sibling Vocabulary Isolation: softwaredev/code/supplychain ===
+
+Group: supplychain/depscan/
+Pair                                    Jaccard  Shared Terms
+go <-> python                           0.040    scan
+node <-> rust                           0.050    cargo
+
+Group: supplychain/
+Pair                                    Jaccard  Shared Terms
+repoaudit <-> historysever              0.060    git, history
+automation <-> sourceaudit              0.030    audit
+
+Assessment: Good isolation. All pairs below 0.15 threshold.
+```
+
+### What to Flag
+
+- **Jaccard > 0.15**: Siblings compete for the same prompts — move shared terms to the parent or pick one owner
+- **Jaccard > 0.25**: Vocabulary collision — these ways likely co-fire on the same inputs, consider merging or sharply splitting
+- **Jaccard = 0.00 for all pairs**: Perfect isolation (report as positive, not as absence of problems)
+
+Show the shared terms for any pair above 0.15 so the author knows exactly which words to relocate.
+
+### Relationship to Other Modes
+
+- **Crowding** operates on BM25 *scores* against a prompt — it measures runtime co-activation
+- **Jaccard** operates on vocabulary *sets* — it measures structural overlap regardless of any specific prompt
+- Both matter: Jaccard catches vocabulary collisions that crowding might miss if no test prompt triggers both ways
 
 ## Crowding Mode
 

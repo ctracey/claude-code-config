@@ -10,6 +10,7 @@
 #
 # Validates way.md and check.md frontmatter against frontmatter-schema.yaml.
 # Flags unknown fields, invalid values, and incomplete conditional pairs.
+# Also checks sibling vocabulary isolation (Jaccard) across way trees.
 # Does NOT flag absence of optional fields.
 
 set -uo pipefail
@@ -412,6 +413,57 @@ else
         PROJ_WITH_WAYS=1
     fi
     scan_dir "$WAYS_DIR" "Global"
+fi
+
+# ── Sibling vocabulary isolation (Jaccard) ───────────────────────
+# After per-file checks, find way trees and flag sibling vocabulary overlap.
+# A "tree" is any directory containing nested way.md files (depth > 0).
+
+TREE_ANALYZER="${HOME}/.claude/tools/way-tree-analyze.sh"
+
+lint_jaccard() {
+    local dir="$1"
+    [[ ! -d "$dir" ]] && return
+    [[ ! -x "$TREE_ANALYZER" ]] && return
+
+    # Find tree roots: directories that contain way.md AND have subdirectories with way.md
+    while IFS= read -r wayfile; do
+        local waydir
+        waydir=$(dirname "$wayfile")
+        # Check if this directory has any child directories with way.md
+        local child_count
+        child_count=$(find -L "$waydir" -mindepth 2 -name 'way.md' 2>/dev/null | head -1)
+        [[ -z "$child_count" ]] && continue
+
+        # This is a tree root — run jaccard
+        local relroot="${waydir#$WAYS_DIR/}"
+        relroot="${relroot#$PROJECT_DIR/.claude/ways/}"
+
+        while IFS=$'\t' read -r tag way_a way_b score; do
+            [[ "$tag" != "PAIR" ]] && continue
+            # Extract short names for display
+            local name_a name_b
+            name_a=$(basename "$(dirname "$way_a")")
+            name_b=$(basename "$(dirname "$way_b")")
+            if awk "BEGIN{exit ($score > 0.25) ? 0 : 1}"; then
+                echo -e "  ${RED}ERROR:${RESET} ${way_a%/way.md} <-> ${way_b%/way.md} — Jaccard ${score} (> 0.25 collision)"
+                ((ERRORS++))
+            elif awk "BEGIN{exit ($score > 0.15) ? 0 : 1}"; then
+                echo -e "  ${YELLOW}WARNING:${RESET} ${way_a%/way.md} <-> ${way_b%/way.md} — Jaccard ${score} (> 0.15 overlap)"
+                ((WARNINGS++))
+            fi
+        done < <(bash "$TREE_ANALYZER" jaccard "$waydir" 2>/dev/null)
+    done < <(find -L "$dir" -maxdepth 2 -name 'way.md' -print 2>/dev/null | sort)
+}
+
+# Run Jaccard checks on all scanned directories
+if [[ -n "$TARGET" ]]; then
+    lint_jaccard "$TARGET"
+else
+    if [[ -n "$PROJECT_DIR" && -d "$PROJECT_DIR/.claude/ways" ]]; then
+        lint_jaccard "$PROJECT_DIR/.claude/ways"
+    fi
+    lint_jaccard "$WAYS_DIR"
 fi
 
 echo ""
