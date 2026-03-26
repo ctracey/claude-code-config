@@ -10,6 +10,7 @@
 #
 # Validates way.md and check.md frontmatter against frontmatter-schema.yaml.
 # Flags unknown fields, invalid values, and incomplete conditional pairs.
+# Also checks sibling vocabulary isolation (Jaccard) across way trees.
 # Does NOT flag absence of optional fields.
 
 set -uo pipefail
@@ -412,6 +413,64 @@ else
         PROJ_WITH_WAYS=1
     fi
     scan_dir "$WAYS_DIR" "Global"
+fi
+
+# ── Sibling vocabulary isolation (Jaccard) ───────────────────────
+# After per-file checks, find way trees and flag sibling vocabulary overlap.
+# A "tree" is any directory containing nested way.md files (depth > 0).
+
+TREE_ANALYZER="${HOME}/.claude/tools/way-tree-analyze.sh"
+
+lint_jaccard() {
+    local dir="$1"
+    [[ ! -d "$dir" ]] && return
+    [[ ! -x "$TREE_ANALYZER" ]] && return
+
+    # Find outermost tree roots: directories with way.md that have child way.md files.
+    # way-tree-analyze.sh jaccard handles all sibling groups recursively within a tree,
+    # so we only need outermost roots to avoid redundant checks.
+    local -a roots=()
+    while IFS= read -r wayfile; do
+        local waydir
+        waydir=$(dirname "$wayfile")
+        local has_children
+        has_children=$(find -L "$waydir" -mindepth 2 -name 'way.md' 2>/dev/null | head -1)
+        [[ -z "$has_children" ]] && continue
+        roots+=("$waydir")
+    done < <(find -L "$dir" -name 'way.md' -print 2>/dev/null | sort)
+
+    # Filter to outermost roots only (skip any root that's inside another root)
+    local -A outermost
+    for candidate in "${roots[@]}"; do
+        local is_nested=false
+        for other in "${roots[@]}"; do
+            [[ "$candidate" != "$other" && "$candidate" == "$other"/* ]] && { is_nested=true; break; }
+        done
+        $is_nested || outermost["$candidate"]=1
+    done
+
+    for tree_root in "${!outermost[@]}"; do
+        while IFS=$'\t' read -r tag way_a way_b score; do
+            [[ "$tag" != "PAIR" ]] && continue
+            if awk "BEGIN{exit ($score > 0.25) ? 0 : 1}"; then
+                echo -e "  ${RED}ERROR:${RESET} ${way_a%/way.md} <-> ${way_b%/way.md} — Jaccard ${score} (> 0.25 collision)"
+                ((ERRORS++))
+            elif awk "BEGIN{exit ($score > 0.15) ? 0 : 1}"; then
+                echo -e "  ${YELLOW}WARNING:${RESET} ${way_a%/way.md} <-> ${way_b%/way.md} — Jaccard ${score} (> 0.15 overlap)"
+                ((WARNINGS++))
+            fi
+        done < <(bash "$TREE_ANALYZER" jaccard "$tree_root" 2>/dev/null)
+    done
+}
+
+# Run Jaccard checks on all scanned directories
+if [[ -n "$TARGET" ]]; then
+    lint_jaccard "$TARGET"
+else
+    if [[ -n "$PROJECT_DIR" && -d "$PROJECT_DIR/.claude/ways" ]]; then
+        lint_jaccard "$PROJECT_DIR/.claude/ways"
+    fi
+    lint_jaccard "$WAYS_DIR"
 fi
 
 echo ""
