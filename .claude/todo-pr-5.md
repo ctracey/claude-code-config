@@ -6,6 +6,7 @@
   - [x] 1.1. Define reference doc conventions (`todo.md`, `plan.md`, `architecture.md` structure)
   - [x] 1.2. Build the task-execution skill
   - [ ] 1.3. Build the user-handoff skill
+  - [ ] 1.4. Explore Aaron's ADR method and assess fit with this workflow
 
 - [-] **2. Todo list management skills**
   - [x] 2.1. Build the todo-list skill
@@ -15,7 +16,7 @@
   - [x] 2.5. Build the todo-report skill
   - [ ] 2.6. Build the todo-update skill
   - [ ] 2.7. Build the todo-add skill
-  - [ ] 2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
+  - [x] 2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
 
 - [ ] **3. Todo list creation skills**
   - [ ] 3.1. Build the todo-new skill (scaffold todo + plan + architecture from a documented plan)

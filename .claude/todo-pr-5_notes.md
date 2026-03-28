@@ -84,6 +84,16 @@ Entries are in **chronological order** — appended as work happens, not sorted 
 - Underscore separates a doctype qualifier (looser binding): `todo-pr-5_plan`
 - Always lowercase
 
+## Available agents and relation to this plan
+
+| Agent | Description | Relation to this plan | Author |
+|---|---|---|---|
+| `workflow-orchestrator` | Coordinates ADR-driven workflow, guides debate→ADR→branch→implement→PR | Overlaps with the main session orchestrator role — but ADR-focused, not todo-task-focused | Aaron Bockelie |
+| `task-planner` | Plans work using branches and TodoWrite, breaks down complex work | Overlaps with todo-new (3.1) — scaffolding a task breakdown from a plan | Aaron Bockelie |
+| `code-reviewer` | Reviews code for quality, SOLID, requirement traceability | Is the review subagent (6.2) — just needs context wiring | Aaron Bockelie |
+| `Plan` | Designs implementation strategy, identifies critical files | Could feed into implementation subagent briefs, or replace parts of todo-new | Claude Code built-in |
+| `system-architect` | Drafts ADRs, never implements | Not directly in scope unless ADR gates are added to the workflow | Aaron Bockelie |
+
 ## Todo file tracking in git
 
 Todo files (`todo-pr-N*.md`) are first-class documentation — equivalent to specs, plans, and changelogs. They are tracked in git alongside the PR branch they describe.
