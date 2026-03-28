@@ -14,7 +14,7 @@
   - [x] 2.3. Build the todo-notes skill
   - [x] 2.4. Build the todo-changelog skill
   - [x] 2.5. Build the todo-report skill
-  - [ ] 2.6. Build the todo-update skill
+  - [x] 2.6. Build the todo-update skill
   - [ ] 2.7. Build the todo-add skill
   - [x] 2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
 

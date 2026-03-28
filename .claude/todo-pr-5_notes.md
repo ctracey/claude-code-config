@@ -127,7 +127,7 @@ The todo skills (todo-list, todo-update, todo-add, etc.) could be backed by a sm
 
 Candidate approaches: a standalone shell script, a small Node/Python CLI, or a Bash wrapper. The CLI reads and writes `todo-pr-N.md` files; the skills handle presentation and user interaction.
 
-Decision not yet made — captured here as a direction worth exploring when building todo-update (2.6) and todo-add (2.7).
+Decision not yet made — captured here as a direction worth exploring when building todo-add (2.7). The `todo-update` skill was built without a CLI backing and works reliably for direct markdown edits — revisit for todo-add if complexity warrants it.
 
 ## Packaging this workflow
 
@@ -168,7 +168,7 @@ This is a reason to prefer subagents for implementation and review work even whe
 | `todo-changelog` | ✔ done | Show recent changelog entries |
 | `todo-report` | ✔ done | Full status report (plan + list + notes) |
 | `todo-execute` | ✔ done | Spawn implementation subagent for a task |
-| `todo-update` | □ not built | Update task status in file |
+| `todo-update` | ✔ done | Update task status in file, with parent rollup |
 | `todo-add` | □ not built | Add a new task |
 | `todo-new` | □ not built | Scaffold new todo + plan + architecture |
 | `user-handoff` | □ not built | Structured handoff before commit |

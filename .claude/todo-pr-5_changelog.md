@@ -59,6 +59,13 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Task 8 added: implementation agent reflection (what to reflect on, capture in summary artifact)
 - Task 2.8 decision taken immediately: todo files are documentation, track in git via `.gitignore` allowlist
 
+## Task 2.6 — Build the todo-update skill `2026-03-29`
+
+- Skill updates task/subtask checkbox to `done`, `in-progress`, or `reset`
+- Rollup logic: re-evaluates parent status after each subtask change — all done → `[x]`, any started → `[-]`, all reset → `[ ]`
+- Built without CLI backing — direct markdown edit proved reliable enough; CLI deferred to todo-add (2.7) decision
+- Tested: mark done, reset, and re-mark done all behaved correctly with correct parent rollup
+
 ## Notes session — Agent research and workflow clarification `2026-03-29`
 
 - Explored existing agents: `task-planner`, `code-reviewer`, `workflow-orchestrator`, `Plan` (built-in), `system-architect`
