@@ -58,3 +58,13 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Task 7 added: todo file lifecycle and cleanup (tracking strategy, ship flow cleanup step)
 - Task 8 added: implementation agent reflection (what to reflect on, capture in summary artifact)
 - Task 2.8 decision taken immediately: todo files are documentation, track in git via `.gitignore` allowlist
+
+## Notes session — Agent research and workflow clarification `2026-03-29`
+
+- Explored existing agents: `task-planner`, `code-reviewer`, `workflow-orchestrator`, `Plan` (built-in), `system-architect`
+- ADR workflow distinguished from this workflow: ADR is architectural lead / decision capture; this workflow is task/outcome driven
+- `code-reviewer` confirmed as the review subagent for task 6.2 — needs context wiring only
+- `task-planner` identified as candidate for task breakdown step in `todo-new` (3.1); key mismatch: it uses ephemeral TodoWrite, this workflow uses persistent markdown — translation is main session's responsibility
+- `Plan` (built-in) identified as candidate for architecture analysis step in `todo-new`, complementing `task-planner`
+- Added notes: CLI tool for todo management, packaging options, ways/fresh agent sessions, workflow components inventory
+- Task 1.4 marked done (ADR method assessed, fit documented in notes)

@@ -6,7 +6,7 @@
   - [x] 1.1. Define reference doc conventions (`todo.md`, `plan.md`, `architecture.md` structure)
   - [x] 1.2. Build the task-execution skill
   - [ ] 1.3. Build the user-handoff skill
-  - [ ] 1.4. Explore Aaron's ADR method and assess fit with this workflow
+  - [x] 1.4. Explore Aaron's ADR method and assess fit with this workflow
 
 - [-] **2. Todo list management skills**
   - [x] 2.1. Build the todo-list skill

@@ -94,6 +94,20 @@ Entries are in **chronological order** — appended as work happens, not sorted 
 | `Plan` | Designs implementation strategy, identifies critical files | Could feed into implementation subagent briefs, or replace parts of todo-new | Claude Code built-in |
 | `system-architect` | Drafts ADRs, never implements | Not directly in scope unless ADR gates are added to the workflow | Aaron Bockelie |
 
+> **Note on ADRs:** Aaron's ADR technique (`workflow-orchestrator`, `system-architect`) is an **architectural lead workflow** — it captures decisions, trade-offs, and rationale for future reference. This PR-5 workflow is a **task/outcome driven workflow** — it cares about getting work done, reviewed, and shipped one task at a time. The two can coexist: an ADR could precede and inform a todo breakdown, but ADR authorship is not part of this workflow's loop.
+
+## task-planner integration with todo-new (3.1)
+
+`task-planner` is a good candidate to drive the breakdown step inside `todo-new`. The proposed split:
+
+1. `todo-new` receives the feature description from the user
+2. Spawns `task-planner` as a subagent to reason about task breakdown, dependencies, and branch strategy
+3. Main session translates `task-planner`'s output into the persistent `todo-pr-N.md` format (with `_plan`, `_notes`, `_architecture` stubs)
+
+Key mismatch to resolve: `task-planner` thinks in ephemeral TodoWrite + git branches; `todo-new` needs persistent markdown files. The translation step is the main session's responsibility, not the subagent's.
+
+`task-planner` should receive the `_plan` doc (goal, features, scope) as context so it breaks down work that matches the stated intent.
+
 ## Todo file tracking in git
 
 Todo files (`todo-pr-N*.md`) are first-class documentation — equivalent to specs, plans, and changelogs. They are tracked in git alongside the PR branch they describe.
@@ -101,3 +115,84 @@ Todo files (`todo-pr-N*.md`) are first-class documentation — equivalent to spe
 - Tracked: `todo-pr-N.md`, `todo-pr-N_plan.md`, `todo-pr-N_notes.md`, `todo-pr-N_changelog.md`, `todo-pr-N_architecture.md`
 - `.gitignore` allowlist pattern: un-ignore `.claude/` directory, then `!.claude/todo-pr-*.md`
 - Motivation: these files give reviewers full context on intent, decisions, and task breakdown — valuable PR documentation that should live in version control
+
+## CLI tool for todo management
+
+The todo skills (todo-list, todo-update, todo-add, etc.) could be backed by a small CLI tool rather than Claude reading/writing markdown directly. Benefits:
+
+- Structured reads/writes — no risk of Claude mangling the file format
+- Skills become thin wrappers: invoke CLI, present output
+- CLI can be tested independently of Claude
+- Could expose a `todo` command: `todo list`, `todo add`, `todo done 2.3`, `todo status`
+
+Candidate approaches: a standalone shell script, a small Node/Python CLI, or a Bash wrapper. The CLI reads and writes `todo-pr-N.md` files; the skills handle presentation and user interaction.
+
+Decision not yet made — captured here as a direction worth exploring when building todo-update (2.6) and todo-add (2.7).
+
+## Packaging this workflow
+
+The skills, ways, hooks, and agents that make up this workflow should be distributable as a unit. Options:
+
+| Approach | Description |
+|---|---|
+| **Plugin** | Claude Code plugin bundling skills + ways + agents as a named package |
+| **Dotfiles repo** | Fork of `~/.claude` with workflow pre-installed — user clones to get everything |
+| **Install script** | Shell script that copies skills/ways/agents into `~/.claude` |
+| **Project scaffold** | `todo-new` skill writes the workflow files into `.claude/` at project setup time |
+
+The plugin approach is cleanest for distribution (single install, versioned), but depends on Claude Code's plugin support. The install script is the most portable today.
+
+Decision not yet made — worth revisiting when the workflow is stable enough to package.
+
+## Ways and fresh agent sessions
+
+Each subagent gets its own session, which means ways fire fresh for every subagent spawn. This is a feature, not a coincidence — it ensures that project preferences, code style, and workflow guidance are always present regardless of how far into a long main session we are.
+
+Practical implications:
+
+- **Implementation subagent** — ways fire on first relevant action (e.g. editing a file triggers `meta/tracking`, running a commit triggers `delivery/commits`). The subagent always gets clean, un-drifted guidance.
+- **Review subagent** — same: `code/quality`, `code/security`, and other review-relevant ways fire fresh when it starts examining code.
+- **Main session** — ways fire once per session. In a long session, guidance injected early may be far back in context. Spawning a subagent to handle a bounded task (rather than doing it inline) keeps the main session clean and ways fresh where they matter.
+
+This is a reason to prefer subagents for implementation and review work even when the main session *could* do it — fresh ways are a form of context hygiene.
+
+## Workflow components inventory
+
+**Skills** (built by this workflow)
+
+| Skill | Status | Purpose |
+|---|---|---|
+| `todo-list` | ✔ done | Display task list with visual symbols |
+| `todo-plan` | ✔ done | Summarise the `_plan` doc |
+| `todo-notes` | ✔ done | Summarise the `_notes` doc |
+| `todo-changelog` | ✔ done | Show recent changelog entries |
+| `todo-report` | ✔ done | Full status report (plan + list + notes) |
+| `todo-execute` | ✔ done | Spawn implementation subagent for a task |
+| `todo-update` | □ not built | Update task status in file |
+| `todo-add` | □ not built | Add a new task |
+| `todo-new` | □ not built | Scaffold new todo + plan + architecture |
+| `user-handoff` | □ not built | Structured handoff before commit |
+| `implementation-workflow` | □ not built | Governs the impl subagent step-by-step |
+| `review-subagent` | □ not built | Review findings format + skill |
+
+**Ways** (pre-existing, relevant to this workflow)
+
+| Way | Trigger | Relevance |
+|---|---|---|
+| `meta/subagents` | keyword: subagent/delegate/spawn | How to invoke subagents — directly used by todo-execute |
+| `meta/tracking` | file edit: `.claude/todo-*.md` | Defines the tracking file format this workflow builds on |
+| `meta/todos` | context threshold >75% | Prompts task capture before compaction |
+
+**Agents** (pre-existing, wired into this workflow)
+
+| Agent | Role in this workflow |
+|---|---|
+| `code-reviewer` | Is the review subagent (6.2) — needs context wiring |
+| `task-planner` | Candidate for breakdown step in `todo-new` (3.1) |
+| `Plan` (built-in) | Candidate for architecture analysis in `todo-new` |
+
+**Hooks** (planned, not yet built)
+
+| Hook | Purpose |
+|---|---|
+| Pre-commit / pre-push | Confirm user is ready before git operations |
