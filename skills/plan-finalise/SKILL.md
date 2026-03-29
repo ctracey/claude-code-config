@@ -21,17 +21,21 @@ Check each doc:
 
 Fill any missing sections. For **Extend**, **Sibling**, and **New sections** modes, edit rather than overwrite.
 
-### 2. Run todo-report
+### 2. Play back the plan using todo-report
 
-Invoke `todo-report` to surface the summary view.
+Run the `todo-report` skill now. This is the playback — present its full output to the user as the summary of what was planned.
+
+`todo-report` covers: plan summary, task list, notes overview, and next step. This is the user's confirmation that the docs reflect what was agreed.
 
 ### 3. Close and hand back
 
-> "The docs are up to date — here's the summary. If anything looks off, open the files directly:
+After the report output, say:
+
+> "That's the plan. If anything looks off, open the docs directly and we can adjust:
 > - `.claude/todo-pr-N_plan.md`
 > - `.claude/todo-pr-N_architecture.md`
 > - `.claude/todo-pr-N_notes.md`
 >
-> Planning is done. Head back to the main session to start delivery — run `/todo-execute` to begin the first task."
+> Planning is done — head back to the main session and run `/todo-execute` to start the first task."
 
 **Stop here.** Do not begin implementation. Do not write code. Return control to the main session.
