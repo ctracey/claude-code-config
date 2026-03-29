@@ -79,7 +79,7 @@ scan_checks() {
 
   while IFS= read -r -d '' checkfile; do
     waypath="${checkfile#$dir/}"
-    waypath="${waypath%/check.md}"
+    waypath="$(way_id_from_path "$checkfile" "$dir")"
 
     # Extract frontmatter
     frontmatter=$(awk 'NR==1 && /^---$/{p=1; next} p && /^---$/{exit} p{print}' "$checkfile")
@@ -123,7 +123,7 @@ scan_checks() {
       check_out=$("${HOME}/.claude/hooks/ways/show-check.sh" "$waypath" "$SESSION_ID" "file" "$MATCH_SCORE")
       [[ -n "$check_out" ]] && CONTEXT+="$check_out"
     fi
-  done < <(find -L "$dir" -name "check.md" -print0 2>/dev/null)
+  done < <(find -L "$dir" -name "*.check.md" -print0 2>/dev/null)
 }
 
 scan_checks "$PROJECT_DIR/.claude/ways"

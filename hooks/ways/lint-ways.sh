@@ -371,7 +371,7 @@ scan_dir() {
     local count=0
     while IFS= read -r -d '' f; do
         local ftype="way"
-        [[ "$f" == *check.md ]] && ftype="check"
+        [[ "$f" == *.check.md ]] && ftype="check"
         lint_file "$f" "$ftype"
         ((count++))
     done < <(find -L "$dir" -name "*.md" -print0 2>/dev/null | sort -z | while IFS= read -r -d '' f; do
@@ -464,10 +464,10 @@ lint_jaccard() {
         local waydir
         waydir=$(dirname "$wayfile")
         local has_children
-        has_children=$(find -L "$waydir" -mindepth 2 -name '*.md' ! -name 'check.md' 2>/dev/null | head -1)
+        has_children=$(find -L "$waydir" -mindepth 2 -name '*.md' ! -name '*.check.md' 2>/dev/null | head -1)
         [[ -z "$has_children" ]] && continue
         roots+=("$waydir")
-    done < <(find -L "$dir" -name '*.md' ! -name 'check.md' -print 2>/dev/null | sort)
+    done < <(find -L "$dir" -name '*.md' ! -name '*.check.md' -print 2>/dev/null | sort)
 
     # Filter to outermost roots only (skip any root that's inside another root)
     local -A outermost
