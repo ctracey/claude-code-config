@@ -14,15 +14,15 @@ Establish context before the planning conversation begins: resolve the PR number
 
 If a PR number was passed as an argument, use it — skip branch detection.
 
-Otherwise, run `git branch --show-current` and `gh pr view --json number,title 2>/dev/null`.
+Otherwise, run `git branch --show-current` and `gh pr view --json number,title 2>/dev/null`, then **ask the user explicitly**:
 
-| Branch state | Action |
+| Branch state | What to ask |
 |---|---|
-| On `main` | Note — a new branch will be needed before work begins |
-| Feature branch, no PR | Ask if this initiative relates to that branch or needs a fresh one |
-| Feature branch with open PR | Confirm: "Is this new work for PR #N (`[title]`), or a separate initiative?" |
+| On `main` | "What should we call this work? Do you have a branch or PR in mind, or should we use a placeholder for now?" |
+| Feature branch, no PR | "We're on `[branch]` — is this new work related to that branch, or a separate initiative? And do you have a PR number yet?" |
+| Feature branch with open PR | "I can see PR #N (`[title]`). Is this new work for that PR, or something separate?" |
 
-If the user is ready to create a branch and PR now, do it. If too early, use a timestamp placeholder: `todo-pr-YYYYMMDD.md` — this can be renamed once a real PR exists.
+Do not assume a PR number or default to a timestamp without asking. If the user doesn't have a PR yet, offer the timestamp placeholder and confirm: "I'll use `todo-pr-YYYYMMDD` as a placeholder — you can rename it once the PR is open. Does that work?"
 
 ### 2. Check for existing todo files
 
