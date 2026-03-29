@@ -1,6 +1,6 @@
 ---
-name: todo-notes
-description: Summarise the notes and decisions captured for the active todo. Use when the user says "what notes do we have", "show me the notes", "what decisions have been made", "summarise the notes", or invokes /todo-notes.
+name: todo-report-notes
+description: Summarise the notes and decisions captured for the active todo. Use when the user says "what notes do we have", "show me the notes", "what decisions have been made", "summarise the notes", or invokes /todo-report-notes.
 allowed-tools: Read, Glob
 ---
 

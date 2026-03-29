@@ -15,9 +15,40 @@ Scaffold a new piece of work. Creates (or extends) the three reference docs — 
 
 ---
 
+## Acceptance criteria
+
+The planning conversation is complete when the user can close all sessions, return the next day, open a new session, and — using only the docs — pick up delivery with confidence. No need to re-explain the context, re-describe the goal, or re-make decisions already taken.
+
+A new session should be able to read the docs and immediately know:
+- What we're building and why
+- Who it's for and what they need
+- What's in scope and what's explicitly out
+- The approach agreed for the solution
+- The delivery shape and priorities
+- The task breakdown and what to start with
+- What's been decided, what's an open question, and what's intentionally deferred
+
+If any of these would require asking the user again, the docs are not complete.
+
+---
+
+## Core principle: the docs are the only briefing the implementer gets
+
+The planning conversation happens in its own session. The implementation subagent — and any future session — will not have access to that conversation. The documents are the only thing they will see.
+
+This means the docs must be self-contained and complete. Every decision that influences the work must be captured, along with why it was made. Every constraint, every intent, every direction agreed during planning. Not a transcript — but comprehensive enough that someone who was not in the room can read the docs and do the work correctly.
+
+If it shaped the direction of the work, it belongs in the docs. If it was just conversational, leave it out. When in doubt, include it.
+
+**Deferred decisions are first-class entries.** Not everything needs to be resolved in the planning conversation. If something is intentionally parked — "we'll work out the user story format when we get to that task", "the auth approach needs its own conversation" — capture it explicitly as a deferred decision with enough context to pick it up later. The distinction between a gap (something missed) and a deferred decision (something acknowledged and parked) must be clear in the docs.
+
+Write to them as agreements are reached throughout the conversation. The final review is just confirming nothing was missed and every open item is explicitly named.
+
+---
+
 ## Collaboration principles
 
-This is a conversation, not a form. The goal is to think through the work together and arrive at a shared understanding before anything gets written.
+This is a conversation, not a form. The goal is to think through the work together and arrive at a shared understanding.
 
 **Ask, don't assume.** Lead with questions. Don't fill in blanks the user hasn't given you.
 
@@ -161,7 +192,7 @@ You don't need answers to all of these — just enough to inform the task breakd
 
 If the breakdown feels complex (many moving parts, unclear dependencies), offer to spawn a `task-planner` subagent to help reason about task order and structure. Present this as optional.
 
-> **Capture:** Write tech stack, folder structure, and constraints to `_architecture.md`. Add key decisions to `_notes.md` under `## Solution decisions`. Add unresolved questions to `_notes.md` under `## Open questions`. Update `_plan.md` Features and Out of scope sections.
+> **Capture:** Write tech stack, folder structure, and constraints to `_architecture.md`. Add key decisions to `_notes.md` under `## Solution decisions`. Add unresolved unknowns to `_notes.md` under `## Open questions`. Add intentionally parked items to `_notes.md` under `## Deferred decisions` — include enough context so a future conversation can pick them up. Update `_plan.md` Features and Out of scope sections.
 
 **Playback before moving on:**
 > "So the approach is [one sentence on the solution direction]. Key constraints are [X]. Still open: [any unresolved questions]. Sound right?"
@@ -310,18 +341,18 @@ For **New sections** mode, append a new named section to the relevant existing d
 
 ---
 
-### 8. Present and confirm
+### 8. Review
 
-Run the `todo-report` skill to present the full status — plan summary, task list, and notes overview.
+The documents have been maintained throughout the conversation — this step is a review, not a documentation event.
 
-Then prompt the user to review the full documents:
+Run `todo-report` to surface the summary view. Then invite the user to check the docs directly if they want to go deeper:
 
-> "Here's the full picture. You can review the individual docs directly:
-> - `todo-pr-N_plan.md` — goal, features, out of scope, delivery shape
-> - `todo-pr-N_architecture.md` — tech stack, folder structure, constraints
-> - `todo-pr-N_notes.md` — conventions, decisions, open questions
+> "The docs are up to date — here's the summary. If anything looks off, open the files directly:
+> - `todo-pr-N_plan.md`
+> - `todo-pr-N_architecture.md`
+> - `todo-pr-N_notes.md`
 >
-> Anything to adjust before we start executing?"
+> Ready to start, or anything to adjust?"
 
 ---
 

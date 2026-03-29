@@ -8,9 +8,9 @@ allowed-tools: Read, Glob
 
 Delegate to the three component skills in order, then add a NEXT STEP section.
 
-1. Invoke `todo-plan`
+1. Invoke `todo-report-plan`
 2. Invoke `todo-list`
-3. Invoke `todo-notes`
+3. Invoke `todo-report-notes`
 
 ## 4. NEXT STEP
 

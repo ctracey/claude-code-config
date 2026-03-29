@@ -20,8 +20,8 @@ All todo-related skills use noun-first, `todo-` prefix naming to:
 | Skill | Purpose |
 |-------|---------|
 | `todo-list` | Display the task list visually |
-| `todo-plan` | Concise summary of the `_plan` doc, with invitation to ask for detail |
-| `todo-notes` | Concise summary of the `_notes` doc, with invitation to ask for detail |
+| `todo-report-plan` | Concise summary of the `_plan` doc, with invitation to ask for detail |
+| `todo-report-notes` | Concise summary of the `_notes` doc, with invitation to ask for detail |
 | `todo-changelog` | Recent changelog entries, with invitation to ask for more |
 | `todo-update` | Update task status in the file |
 | `todo-add` | Add a new task to the list |
@@ -108,6 +108,18 @@ Key mismatch to resolve: `task-planner` thinks in ephemeral TodoWrite + git bran
 
 `task-planner` should receive the `_plan` doc (goal, features, scope) as context so it breaks down work that matches the stated intent.
 
+## Acceptance criteria for planning
+
+The planning conversation is complete when the user can close all sessions, return the next day, open a new session, and — using only the docs — pick up delivery with confidence. No re-explaining context, no re-describing the goal, no re-making decisions already taken.
+
+## Documents are the only briefing the implementer gets
+
+The planning conversation happens in its own session. The implementation subagent — and any future session — will not have access to that conversation. The docs are the only thing they will see.
+
+Every decision that influenced the work must be captured: what was decided, and why. Every constraint, intent, and direction agreed during planning. Not a transcript — but complete enough that someone who was not in the room can read the docs and do the work correctly.
+
+If it shaped the direction, it belongs in the docs. Write to them throughout the conversation as agreements are reached. The final review is just confirming nothing was missed.
+
 ## Todo file tracking in git
 
 Todo files (`todo-pr-N*.md`) are first-class documentation — equivalent to specs, plans, and changelogs. They are tracked in git alongside the PR branch they describe.
@@ -163,8 +175,8 @@ This is a reason to prefer subagents for implementation and review work even whe
 | Skill | Status | Purpose |
 |---|---|---|
 | `todo-list` | ✔ done | Display task list with visual symbols |
-| `todo-plan` | ✔ done | Summarise the `_plan` doc |
-| `todo-notes` | ✔ done | Summarise the `_notes` doc |
+| `todo-report-plan` | ✔ done | Summarise the `_plan` doc |
+| `todo-report-notes` | ✔ done | Summarise the `_notes` doc |
 | `todo-changelog` | ✔ done | Show recent changelog entries |
 | `todo-report` | ✔ done | Full status report (plan + list + notes) |
 | `todo-execute` | ✔ done | Spawn implementation subagent for a task |

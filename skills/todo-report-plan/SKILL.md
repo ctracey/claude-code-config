@@ -1,6 +1,6 @@
 ---
-name: todo-plan
-description: Summarise the plan for the active todo. Use when the user says "what's the plan", "show me the plan", "summarise the plan", or invokes /todo-plan.
+name: todo-report-plan
+description: Summarise the plan for the active todo. Use when the user says "what's the plan", "show me the plan", "summarise the plan", or invokes /todo-report-plan.
 allowed-tools: Read, Glob
 ---
 
