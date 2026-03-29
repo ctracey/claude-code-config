@@ -47,3 +47,12 @@ Run `todo-list` to show the skeleton. Then ask:
 Wait for confirmation or adjustments.
 
 Transition: *"Good — let's figure out how to break it down."*
+
+## Exit criteria
+
+**Done when:**
+- `_plan.md` has `## Delivery shape`
+- Skeleton task list written to `todo-pr-N.md`
+- User confirmed the ordering and grouping
+
+**Return control to `todo-begin`.**

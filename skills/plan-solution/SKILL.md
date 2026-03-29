@@ -64,3 +64,13 @@ Run `todo-report-plan` and `todo-report-notes` to show the current state of the 
 Wait for confirmation or corrections.
 
 Transition: *"Good — before we get into individual tasks, let's talk about how you see this unfolding."*
+
+## Exit criteria
+
+**Done when:**
+- `_architecture.md` has Tech stack, Folder structure, Constraints
+- `_notes.md` has Solution decisions, Open questions, Deferred decisions
+- `_plan.md` has Features and Out of scope
+- User confirmed the playback is correct
+
+**Return control to `todo-begin`.**

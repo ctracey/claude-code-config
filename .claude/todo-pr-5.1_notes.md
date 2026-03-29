@@ -2,7 +2,7 @@
 
 ## Scope
 
-This sub-initiative refactors `todo-begin` from a monolithic 8-step skill into a layered architecture: a thin entry point that spawns a dedicated planning agent, which in turn uses focused per-phase skills.
+This sub-initiative refactors `todo-begin` from a monolithic 8-step skill into a layered architecture: a thin orchestrator that runs focused per-phase skills directly in the main session.
 
 Parent: PR-5 task 3.1 (`todo-begin` skill)
 
@@ -12,7 +12,7 @@ Parent: PR-5 task 3.1 (`todo-begin` skill)
 
 ### 1. The docs are the only briefing the implementer gets
 
-The planning conversation happens in an isolated agent session. The implementation subagent — and any future session — will not have access to that conversation. The documents are the only thing they will see.
+The planning conversation happens in the main session. The implementation subagent — and any future session — will not have access to that conversation history. The documents are the only thing they will see.
 
 Every influential decision, constraint, and intent must be captured, along with why. Not a transcript — complete enough that someone who was not in the room can read the docs and do the work correctly. If it shaped the direction, it belongs in the docs. If it was just conversational, leave it out. When in doubt, include it.
 
@@ -50,21 +50,15 @@ These move to the planning way. Captured here as the canonical reference.
 
 ### Layer 1 — Entry point: `todo-begin` skill
 
-Thin orchestrator. Resolves the PR number from the argument (if provided) and spawns the `todo-plan` agent immediately with context. Does not run any planning steps itself.
+Orchestrator. Runs the full planning conversation directly in the main session by invoking the `plan-*` skills in sequence. No agent is spawned — the user interacts with the main session throughout.
 
 Invocation:
 - `/todo-begin` — auto-detect PR number from branch/PR
 - `/todo-begin N` — use specific PR number N
 
-### Layer 2 — Planning agent: `todo-plan`
+**Rationale for main session over agent:** Agents are for autonomous work — they receive a complete brief and execute without user interaction. Planning is inherently interactive (questions, corrections, confirmations). Running it in an agent required the main session to relay every user message via `SendMessage`, which caused double-spawning bugs and split context. The main session is the right place for any conversation that requires back-and-forth with the user.
 
-First-class agent definition at `agents/todo-plan.md`. Runs the full planning conversation by invoking the plan-* skills in sequence. Receives PR number and working directory as context.
-
-Rationale for first-class agent over inline skill: semantically discoverable, independently improvable, consistent with the pattern of `code-reviewer`, `task-planner`, etc.
-
-Ways fire fresh for every subagent session. The planning way — and any other relevant ways — will be active in `todo-plan`'s session from the start, giving it clean context without relying on the main session's history.
-
-### Layer 3 — Phase skills
+### Layer 2 — Phase skills
 
 Six focused skills, each owning one phase of the planning conversation. Each is independently invocable — useful for resuming a planning session at a specific phase.
 
@@ -77,20 +71,17 @@ Six focused skills, each owning one phase of the planning conversation. Each is 
 | `plan-breakdown` | Navigation style, task list proposal, confirmation, write | `todo-pr-N.md` |
 | `plan-finalise` | Fill gaps, run `todo-report`, confirm ready | all docs |
 
-### Layer 4 — Planning way
+### Layer 3 — Planning way
 
-`hooks/ways/meta/planning/way.md` — fires in the agent's session and injects the collaboration principles. Keeps skill files lean.
+`hooks/ways/meta/planning/way.md` — fires in the main session and injects the collaboration principles. Keeps skill files lean.
 
 ---
 
 ## File layout
 
 ```
-agents/
-  todo-plan.md                  ← planning agent definition
-
 skills/
-  todo-begin/SKILL.md           ← entry point (updated: thin orchestrator)
+  todo-begin/SKILL.md           ← entry point: runs phases 1–6 in main session
   plan-context/SKILL.md         ← phase 1: context + existing-work mode
   plan-intent/SKILL.md          ← phase 2: intent and motivation
   plan-solution/SKILL.md        ← phase 3: solution direction
@@ -330,22 +321,22 @@ A new session should be able to read the docs and immediately know:
 If any of these would require asking the user again, the docs are not complete.
 
 Implementation acceptance:
-- `todo-begin` invokes `todo-plan` agent immediately on launch
-- `todo-plan` agent runs phases 1–6 in order using dedicated skills
+- `todo-begin` runs phases 1–6 directly in the main session — no agent spawned
 - Docs are written incrementally throughout — not batched at the end
 - Collaboration principles are in the way, not duplicated across skill files
 - Each `plan-*` skill is independently invocable
+- Each `plan-*` skill has an explicit `## Exit criteria` section — done when conditions + "return control to todo-begin"
+- `plan-*` skills are decoupled from each other — no skill knows what comes next; `todo-begin` owns the sequence
 - Each phase ends with a skill-based playback and explicit confirmation before moving on
 - `plan-solution` is design-only — no code, commands, or file changes outside planning docs
-- `todo-plan` agent stops after `plan-finalise` and does not begin implementation
+- `plan-finalise` presents the full `todo-report` playback and waits for explicit user confirmation before handing back — implementation cannot start until the user confirms the plan is correct
 - After a completed planning session, a new session can read the docs and start delivery without re-asking the user anything
 
 ---
 
 ## Open questions
 
-- How are ways triggered within an agent session? Confirm that `scope: agent` in the planning way frontmatter causes it to fire when `todo-plan` starts.
-- Should `plan-context` handle all four existing-work modes (replace/extend/sibling/new sections) inline, or delegate mode-specific logic to the agent?
+- Should `plan-context` handle all four existing-work modes (replace/extend/sibling/new sections) inline, or delegate mode-specific logic to a helper?
 - Naming convention alignment (task 12.1): should `todo-pr-N` track the PR number, the branch name, or both? How does `plan-context` handle renaming when a placeholder becomes a real PR?
 - New project setup (task 13.1): what's the right level of guidance for creating a repo/branch from scratch — full scaffold, or just a prompt to do it and confirm?
 

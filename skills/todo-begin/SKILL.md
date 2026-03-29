@@ -1,12 +1,12 @@
 ---
 name: todo-begin
 description: Begin a new piece of work — scaffold todo + plan + architecture from a feature description. Use when starting a new project, plan, or piece of work, or when the user says "begin new work", "start a new plan", "new project", "new piece of work", or invokes /todo-begin.
-allowed-tools: Bash
+allowed-tools: Bash, Read, Write, Edit, Glob
 ---
 
 # Todo Begin
 
-Entry point for starting a new piece of work. Spawns the `todo-plan` agent to run the planning conversation.
+Entry point for starting a new piece of work. Runs the full planning conversation directly in the main session — no agent spawning.
 
 ## Arguments
 
@@ -15,16 +15,23 @@ Entry point for starting a new piece of work. Spawns the `todo-plan` agent to ru
 
 ## Steps
 
-### 1. Resolve PR number
+This skill owns the sequence. Invoke each phase skill in order. When a phase reaches its exit criteria and returns control here, invoke the next one. Do not skip phases.
 
-If a number was passed as an argument, that is the PR number. Otherwise pass `auto` — the `todo-plan` agent will detect it.
+Write to the docs as agreements are reached throughout — not at the end.
 
-### 2. Spawn the planning agent
+1. Invoke `plan-context` — resolve PR number (pass the argument if one was given), check existing files, create stub docs
+2. Invoke `plan-intent` — why this work exists, for whom, what success looks like
+3. Invoke `plan-solution` — approach, constraints, open questions, deferred decisions
+4. Invoke `plan-delivery` — phases, milestones, priorities
+5. Invoke `plan-breakdown` — task list, confirm before writing
+6. Invoke `plan-finalise` — fill gaps, run todo-report playback, get user confirmation
 
-Spawn the `todo-plan` agent with:
-- The PR number (or `auto`)
-- The current working directory
+When `plan-finalise` returns control, planning is complete. Tell the user to run `/todo-execute` to begin the first task.
 
-The agent runs the full planning conversation — context check, intent, solution direction, delivery shape, task breakdown, and final review. It writes directly to the planning docs throughout.
+## Role boundary
 
-Do not run any planning steps in this skill. Hand off immediately.
+**Plan. Do not implement.**
+
+Implementation does not start until the user has explicitly confirmed the plan is correct — that confirmation is what `plan-finalise` is waiting for. The playback in `plan-finalise` is the gate: present it, wait for the user to say it looks right, then hand back. A plan the user hasn't confirmed is not a finished plan.
+
+Once confirmed, return control. The user runs `/todo-execute` to begin the first task.

@@ -21,6 +21,18 @@ Check each doc:
 
 Fill any missing sections. For **Extend**, **Sibling**, and **New sections** modes, edit rather than overwrite.
 
+**Acceptance criteria — the docs are complete when a future session could answer all of these without asking the user again:**
+
+- What we're building and why
+- Who it's for and what they need
+- What's in scope and what's explicitly out
+- The approach agreed for the solution
+- The delivery shape and priorities
+- The task breakdown and what to start with
+- What's been decided, what's an open question, and what's intentionally deferred
+
+If any of these would require re-asking, the docs are not complete.
+
 ### 2. Play back the plan using todo-report
 
 Run the `todo-report` skill now. This is the playback — present its full output to the user as the summary of what was planned.
@@ -39,3 +51,12 @@ After the report output, say:
 > Planning is done — head back to the main session and run `/todo-execute` to start the first task."
 
 **Stop here.** Do not begin implementation. Do not write code. Return control to the main session.
+
+## Exit criteria
+
+**Done when:**
+- All docs pass the acceptance criteria checklist
+- `todo-report` playback has been presented
+- User has explicitly confirmed the plan is correct
+
+**Return control to `todo-begin`. Planning is complete.**

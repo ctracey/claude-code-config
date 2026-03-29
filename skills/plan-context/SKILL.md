@@ -75,3 +75,12 @@ Create the four planning docs with title + section headers only. This establishe
 For **Extend**, **Sibling**, and **New sections** modes, edit existing files rather than creating new ones.
 
 Confirm: "Docs are ready at `.claude/todo-pr-N*.md`. Let's start with what's driving this work."
+
+## Exit criteria
+
+**Done when:**
+- PR number confirmed with user
+- Existing-work mode chosen (if applicable)
+- Stub docs created at `.claude/todo-pr-N*.md`
+
+**Return control to `todo-begin`.**

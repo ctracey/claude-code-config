@@ -69,3 +69,11 @@ Run `todo-list` to show the full task list. Then ask:
 > "That's the full breakdown. Anything to adjust before we wrap up?"
 
 Wait for any final adjustments, then proceed to `plan-finalise`.
+
+## Exit criteria
+
+**Done when:**
+- Full task list written to `todo-pr-N.md`
+- User confirmed the breakdown
+
+**Return control to `todo-begin`.**

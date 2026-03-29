@@ -55,3 +55,11 @@ Run `todo-report-plan` to show the current state of the plan doc. Then ask:
 Wait for confirmation or corrections before transitioning.
 
 Transition: *"Good — now let's talk about how you're thinking of approaching it."*
+
+## Exit criteria
+
+**Done when:**
+- `_plan.md` has `## Goal / Why` written
+- User confirmed the playback is correct
+
+**Return control to `todo-begin`.**

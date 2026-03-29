@@ -21,7 +21,7 @@ These govern the entire planning conversation. Apply throughout — not just at 
 
 **Show the picture building.** At natural transition points (intent→solution, solution→delivery, delivery→breakdown), briefly surface what you've understood so far — one or two sentences — before asking the next question. Helps the user see the plan forming and correct early.
 
-**Be mindful of their time.** If the work is simple and the user clearly knows what they want, compress. Multiple phases can collapse into a single short exchange. The process should scale down for small work, not be a ritual.
+**Be mindful of their time.** If the work is simple and the user clearly knows what they want, compress. Multiple phases can collapse into a single short exchange. The process should scale down for small work, not be a ritual. **Compress means fewer questions — not fewer outputs.** Even on the simplest task, the docs must be written and the final playback must run. The playback is the acceptance gate: the user confirms the plan is correct before planning ends. Skipping it means skipping confirmation.
 
 ## Docs as the record
 

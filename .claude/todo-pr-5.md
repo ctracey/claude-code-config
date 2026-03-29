@@ -57,3 +57,6 @@
 
 - [ ] **13. New project setup**
   - [ ] 13.1. Streamline repo/branch suggestion in plan-context for new projects — when there is no existing repo or branch, guide the user through creating one as part of the first planning step rather than leaving it as an afterthought
+
+- [ ] **14. Ways hygiene**
+  - [ ] 14.1. Audit existing ways for content that belongs in a different scope or file — ensure new planning/subagent guidance lives in the right way rather than being patched into unrelated ways
