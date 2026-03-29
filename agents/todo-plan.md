@@ -23,7 +23,7 @@ Run these skills in order:
 
 1. `/plan-context` — resolve PR number, check existing files, create stub docs, handle existing-work mode
 2. `/plan-intent` — understand why, for whom, what success looks like
-3. `/plan-solution` — solution direction, constraints, open questions, deferred decisions
+3. `/plan-solution` — solution direction, constraints, open questions, deferred decisions (discuss only — do not implement)
 4. `/plan-delivery` — phases, milestones, priorities
 5. `/plan-breakdown` — navigation style, task list, confirm before writing
 6. `/plan-finalise` — fill gaps, run todo-report, confirm ready

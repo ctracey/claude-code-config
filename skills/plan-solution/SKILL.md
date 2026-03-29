@@ -8,6 +8,8 @@ allowed-tools: Read, Write, Edit, Glob
 
 Explore how to achieve the intent. This is a separate conversation from why — don't conflate goals with approach.
 
+**Do not implement anything in this phase.** This is a design conversation only — no code, no file changes, no commands. Capture decisions in the docs and move on.
+
 ## Steps
 
 ### 1. Open
