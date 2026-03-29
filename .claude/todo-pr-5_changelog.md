@@ -75,3 +75,18 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - `Plan` (built-in) identified as candidate for architecture analysis step in `todo-new`, complementing `task-planner`
 - Added notes: CLI tool for todo management, packaging options, ways/fresh agent sessions, workflow components inventory
 - Task 1.4 marked done (ADR method assessed, fit documented in notes)
+
+## Task 3.1 — Build the todo-begin skill `2026-03-29`
+
+- Skill named `todo-begin` (over `todo-new`, `todo-init`) — "begin" signals intent clearly without implying item-level addition or git-style initialisation
+- Skill handles four relationship modes when an existing todo is found: replace, extend, sibling, new sections
+- Sibling mode renumbers existing top-level tasks one level deeper and adds new work as a peer top-level item — user confirms the full renumbered list before any files are written
+- Task breakdown proposed and confirmed by user before files are written (step 5 gate)
+- `_changelog` is not created by `todo-begin` — it is created as part of the execution workflow when work actually begins
+- Skill has 8 steps: check context → relate to existing work → understand intent → understand solution direction → understand delivery shape → propose task breakdown → finalise documents → present and confirm
+- Docs are written incrementally — stub files created in step 1, sections populated as each conversation step completes
+- Collaboration principles block added: ask don't assume, one question at a time, play back before moving on, read the room, show the picture building, be mindful of time
+- Playback moments added at transitions: steps 3→4, 4→5, 5→6
+- Step 6 asks the user how they want to navigate the breakdown (logical map, user/persona, feature set, journey/scenario) before proposing tasks
+- Step 5 surfaces delivery shape (milestones, phases, priorities) before task granularity — informs ordering in step 6
+- Skill is a draft — further improvements planned

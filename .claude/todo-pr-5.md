@@ -18,8 +18,8 @@
   - [ ] 2.7. Build the todo-add skill
   - [x] 2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
 
-- [ ] **3. Todo list creation skills**
-  - [ ] 3.1. Build the todo-new skill (scaffold todo + plan + architecture from a documented plan)
+- [-] **3. Todo list creation skills**
+  - [-] 3.1. Build the todo-begin skill (scaffold todo + plan + architecture from a documented plan)
 
 - [-] **4. Documentation and notes updates**
   - [x] 4.1. Split _notes and _changelog into separate docs
@@ -39,5 +39,8 @@
   - [ ] 7.2. Add cleanup step to ship flow if branch-only approach adopted
 
 - [ ] **8. Implementation agent reflection**
-  - [ ] 7.1. Define what the implementation agent should reflect on after completing a task
-  - [ ] 7.2. Capture reflection output as part of the rich summary artifact
+  - [ ] 8.1. Define what the implementation agent should reflect on after completing a task
+  - [ ] 8.2. Capture reflection output as part of the rich summary artifact
+
+- [ ] **9. Story mapping**
+  - [ ] 9.1. Consider story mapping as a complement to task breakdown — logical user journey vs delivery roadmap with outcome/learning milestones

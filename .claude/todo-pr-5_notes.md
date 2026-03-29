@@ -25,7 +25,7 @@ All todo-related skills use noun-first, `todo-` prefix naming to:
 | `todo-changelog` | Recent changelog entries, with invitation to ask for more |
 | `todo-update` | Update task status in the file |
 | `todo-add` | Add a new task to the list |
-| `todo-new` | Scaffold a new todo + plan + architecture set |
+| `todo-begin` | Scaffold a new todo + plan + architecture set |
 | `todo-execute` | Spawn an implementation subagent for a task |
 
 ## Skill invocation
@@ -89,22 +89,22 @@ Entries are in **chronological order** — appended as work happens, not sorted 
 | Agent | Description | Relation to this plan | Author |
 |---|---|---|---|
 | `workflow-orchestrator` | Coordinates ADR-driven workflow, guides debate→ADR→branch→implement→PR | Overlaps with the main session orchestrator role — but ADR-focused, not todo-task-focused | Aaron Bockelie |
-| `task-planner` | Plans work using branches and TodoWrite, breaks down complex work | Overlaps with todo-new (3.1) — scaffolding a task breakdown from a plan | Aaron Bockelie |
+| `task-planner` | Plans work using branches and TodoWrite, breaks down complex work | Overlaps with todo-begin (3.1) — scaffolding a task breakdown from a plan | Aaron Bockelie |
 | `code-reviewer` | Reviews code for quality, SOLID, requirement traceability | Is the review subagent (6.2) — just needs context wiring | Aaron Bockelie |
-| `Plan` | Designs implementation strategy, identifies critical files | Could feed into implementation subagent briefs, or replace parts of todo-new | Claude Code built-in |
+| `Plan` | Designs implementation strategy, identifies critical files | Could feed into implementation subagent briefs, or replace parts of todo-begin | Claude Code built-in |
 | `system-architect` | Drafts ADRs, never implements | Not directly in scope unless ADR gates are added to the workflow | Aaron Bockelie |
 
 > **Note on ADRs:** Aaron's ADR technique (`workflow-orchestrator`, `system-architect`) is an **architectural lead workflow** — it captures decisions, trade-offs, and rationale for future reference. This PR-5 workflow is a **task/outcome driven workflow** — it cares about getting work done, reviewed, and shipped one task at a time. The two can coexist: an ADR could precede and inform a todo breakdown, but ADR authorship is not part of this workflow's loop.
 
-## task-planner integration with todo-new (3.1)
+## task-planner integration with todo-begin (3.1)
 
-`task-planner` is a good candidate to drive the breakdown step inside `todo-new`. The proposed split:
+`task-planner` is a good candidate to drive the breakdown step inside `todo-begin`. The proposed split:
 
-1. `todo-new` receives the feature description from the user
+1. `todo-begin` receives the feature description from the user
 2. Spawns `task-planner` as a subagent to reason about task breakdown, dependencies, and branch strategy
 3. Main session translates `task-planner`'s output into the persistent `todo-pr-N.md` format (with `_plan`, `_notes`, `_architecture` stubs)
 
-Key mismatch to resolve: `task-planner` thinks in ephemeral TodoWrite + git branches; `todo-new` needs persistent markdown files. The translation step is the main session's responsibility, not the subagent's.
+Key mismatch to resolve: `task-planner` thinks in ephemeral TodoWrite + git branches; `todo-begin` needs persistent markdown files. The translation step is the main session's responsibility, not the subagent's.
 
 `task-planner` should receive the `_plan` doc (goal, features, scope) as context so it breaks down work that matches the stated intent.
 
@@ -138,7 +138,7 @@ The skills, ways, hooks, and agents that make up this workflow should be distrib
 | **Plugin** | Claude Code plugin bundling skills + ways + agents as a named package |
 | **Dotfiles repo** | Fork of `~/.claude` with workflow pre-installed — user clones to get everything |
 | **Install script** | Shell script that copies skills/ways/agents into `~/.claude` |
-| **Project scaffold** | `todo-new` skill writes the workflow files into `.claude/` at project setup time |
+| **Project scaffold** | `todo-begin` skill writes the workflow files into `.claude/` at project setup time |
 
 The plugin approach is cleanest for distribution (single install, versioned), but depends on Claude Code's plugin support. The install script is the most portable today.
 
@@ -170,7 +170,7 @@ This is a reason to prefer subagents for implementation and review work even whe
 | `todo-execute` | ✔ done | Spawn implementation subagent for a task |
 | `todo-update` | ✔ done | Update task status in file, with parent rollup |
 | `todo-add` | □ not built | Add a new task |
-| `todo-new` | □ not built | Scaffold new todo + plan + architecture |
+| `todo-begin` | ◐ draft | Scaffold new todo + plan + architecture |
 | `user-handoff` | □ not built | Structured handoff before commit |
 | `implementation-workflow` | □ not built | Governs the impl subagent step-by-step |
 | `review-subagent` | □ not built | Review findings format + skill |
@@ -188,8 +188,8 @@ This is a reason to prefer subagents for implementation and review work even whe
 | Agent | Role in this workflow |
 |---|---|
 | `code-reviewer` | Is the review subagent (6.2) — needs context wiring |
-| `task-planner` | Candidate for breakdown step in `todo-new` (3.1) |
-| `Plan` (built-in) | Candidate for architecture analysis in `todo-new` |
+| `task-planner` | Candidate for breakdown step in `todo-begin` (3.1) |
+| `Plan` (built-in) | Candidate for architecture analysis in `todo-begin` |
 
 **Hooks** (planned, not yet built)
 
