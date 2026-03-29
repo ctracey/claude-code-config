@@ -50,3 +50,8 @@ After writing the synthesis, offer to compact now:
 If the user agrees, run `/compact` (or let them trigger it). The synthesis is the freshest, highest-signal content in context, so compaction will preserve it as the dominant signal.
 
 This is the difference between controlled compaction (user-directed, synthesis-anchored) and uncontrolled compaction (generic, whatever the system decides to keep).
+
+## See Also
+
+- tracking(meta) — tracking files survive compaction
+- todos(meta) — task state should be captured before compaction

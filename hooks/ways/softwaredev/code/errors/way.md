@@ -49,3 +49,8 @@ async function processOrder(orderId) {
 - Swallow errors silently (`catch (e) {}`)
 - Log the same error at multiple levels — log once at the boundary
 - Catch errors you can't handle just to re-throw unchanged
+
+## See Also
+
+- code/security(softwaredev) — error messages can leak information
+- code/testing(softwaredev) — test error paths explicitly

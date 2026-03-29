@@ -40,3 +40,8 @@ Scan emails across all accounts for a given time period, filter noise, cross-ref
 **Filter IN:** real people expecting responses, meeting-related threads, deadlines, invitations, anything mentioning the user by name.
 
 **When uncertain:** include with a note rather than filtering out.
+
+## See Also
+
+- email/drafting(ea) — drafting workflow for outbound email
+- trust/voice(meta) — voice and attribution in email

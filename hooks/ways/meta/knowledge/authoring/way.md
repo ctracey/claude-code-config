@@ -154,3 +154,8 @@ Use `/ways-tests` to validate matching quality:
 For vocabulary tuning workflows, see the optimization sub-way (triggers on vocabulary/optimization discussion).
 
 Full authoring guide: `docs/hooks-and-ways/extending.md`
+
+## See Also
+
+- knowledge/authoring/tool-agnostic(meta) — ways describe intent, not tool calls
+- knowledge/authoring/pii-free(meta) — privacy constraint on way content

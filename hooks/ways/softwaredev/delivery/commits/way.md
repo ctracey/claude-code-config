@@ -32,3 +32,8 @@ Scopes match the area of change: `ways`, `hooks`, `adr`, `docs`, `config`, `gove
 - Skip "Co-Authored-By" and emoji trailers
 - Focus commit message on the "why" not the "what"
 - Keep commits atomic - one logical change per commit
+
+## See Also
+
+- delivery/github(softwaredev) — commits feed into PRs
+- delivery/release(softwaredev) — commit types drive version bumps

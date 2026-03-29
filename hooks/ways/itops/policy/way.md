@@ -42,3 +42,8 @@ scope: agent, subagent
 | Error threshold | Stop on failure rate | 3 failures / 5 min |
 | Rate limit | Prevent runaway | 10 WRITE ops / min |
 | Cooldown | Space operations | 30s between restarts |
+
+## See Also
+
+- proposals(itops) — proposals implement policy gates
+- incident(itops) — incidents may bypass normal policy

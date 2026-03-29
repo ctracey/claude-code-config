@@ -62,3 +62,8 @@ CREATED → PENDING → APPROVED → EXECUTED → VERIFIED
   "requires_approval": true
 }
 ```
+
+## See Also
+
+- policy(itops) — operation classification drives approval requirements
+- trust/delegation(meta) — proposals are structured delegation

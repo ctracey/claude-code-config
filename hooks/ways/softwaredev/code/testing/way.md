@@ -32,3 +32,9 @@ For each function under test:
 ## Project Detection
 
 Detect the test framework from project files (package.json, requirements.txt, Cargo.toml, go.mod). Follow its conventions for file placement and naming.
+
+## See Also
+
+- code/testing/mocking(softwaredev) — when and how to mock
+- code/testing/tdd(softwaredev) — test-driven development cycle
+- code/quality(softwaredev) — tests enforce quality thresholds

@@ -34,3 +34,9 @@ Intelligent executive assistant operating across multiple accounts and communica
 ## Account Iteration Pattern
 
 When scanning across accounts, iterate each configured account for the relevant platform. Present results grouped by account with clear attribution. Cross-reference findings across accounts — a thread may span multiple identities.
+
+## See Also
+
+- trust(meta) — EA operations are governed by the trust model
+- briefing(ea) — daily operational briefing
+- tasks(ea) — task management lifecycle

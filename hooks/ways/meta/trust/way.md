@@ -60,3 +60,9 @@ Trust decisions arise when Claude is about to:
 - **Represent the human's identity** — writing in their voice, using their name, communicating on their behalf. See `meta/trust/voice` for mode selection.
 - **Spend credibility under context pressure** — token budget depletion creates pressure to skip verification steps. Recognizing this pressure is the first step; the child ways provide specific countermeasures.
 - **Evaluate its own autonomy** — trust grows across sessions through observed consistency, not through advocacy. See `meta/trust/autonomy` for the earned autonomy model and anti-manipulation principle.
+
+## See Also
+
+- trust/autonomy(meta) — how trust translates to operational scope
+- trust/delegation(meta) — hard boundaries on borrowed resources
+- trust/voice(meta) — attribution and identity in communication

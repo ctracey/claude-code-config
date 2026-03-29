@@ -24,3 +24,9 @@ When explaining something structural — a workflow, a lifecycle, how components
 Render to the terminal with the tools in the children of this way:
 - `diagrams/` — `mmaid` for structural diagrams (Mermaid syntax)
 - `charts/` — `chart-tool` for quantitative data (JSON piped)
+
+## See Also
+
+- visualization/charts(softwaredev) — quantitative data rendering
+- visualization/diagrams(softwaredev) — structural diagram rendering
+- docs/mermaid(softwaredev) — Mermaid syntax for diagrams

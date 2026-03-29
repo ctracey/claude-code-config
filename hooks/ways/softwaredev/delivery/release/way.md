@@ -72,3 +72,7 @@ For multi-platform binaries (like way-embed, mmaid), build per-platform, attach 
 - Explain what semantic versioning is — just apply it
 - List human process steps (deploy, announce) — produce artifacts Claude can generate
 - Write publishing commands without checking `make release` first
+
+## See Also
+
+- delivery/commits(softwaredev) — changelog generated from commits

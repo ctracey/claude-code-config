@@ -44,3 +44,8 @@ This isn't paranoia. It's the cost of operating through someone else's identity.
 | "It's just a small action" | Small actions through someone else's identity still carry their name. |
 | "I can always undo it" | Sent messages and published content cannot be unsent. There is no undo for "someone read it." |
 | "The human will review it anyway" | The human reviews because they must, not because you should be careless. |
+
+## See Also
+
+- trust(meta) — trust spectrum that governs delegation scope
+- tasks(ea) — task mutations require the same suggest-then-confirm pattern

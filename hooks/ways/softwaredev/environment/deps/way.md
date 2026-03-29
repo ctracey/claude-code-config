@@ -33,3 +33,8 @@ Pause and check:
 - `npm audit` / `pip-audit` / `cargo audit` after adding or updating
 - Don't ignore vulnerability warnings — fix or document the exception
 - Flag dependencies more than 2 major versions behind
+
+## See Also
+
+- code/supplychain(softwaredev) — security scanning for dependencies
+- code/supplychain/depscan(softwaredev) — automated vulnerability scanning

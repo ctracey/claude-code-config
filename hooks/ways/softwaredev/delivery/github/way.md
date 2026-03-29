@@ -73,3 +73,8 @@ The macro checks repository configuration (README, license, templates, branch pr
 - Complex project boards
 - Elaborate milestone hierarchies
 - Over-labeled issues
+
+## See Also
+
+- delivery/commits(softwaredev) — PR quality depends on commit quality
+- architecture/adr(softwaredev) — reference ADRs in PR descriptions

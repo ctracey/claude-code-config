@@ -20,3 +20,9 @@ Children of this way cover the journey from local changes to production:
 | Schema migrations | `delivery/migrations` |
 | Patch creation | `delivery/patches` |
 | Implementation planning | `delivery/implement` |
+
+## See Also
+
+- delivery/commits(softwaredev) — commit structure and messages
+- delivery/github(softwaredev) — PR workflow
+- delivery/implement(softwaredev) — implementation planning

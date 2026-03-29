@@ -28,3 +28,10 @@ Work from fast and cheap to slow and thorough. Most repos only need the first tw
 - **Containers aren't a security boundary.** A malicious setup.py in Docker still has network access.
 - **Match the tool to the project.** Manual `osv-scanner` for a hobby project. GitHub Actions for a team repo. Don't skip levels, don't overbuild.
 - **Responsible disclosure over silence.** If you find leaked secrets in someone else's repo, report it — masked values, remediation hints, not a public callout.
+
+## See Also
+
+- code/security(softwaredev) — supply chain is a security concern
+- code/supplychain/depscan(softwaredev) — scanning dependencies
+- code/supplychain/sourceaudit(softwaredev) — auditing source before execution
+- environment/deps(softwaredev) — dependency management workflow

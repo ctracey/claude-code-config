@@ -15,3 +15,9 @@ Children of this way cover structural thinking about software:
 | Decision records | `architecture/adr` |
 | System design | `architecture/design` |
 | Threat modeling | `architecture/threat-modeling` |
+
+## See Also
+
+- architecture/adr(softwaredev) — record decisions as ADRs
+- architecture/design(softwaredev) — design discussion before implementation
+- architecture/threat-modeling(softwaredev) — security design review

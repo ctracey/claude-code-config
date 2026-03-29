@@ -103,3 +103,9 @@ The linter detects:
 4. **Review**: User reviews, comments, iterates
 5. **Merge**: ADR becomes accepted, update index with `docs/scripts/adr index -y`
 6. **Implement**: Create branch, reference ADR in work
+
+## See Also
+
+- architecture/adr-context(softwaredev) — read existing ADRs before building
+- architecture/adr/migration(softwaredev) — adopting ADR tooling in existing projects
+- delivery/implement(softwaredev) — ADRs feed implementation planning

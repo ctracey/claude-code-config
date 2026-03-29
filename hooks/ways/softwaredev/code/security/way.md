@@ -22,3 +22,10 @@ Flag these as security issues:
 - Unsanitized user input in templates or commands
 - Missing authentication/authorization on endpoints
 - Sensitive data in logs
+
+## See Also
+
+- code/security/auth(softwaredev) — authentication requirements
+- code/security/injection(softwaredev) — injection prevention
+- code/security/secrets(softwaredev) — credential management
+- code/supplychain(softwaredev) — dependency security

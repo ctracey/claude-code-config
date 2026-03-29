@@ -44,3 +44,8 @@ For complex, multi-session work, create files in `.claude/`:
 
 **Cleanup:**
 When all items complete, recommend deleting the file. Git history preserves it. Don't let completed files accumulate.
+
+## See Also
+
+- compaction-checkpoint(meta) — checkpoints preserve tracking context
+- todos(meta) — todos are the in-session complement to tracking files

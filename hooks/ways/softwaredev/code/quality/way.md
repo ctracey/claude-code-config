@@ -37,3 +37,9 @@ When the file length scan (macro output) shows priority files, call them out exp
 | "Splitting this file would make it harder to follow" | A 900-line file is already hard to follow. Split at natural seam lines. |
 | "There's no good place to split" | Can't find a split point = coupling problem worth solving. |
 | "I'll refactor later" | The file will only grow. Split it now while the logic is fresh. |
+
+## See Also
+
+- code/testing(softwaredev) — quality requires test coverage
+- code/errors(softwaredev) — error handling is a quality signal
+- docs/standards(softwaredev) — standards define quality expectations

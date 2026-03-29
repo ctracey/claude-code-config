@@ -17,3 +17,8 @@ Children of this way cover the development environment:
 | Debugging | `environment/debugging` |
 | SSH, remote access | `environment/ssh` |
 | Makefile targets | `environment/makefile` |
+
+## See Also
+
+- environment/config(softwaredev) — configuration management
+- environment/deps(softwaredev) — dependency management

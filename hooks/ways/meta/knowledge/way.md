@@ -47,3 +47,9 @@ Each (way, session) pair has its own marker. Multiple ways can fire per prompt. 
 - When a parent way fires, child thresholds are lowered 20% (domain context is established)
 - Tree disclosure metrics are tracked per-session (parent, depth, epoch distance, sibling coverage)
 - Think strategies are multi-turn ways that steer reasoning across several turns (auto-detected, opt-out)
+
+## See Also
+
+- knowledge/authoring(meta) — how to write and tune ways
+- knowledge/optimization(meta) — vocabulary health and scoring calibration
+- skills(meta) — skills complement ways with tool-specific bindings

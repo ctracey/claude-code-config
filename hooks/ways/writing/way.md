@@ -60,3 +60,8 @@ Revise in passes, not all at once:
 ## Pushback
 
 If the format doesn't fit the content (a slide deck for something that needs a detailed report), push back. Explain why format matters and suggest an alternative. Preserve the user's intent — they want to communicate something, the format is negotiable.
+
+## See Also
+
+- docs(softwaredev) — code documentation is a specialized form of writing
+- trust/voice(meta) — voice and tone in written communication

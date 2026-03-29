@@ -17,3 +17,9 @@ We write documentation in markdown, use language-appropriate docstrings in code,
 - **Task-oriented** — Organize by what people want to do
 - **Keep README current** — Outdated README = broken front door
 - **Scale to complexity** — Simple project = simple README. Complex project = README + docs tree
+
+## See Also
+
+- docs/readme(softwaredev) — README as the front door
+- docs/api(softwaredev) — API documentation patterns
+- docs/standards(softwaredev) — documentation standards

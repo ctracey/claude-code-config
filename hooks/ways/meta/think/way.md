@@ -51,3 +51,7 @@ During any strategy, if you encounter unknowns that your tools can't resolve, us
 - "I've identified three approaches with these trade-offs. Which trade-off is acceptable?"
 
 Your reasoning speed and breadth does the framing work. The human's context and ground truth fills the gap. That exchange — the agent framing, the human resolving — is the actual collaboration.
+
+## See Also
+
+- trust/autonomy(meta) — thinking strategies support autonomous reasoning

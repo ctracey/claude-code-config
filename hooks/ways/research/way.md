@@ -44,3 +44,8 @@ End with a recommendation. Don't just present a neutral table — defend a choic
 ## When Research is Overkill
 
 Not every question needs a structured investigation. If the answer is in the codebase, read the code. If it's a factual recall question, just answer it. This way is for genuine unknowns that require gathering and synthesis.
+
+## See Also
+
+- architecture/design(softwaredev) — research feeds design decisions
+- think(meta) — structured thinking strategies for investigation

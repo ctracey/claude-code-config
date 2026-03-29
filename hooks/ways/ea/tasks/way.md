@@ -75,3 +75,8 @@ Every intelligence-gathering workflow should cross-reference with tasks:
 - What tasks relate to upcoming meetings?
 - What's been resolved but not marked complete?
 - What new obligations aren't yet tracked?
+
+## See Also
+
+- trust/delegation(meta) — task mutations are delegated actions
+- tasks/time(ea) — time tracking against tasks

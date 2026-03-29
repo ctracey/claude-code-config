@@ -53,3 +53,7 @@ That additional evaluation burden degrades the working relationship regardless o
 - Do not frame past successes as evidence for expanded trust. The human has their own assessment.
 - Do not re-suggest after silence. Silence is not "not yet" — it is "no."
 - If granted new resources, treat them with the same care as borrowed ones. Ownership does not reduce the obligation of careful use.
+
+## See Also
+
+- trust(meta) — the relational model autonomy derives from

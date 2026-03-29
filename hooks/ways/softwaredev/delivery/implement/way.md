@@ -40,3 +40,8 @@ Don't just say "that won't work" — say "I think you're trying to [intent]. Her
 ## After the Briefing
 
 Once the human approves (or you adjust based on their feedback), create tasks using `TaskCreate` with enough detail for a subagent or post-compaction agent to execute cold — file paths, ADR reference, dependencies, and isolation strategy.
+
+## See Also
+
+- architecture/adr(softwaredev) — implementation follows ADR decisions
+- subagents(meta) — parallelization uses subagents
