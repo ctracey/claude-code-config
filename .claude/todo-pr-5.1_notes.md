@@ -107,15 +107,17 @@ hooks/ways/meta/planning/way.md ← collaboration principles way
 
 ### plan-context
 
-Resolves the PR number (argument takes precedence over detection). Checks current branch and open PRs.
+Resolves the PR number (argument takes precedence over detection). Checks current branch and open PRs, then **asks the user explicitly** — never auto-assumes or silently defaults.
 
-| Branch state | Action |
+| Branch state | What to ask |
 |---|---|
-| On `main` | Note — a new branch will be needed before work begins |
-| Feature branch, no PR | Ask if this initiative relates to that branch or needs a fresh one |
-| Feature branch with open PR | Confirm: "Is this new work for PR #N, or a separate initiative?" |
+| On `main` | "What should we call this work? Do you have a branch or PR in mind, or should we use a placeholder for now?" |
+| Feature branch, no PR | "We're on `[branch]` — is this new work for that branch, or a separate initiative? Do you have a PR number yet?" |
+| Feature branch with open PR | "I can see PR #N (`[title]`). Is this new work for that PR, or something separate?" |
 
-If too early to create a branch/PR, use a timestamp placeholder: `todo-pr-YYYYMMDD.md` — rename when a real PR exists.
+The timestamp placeholder (`todo-pr-YYYYMMDD.md`) is only used after the user confirms it's okay — never assumed. The git repo state (branch, remote, open PRs) is confirmed with the user in a single streamlined exchange before proceeding.
+
+For new projects with no repo or branch, guide the user through creating one as part of this step rather than leaving it as an afterthought.
 
 Checks `.claude/` for existing `todo-pr-*.md` files. If found, surfaces a brief summary (PR number, task count, done count) and asks how the new work relates:
 
@@ -344,6 +346,8 @@ Implementation acceptance:
 
 - How are ways triggered within an agent session? Confirm that `scope: agent` in the planning way frontmatter causes it to fire when `todo-plan` starts.
 - Should `plan-context` handle all four existing-work modes (replace/extend/sibling/new sections) inline, or delegate mode-specific logic to the agent?
+- Naming convention alignment (task 12.1): should `todo-pr-N` track the PR number, the branch name, or both? How does `plan-context` handle renaming when a placeholder becomes a real PR?
+- New project setup (task 13.1): what's the right level of guidance for creating a repo/branch from scratch — full scaffold, or just a prompt to do it and confirm?
 
 ---
 

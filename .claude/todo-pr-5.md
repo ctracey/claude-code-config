@@ -20,6 +20,7 @@
 
 - [-] **3. Todo list creation skills**
   - [-] 3.1. Build the todo-begin skill (scaffold todo + plan + architecture from a documented plan)
+  - [ ] 3.2. Explicitly check and confirm git repo state with user as the first step of planning — branch, remote, open PRs — in a streamlined single exchange before proceeding
 
 - [-] **4. Documentation and notes updates**
   - [x] 4.1. Split _notes and _changelog into separate docs
@@ -44,3 +45,15 @@
 
 - [ ] **9. Story mapping**
   - [ ] 9.1. Consider story mapping as a complement to task breakdown — logical user journey vs delivery roadmap with outcome/learning milestones
+
+- [ ] **10. Workflow visualisation**
+  - [ ] 10.1. Visualise workflow progress and active step — show which phase the current session is in (planning, executing, reviewing, shipping) and progress within it
+
+- [ ] **11. Agent identity**
+  - [ ] 11.1. Explore surfacing a clear agent name visible to the user — e.g. "Planner" or "Implementer" — so the user always knows which agent they are talking to and what its role boundary is
+
+- [ ] **12. Naming conventions**
+  - [ ] 12.1. Consider naming convention from PR to branch — e.g. whether `todo-pr-N` should align with branch name, and how plan-context handles the relationship between PR number, branch name, and todo file naming
+
+- [ ] **13. New project setup**
+  - [ ] 13.1. Streamline repo/branch suggestion in plan-context for new projects — when there is no existing repo or branch, guide the user through creating one as part of the first planning step rather than leaving it as an afterthought
