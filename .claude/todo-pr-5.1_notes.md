@@ -50,7 +50,7 @@ These move to the planning way. Captured here as the canonical reference.
 
 ### Layer 1 — Entry point: `todo-begin` skill
 
-Orchestrator. Runs the full planning conversation directly in the main session by invoking the `plan-*` skills in sequence. No agent is spawned — the user interacts with the main session throughout.
+Orchestrator. Runs the full planning conversation directly in the main session by invoking the `todo-plan-*` skills in sequence. No agent is spawned — the user interacts with the main session throughout.
 
 Invocation:
 - `/todo-begin` — auto-detect PR number from branch/PR
@@ -64,12 +64,12 @@ Six focused skills, each owning one phase of the planning conversation. Each is 
 
 | Skill | Phase | Writes to |
 |---|---|---|
-| `plan-context` | Branch/PR check, existing todos, stub doc creation, relate to existing work | stub docs |
-| `plan-intent` | Why, for whom, what success looks like | `_plan.md` Goal/Why, Users/scenarios |
-| `plan-solution` | Tech direction, constraints, open questions, deferred decisions | `_architecture.md`, `_notes.md` |
-| `plan-delivery` | Phases, milestones, priorities | `_plan.md` Delivery shape |
-| `plan-breakdown` | Navigation style, task list proposal, confirmation, write | `todo-pr-N.md` |
-| `plan-finalise` | Fill gaps, run `todo-report`, confirm ready | all docs |
+| `todo-plan-context` | Branch/PR check, existing todos, stub doc creation, relate to existing work | stub docs |
+| `todo-plan-intent` | Why, for whom, what success looks like | `_plan.md` Goal/Why, Users/scenarios |
+| `todo-plan-solution` | Tech direction, constraints, open questions, deferred decisions | `_architecture.md`, `_notes.md` |
+| `todo-plan-delivery` | Phases, milestones, priorities | `_plan.md` Delivery shape |
+| `todo-plan-breakdown` | Navigation style, task list proposal, confirmation, write | `todo-pr-N.md` |
+| `todo-plan-finalise` | Fill gaps, run `todo-report`, confirm ready | all docs |
 
 ### Layer 3 — Planning way
 
@@ -82,12 +82,12 @@ Six focused skills, each owning one phase of the planning conversation. Each is 
 ```
 skills/
   todo-begin/SKILL.md           ← entry point: runs phases 1–6 in main session
-  plan-context/SKILL.md         ← phase 1: context + existing-work mode
-  plan-intent/SKILL.md          ← phase 2: intent and motivation
-  plan-solution/SKILL.md        ← phase 3: solution direction
-  plan-delivery/SKILL.md        ← phase 4: delivery shape and priorities
-  plan-breakdown/SKILL.md       ← phase 5: task breakdown
-  plan-finalise/SKILL.md        ← phase 6: fill gaps, review, confirm
+  todo-plan-context/SKILL.md    ← phase 1: context + existing-work mode
+  todo-plan-intent/SKILL.md     ← phase 2: intent and motivation
+  todo-plan-solution/SKILL.md   ← phase 3: solution direction
+  todo-plan-delivery/SKILL.md   ← phase 4: delivery shape and priorities
+  todo-plan-breakdown/SKILL.md  ← phase 5: task breakdown
+  todo-plan-finalise/SKILL.md   ← phase 6: fill gaps, review, confirm
 
 hooks/ways/meta/planning/way.md ← collaboration principles way
 ```
@@ -96,7 +96,7 @@ hooks/ways/meta/planning/way.md ← collaboration principles way
 
 ## Phase detail
 
-### plan-context
+### todo-plan-context
 
 Resolves the PR number (argument takes precedence over detection). Checks current branch and open PRs, then **asks the user explicitly** — never auto-assumes or silently defaults.
 
@@ -115,7 +115,7 @@ Checks `.claude/` for existing `todo-pr-*.md` files. If found, surfaces a brief 
 1. **Replace** — archive (rename with `_archived` suffix) or discard existing docs, start fresh
 2. **Extend** — add new tasks continuing from the highest existing task number; ask how the new work relates (goes into `_notes`)
 3. **Sibling** — renumber existing tasks one level deeper, new work becomes a peer task at top level; ask for a label for the existing work group
-4. **New sections** — keep task list as-is, add named sections to existing `_notes` and/or `_architecture`; skip to plan-delivery
+4. **New sections** — keep task list as-is, add named sections to existing `_notes` and/or `_architecture`; skip to `todo-plan-delivery`
 
 **Sibling renumbering logic:**
 - Old top-level task `1` with subtasks `1.1`, `1.2` → becomes `1.1` with subtasks `1.1.1`, `1.1.2`
@@ -130,7 +130,7 @@ Creates stub docs early (title + section headers only) so subsequent phases can 
 
 For Extend/Sibling/New sections modes, edit existing files rather than creating new ones.
 
-### plan-intent
+### todo-plan-intent
 
 Establishes why before what. Keeps intent and solution separate.
 
@@ -152,7 +152,7 @@ Captures to `_plan.md`: Goal/Why section. Users/scenarios section if discussed. 
 
 **End of phase:** Runs `todo-report-plan` and asks "Does that capture what you're going for? Anything to adjust before we move to the solution?"
 
-### plan-solution
+### todo-plan-solution
 
 Shifts to how. Keeps solution separate from intent — don't conflate what with how. **Design conversation only — no code, no file changes, no commands.**
 
@@ -171,7 +171,7 @@ Captures to:
 
 **End of phase:** Runs `todo-report-plan` + `todo-report-notes` and asks "Does that reflect the approach we've agreed? Anything missing or off before we move on?"
 
-### plan-delivery
+### todo-plan-delivery
 
 Brief — gets a sense of shape before task granularity. Not a planning session in itself.
 
@@ -185,7 +185,7 @@ Captures to `_plan.md`: `## Delivery shape` section, 2–4 bullets.
 
 **End of phase:** Writes a skeleton task list to `todo-pr-N.md` — one top-level task per phase or priority area, no subtasks yet. Runs `todo-list` and asks "Here's the rough shape as tasks. Does this ordering and grouping look right before we break it down further?"
 
-### plan-breakdown
+### todo-plan-breakdown
 
 Asks how the user wants to navigate task organisation:
 
@@ -208,7 +208,7 @@ Captures confirmed list to `todo-pr-N.md`. Task granularity guidance: small and 
 
 **End of phase:** Runs `todo-list` to show the full breakdown and asks "That's the full breakdown. Anything to adjust before we wrap up?"
 
-### plan-finalise
+### todo-plan-finalise
 
 Reviews all four docs for completeness. Fills remaining gaps. For Extend/Sibling/New sections modes, edits rather than overwrites.
 
@@ -326,23 +326,23 @@ Implementation acceptance:
 - Collaboration principles are in the way, not duplicated across skill files
 - Each `plan-*` skill is independently invocable
 - Each `plan-*` skill has an explicit `## Exit criteria` section — done when conditions + "return control to todo-begin"
-- `plan-*` skills are decoupled from each other — no skill knows what comes next; `todo-begin` owns the sequence
+- `todo-plan-*` skills are decoupled from each other — no skill knows what comes next; `todo-begin` owns the sequence
 - Each phase ends with a skill-based playback and explicit confirmation before moving on
-- `plan-solution` is design-only — no code, commands, or file changes outside planning docs
-- `plan-finalise` presents the full `todo-report` playback and waits for explicit user confirmation before handing back — implementation cannot start until the user confirms the plan is correct
+- `todo-plan-solution` is design-only — no code, commands, or file changes outside planning docs
+- `todo-plan-finalise` presents the full `todo-report` playback and waits for explicit user confirmation before handing back — implementation cannot start until the user confirms the plan is correct
 - After a completed planning session, a new session can read the docs and start delivery without re-asking the user anything
 
 ---
 
 ## Open questions
 
-- Should `plan-context` handle all four existing-work modes (replace/extend/sibling/new sections) inline, or delegate mode-specific logic to a helper?
-- Naming convention alignment (task 12.1): should `todo-pr-N` track the PR number, the branch name, or both? How does `plan-context` handle renaming when a placeholder becomes a real PR?
+- Should `todo-plan-context` handle all four existing-work modes (replace/extend/sibling/new sections) inline, or delegate mode-specific logic to a helper?
+- Naming convention alignment (task 12.1): should `todo-pr-N` track the PR number, the branch name, or both? How does `todo-plan-context` handle renaming when a placeholder becomes a real PR?
 - New project setup (task 13.1): what's the right level of guidance for creating a repo/branch from scratch — full scaffold, or just a prompt to do it and confirm?
 
 ---
 
 ## Deferred decisions
 
-- Story mapping integration (task 9.1) — how `plan-delivery` and `plan-breakdown` could support outcome/learning milestones as an alternative to pure task lists. Deferred until the core architecture is stable.
+- Story mapping integration (task 9.1) — how `todo-plan-delivery` and `todo-plan-breakdown` could support outcome/learning milestones as an alternative to pure task lists. Deferred until the core architecture is stable.
 - Changelog creation — confirmed: `_changelog.md` is created as part of the execution workflow (`todo-execute`), not planning. No action needed here.

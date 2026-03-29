@@ -15,18 +15,20 @@ Entry point for starting a new piece of work. Runs the full planning conversatio
 
 ## Steps
 
-This skill owns the sequence. Invoke each phase skill in order. When a phase reaches its exit criteria and returns control here, invoke the next one. Do not skip phases.
+This skill owns the sequence. Invoke each phase skill in order via the `Skill` tool. When a phase reaches its exit criteria and returns control here, invoke the next one. Do not skip phases.
+
+**Every phase must be invoked — no exceptions.** Compression applies to the depth of conversation within a phase (fewer questions, shorter exchanges), never to whether the phase runs. Exit criteria for each phase are non-negotiable: a phase is not done until its exit criteria are satisfied, regardless of how simple the work is.
 
 Write to the docs as agreements are reached throughout — not at the end.
 
-1. Invoke `plan-context` — resolve PR number (pass the argument if one was given), check existing files, create stub docs
-2. Invoke `plan-intent` — why this work exists, for whom, what success looks like
-3. Invoke `plan-solution` — approach, constraints, open questions, deferred decisions
-4. Invoke `plan-delivery` — phases, milestones, priorities
-5. Invoke `plan-breakdown` — task list, confirm before writing
-6. Invoke `plan-finalise` — fill gaps, run todo-report playback, get user confirmation
+1. Invoke `todo-plan-context` — resolve PR number (pass the argument if one was given), check existing files, create stub docs
+2. Invoke `todo-plan-intent` — why this work exists, for whom, what success looks like
+3. Invoke `todo-plan-solution` — approach, constraints, open questions, deferred decisions
+4. Invoke `todo-plan-delivery` — phases, milestones, priorities
+5. Invoke `todo-plan-breakdown` — task list, confirm before writing
+6. Invoke `todo-plan-finalise` — fill gaps, run todo-report playback, get user confirmation
 
-When `plan-finalise` returns control, planning is complete. Tell the user to run `/todo-execute` to begin the first task.
+When `todo-plan-finalise` returns control, planning is complete. Tell the user to run `/todo-execute` to begin the first task.
 
 ## Role boundary
 

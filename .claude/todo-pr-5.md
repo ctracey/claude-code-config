@@ -18,9 +18,9 @@
   - [ ] 2.7. Build the todo-add skill
   - [x] 2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
 
-- [-] **3. Todo list creation skills**
-  - [-] 3.1. Build the todo-begin skill (scaffold todo + plan + architecture from a documented plan)
-  - [ ] 3.2. Explicitly check and confirm git repo state with user as the first step of planning — branch, remote, open PRs — in a streamlined single exchange before proceeding
+- [x] **3. Todo list creation skills**
+  - [x] 3.1. Build the todo-begin skill (scaffold todo + plan + architecture from a documented plan)
+  - [x] 3.2. Explicitly check and confirm git repo state with user as the first step of planning — branch, remote, open PRs — in a streamlined single exchange before proceeding
 
 - [-] **4. Documentation and notes updates**
   - [x] 4.1. Split _notes and _changelog into separate docs
