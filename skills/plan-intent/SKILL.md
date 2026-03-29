@@ -46,4 +46,12 @@ If users, personas, or scenarios were discussed, add `## Users and scenarios`.
 
 If constraints were raised, add `## Constraints` to `_notes.md`.
 
+### 6. Present and check
+
+Run `todo-report-plan` to show the current state of the plan doc. Then ask:
+
+> "Does that capture what you're going for? Anything to adjust before we move to the solution?"
+
+Wait for confirmation or corrections before transitioning.
+
 Transition: *"Good — now let's talk about how you're thinking of approaching it."*

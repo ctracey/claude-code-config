@@ -34,6 +34,16 @@ Don't categorise it — just understand what the user considers high priority an
 
 ### 4. Capture
 
-Add `## Delivery shape` to `_plan.md` with 2–4 bullets summarising phases and priorities. This informs task ordering in the next phase.
+Add `## Delivery shape` to `_plan.md` with 2–4 bullets summarising phases and priorities.
+
+Write a skeleton task list to `todo-pr-N.md` — one top-level task per phase or priority area identified, no subtasks yet. This gives a starting shape for the detailed breakdown.
+
+### 5. Present and check
+
+Run `todo-list` to show the skeleton. Then ask:
+
+> "Here's the rough shape as tasks. Does this ordering and grouping look right before we break it down further?"
+
+Wait for confirmation or adjustments.
 
 Transition: *"Good — let's figure out how to break it down."*

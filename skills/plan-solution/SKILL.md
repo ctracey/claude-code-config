@@ -55,4 +55,12 @@ Update `_plan.md`:
 - `## Features` — what we're building
 - `## Out of scope` — what we're not doing
 
+### 6. Present and check
+
+Run `todo-report-plan` and `todo-report-notes` to show the current state of the plan and decisions. Then ask:
+
+> "Does that reflect the approach we've agreed? Anything missing or off before we move on?"
+
+Wait for confirmation or corrections.
+
 Transition: *"Good — before we get into individual tasks, let's talk about how you see this unfolding."*

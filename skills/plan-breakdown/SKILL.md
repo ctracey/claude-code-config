@@ -61,3 +61,11 @@ Write the confirmed task list to `todo-pr-N.md`:
 ```
 
 Task granularity: small and specific, with a clear "done when" implied by each name. More than ~5 subtasks under one parent → consider splitting the parent.
+
+### 5. Present
+
+Run `todo-list` to show the full task list. Then ask:
+
+> "That's the full breakdown. Anything to adjust before we wrap up?"
+
+Wait for any final adjustments, then proceed to `plan-finalise`.
