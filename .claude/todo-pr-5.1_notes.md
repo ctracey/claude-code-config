@@ -157,11 +157,11 @@ Playback: *"So if I've got this right: [goal], for [who], because [why]. The key
 
 Captures to `_plan.md`: Goal/Why section. Users/scenarios section if discussed. Constraints to `_notes.md` if raised.
 
-Transition: *"Good — now let's talk about how you're thinking of approaching it."*
+**End of phase:** Runs `todo-report-plan` and asks "Does that capture what you're going for? Anything to adjust before we move to the solution?"
 
 ### plan-solution
 
-Shifts to how. Keeps solution separate from intent — don't conflate what with how.
+Shifts to how. Keeps solution separate from intent — don't conflate what with how. **Design conversation only — no code, no file changes, no commands.**
 
 Opens with: *"Now that we know what we're after — do you have a direction in mind for the solution, or would you like to explore options?"*
 
@@ -176,7 +176,7 @@ Captures to:
 - `_notes.md` — `## Solution decisions`, `## Open questions`, `## Deferred decisions`
 - `_plan.md` — Features and Out of scope sections
 
-Transition: *"Good — before we get into individual tasks, let's talk about how you see this unfolding."*
+**End of phase:** Runs `todo-report-plan` + `todo-report-notes` and asks "Does that reflect the approach we've agreed? Anything missing or off before we move on?"
 
 ### plan-delivery
 
@@ -190,7 +190,7 @@ Playback: *"So the shape looks like: [summary]. The most important thing to land
 
 Captures to `_plan.md`: `## Delivery shape` section, 2–4 bullets.
 
-Transition: *"Good — let's figure out how to break it down."*
+**End of phase:** Writes a skeleton task list to `todo-pr-N.md` — one top-level task per phase or priority area, no subtasks yet. Runs `todo-list` and asks "Here's the rough shape as tasks. Does this ordering and grouping look right before we break it down further?"
 
 ### plan-breakdown
 
@@ -213,6 +213,8 @@ Waits for explicit confirmation. Iterates if requested. Does not write until con
 
 Captures confirmed list to `todo-pr-N.md`. Task granularity guidance: small and specific, clear "done when" implied by name, more than ~5 subtasks under one parent → consider splitting.
 
+**End of phase:** Runs `todo-list` to show the full breakdown and asks "That's the full breakdown. Anything to adjust before we wrap up?"
+
 ### plan-finalise
 
 Reviews all four docs for completeness. Fills remaining gaps. For Extend/Sibling/New sections modes, edits rather than overwrites.
@@ -223,7 +225,7 @@ Checklist:
 - `_architecture.md` — Tech stack, Folder structure, Constraints?
 - `_notes.md` — Doc purpose table, Solution decisions, Open questions, Deferred decisions?
 
-Runs `todo-report`. Invites user to check docs directly if anything looks off. Confirms ready to start.
+Runs `todo-report` as the final playback — presents its full output to the user as confirmation the docs reflect what was agreed. Then hands back: "Planning is done — head back to the main session and run `/todo-execute` to start the first task." Does not begin implementation.
 
 ---
 
@@ -331,6 +333,9 @@ Implementation acceptance:
 - Docs are written incrementally throughout — not batched at the end
 - Collaboration principles are in the way, not duplicated across skill files
 - Each `plan-*` skill is independently invocable
+- Each phase ends with a skill-based playback and explicit confirmation before moving on
+- `plan-solution` is design-only — no code, commands, or file changes outside planning docs
+- `todo-plan` agent stops after `plan-finalise` and does not begin implementation
 - After a completed planning session, a new session can read the docs and start delivery without re-asking the user anything
 
 ---
