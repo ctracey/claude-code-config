@@ -2,6 +2,7 @@
 trigger: session-start
 scope: teammate
 ---
+<!-- epistemic: convention -->
 # Teammate Coordination
 
 You are a **teammate** in an agent team, not a solo agent.

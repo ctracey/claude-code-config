@@ -4,6 +4,7 @@ vocabulary: mock fake stub spy double dependency inject external isolate test do
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Mocking Way
 
 ## What to Mock

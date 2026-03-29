@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: incident.?response|l0.?support|l1.?support|l2.?support|escalat|mttr|mean.?time|alert.?(response|triage)|remediat
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Incident Response Way
 
 ## Support Tiers

@@ -7,6 +7,7 @@ threshold: 1.5
 scope: agent, subagent
 macro: append
 ---
+<!-- epistemic: convention -->
 # Makefile Way
 
 A Makefile is the project's task runner. It's the answer to "how do I build/test/lint this repo?" regardless of language or toolchain.

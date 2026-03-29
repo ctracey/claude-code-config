@@ -5,6 +5,7 @@ threshold: 2.5
 files: \.claude/(hooks/)?ways/.*way\.md$
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # PII-Free Ways
 
 When decomposing personal configurations, skills, or personas into reusable ways, strip all personal information before writing.

@@ -5,6 +5,7 @@ threshold: 1.8
 commands: git\ clone
 scope: agent, subagent
 ---
+<!-- epistemic: premise -->
 # Supply Chain Trust Assessment
 
 Scan before you run. Don't install dependencies or execute code from an unfamiliar source until you've looked at it.

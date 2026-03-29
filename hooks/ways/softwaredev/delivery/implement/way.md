@@ -5,6 +5,7 @@ threshold: 2.0
 macro: append
 scope: agent
 ---
+<!-- epistemic: convention -->
 # Implementation Way
 
 ## Do Not Reset Context

@@ -4,6 +4,7 @@ vocabulary: secret credential password token key env api-key rotate expose expos
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # Secrets Way
 
 ## Never Commit

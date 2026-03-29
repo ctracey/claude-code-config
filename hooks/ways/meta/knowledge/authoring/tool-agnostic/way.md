@@ -5,6 +5,7 @@ threshold: 2.5
 files: \.claude/(hooks/)?ways/.*way\.md$
 scope: agent, subagent
 ---
+<!-- epistemic: premise -->
 # Tool-Agnostic Ways
 
 Ways should describe patterns and intentions, not reference specific tool names, MCP servers, CLI commands, or API endpoints. Different users may have different tools that serve the same purpose.

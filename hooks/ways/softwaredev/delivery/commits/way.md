@@ -6,6 +6,7 @@ pattern: commit|push.*(remote|origin|upstream)
 commands: git\ commit
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Git Commits Way
 
 ## Conventional Commit Format

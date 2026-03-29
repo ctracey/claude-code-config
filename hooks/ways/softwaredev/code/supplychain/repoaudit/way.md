@@ -4,6 +4,7 @@ vocabulary: git history large objects leaked secrets committed gitignored binary
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Repo Audit
 
 Quick checks you can run in seconds on any unfamiliar repo.

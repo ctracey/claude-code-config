@@ -4,6 +4,7 @@ vocabulary: debug breakpoint stacktrace investigate troubleshoot regression bise
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Debugging Way
 
 ## Before Changing Any Code

@@ -4,6 +4,7 @@ vocabulary: readme project overview getting started quick start onboarding intro
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # README Way
 
 ## Philosophy

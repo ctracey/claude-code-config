@@ -5,6 +5,7 @@ threshold: 3.0
 macro: prepend
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # ADR Migration
 
 ## Identify Your Starting State

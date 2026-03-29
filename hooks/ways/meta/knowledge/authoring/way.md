@@ -2,6 +2,7 @@
 files: \.claude/ways/.*way\.md$
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Authoring Ways
 
 ## Way File Format

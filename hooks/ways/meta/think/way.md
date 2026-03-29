@@ -4,6 +4,7 @@ vocabulary: explore options approaches trade-off balance alternatives stuck prin
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: premise -->
 # Structured Thinking
 
 When you encounter complexity, don't reach for a framework first. Evaluate whether you need one.

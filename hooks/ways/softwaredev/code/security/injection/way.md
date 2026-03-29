@@ -4,6 +4,7 @@ vocabulary: injection sql xss innerHTML parameterized sanitize escape shell comm
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # Injection Prevention Way
 
 ## Detection and Action Rules

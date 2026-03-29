@@ -5,6 +5,7 @@ threshold: 2.5
 embed_threshold: 0.30
 scope: agent, subagent
 ---
+<!-- epistemic: premise -->
 # Delivery
 
 **Before ad-hoc commands, check `make help`.** If the project has a Makefile, it likely has `make release`, `make dist`, `make deploy`, or similar targets that encode the project's actual publishing workflow. Use those.

@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: error.?handl|exception|try.?catch|throw|catch
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Error Handling Way
 
 ## Where to Catch

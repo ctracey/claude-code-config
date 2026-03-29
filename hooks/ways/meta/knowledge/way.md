@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: (^| )ways?( |$)|knowledge|guidance|context.?inject
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Knowledge Way
 
 ## Ways vs Skills

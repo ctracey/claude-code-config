@@ -4,6 +4,7 @@ vocabulary: govulncheck go.sum go.mod replace directive go install go get module
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Go Dependency Security
 
 ## Scanning

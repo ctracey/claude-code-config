@@ -4,6 +4,7 @@ vocabulary: architecture pattern database schema modeling interface component mo
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Design Way
 
 ## Design Discussion Framework

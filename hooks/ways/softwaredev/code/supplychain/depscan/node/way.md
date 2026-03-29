@@ -4,6 +4,7 @@ vocabulary: npm audit package-lock.json node_modules postinstall preinstall yarn
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Node.js Dependency Security
 
 ## Scanning

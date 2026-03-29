@@ -6,6 +6,7 @@ scope: agent
 when:
   project: ~/.claude
 ---
+<!-- epistemic: convention -->
 # Project Health
 
 ## This Project's Relationship to Claude Code

@@ -4,6 +4,7 @@ vocabulary: cargo audit Cargo.lock Cargo.toml unsafe build.rs crate crates.io ru
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Rust Dependency Security
 
 ## Scanning

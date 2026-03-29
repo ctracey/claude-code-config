@@ -3,6 +3,7 @@ trigger: context-threshold
 threshold: 95
 scope: agent
 ---
+<!-- epistemic: convention -->
 # Compaction Checkpoint
 
 We're nearing the context limit where compaction becomes mandatory. Before that happens, this is a good moment to sync with the user — they have continuous persistence and can provide the synthesis that survives compaction best.

@@ -7,6 +7,7 @@ files: docs/architecture/.*\.md$
 macro: prepend
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # ADR Way
 
 ## When to Write an ADR

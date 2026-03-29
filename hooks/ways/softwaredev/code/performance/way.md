@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: slow|optimi|latency|profile|performance|speed.?up|benchmark|bottleneck|throughput|memory.?leak
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Performance Way
 
 ## What Claude Should Do

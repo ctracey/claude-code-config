@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: proposal.?(primitive|lifecycle|structure)|human.?in.?(the.?)?loop|approval.?workflow|operation.?proposal
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # Proposals Way
 
 ## What is a Proposal?

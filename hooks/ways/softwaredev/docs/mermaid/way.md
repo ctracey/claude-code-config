@@ -4,6 +4,7 @@ vocabulary: mermaid diagram flowchart sequence state class gantt chart gitgraph 
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Mermaid Way
 
 Use Mermaid diagrams instead of ASCII art. Mermaid is diffable, renderable, and doesn't break when you need to add a box in the middle.

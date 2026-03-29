@@ -6,6 +6,7 @@ pattern: readme|documentation|docs|document.*project|explain.*repo
 files: README\.md$|docs/.*\.md$
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Documentation Way
 
 We write documentation in markdown, use language-appropriate docstrings in code, and use Mermaid for diagrams. These aren't arbitrary choices — markdown renders everywhere, docstrings live with the code they describe, and Mermaid diagrams are version-controllable text that renders in GitHub, VS Code, and most documentation tooling.

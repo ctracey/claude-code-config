@@ -5,6 +5,7 @@ threshold: 2.0
 macro: append
 scope: agent
 ---
+<!-- epistemic: heuristic -->
 # Writing Way
 
 ## Scope

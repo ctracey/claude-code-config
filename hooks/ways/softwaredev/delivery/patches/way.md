@@ -7,6 +7,7 @@ files: \.(patch|diff)$
 commands: git\ apply|git\ diff.*\>
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Patch Creation Way
 
 **Golden Rule:** Never hand-write patch content. Always generate patches from real file changes using `git diff`.

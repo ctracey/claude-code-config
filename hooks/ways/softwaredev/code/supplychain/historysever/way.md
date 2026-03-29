@@ -4,6 +4,7 @@ vocabulary: orphan branch sever history flatten history fork sever bfg git reflo
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # History Severing
 
 When git history itself is the problem — leaked secrets baked into commit objects, malicious payloads spread across tree history, or a fork relationship you want to break cleanly.

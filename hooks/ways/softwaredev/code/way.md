@@ -5,6 +5,7 @@ threshold: 2.5
 embed_threshold: 0.30
 scope: agent, subagent
 ---
+<!-- epistemic: premise -->
 # Code Craft
 
 Children of this way cover specific aspects of writing and maintaining code:

@@ -5,6 +5,7 @@ threshold: 2.5
 embed_threshold: 0.30
 scope: agent, subagent
 ---
+<!-- epistemic: premise -->
 # Architecture
 
 Children of this way cover structural thinking about software:

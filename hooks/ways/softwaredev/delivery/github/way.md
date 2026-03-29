@@ -7,6 +7,7 @@ commands: ^gh\ |^gh$
 macro: prepend
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # GitHub Way
 
 ## Pull Requests — Always

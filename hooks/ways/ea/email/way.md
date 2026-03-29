@@ -4,6 +4,7 @@ vocabulary: triage inbox unread email scan messages filter noise priority action
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Email Triage
 
 Scan emails across all accounts for a given time period, filter noise, cross-reference with calendar and tasks, and present an intelligent summary.

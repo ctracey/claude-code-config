@@ -4,6 +4,7 @@ vocabulary: docstring jsdoc godoc pydoc rustdoc comment annotation type hint doc
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Docstrings Way
 
 Use docstrings in every language, following the idiomatic style:

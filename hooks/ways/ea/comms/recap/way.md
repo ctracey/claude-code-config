@@ -4,6 +4,7 @@ vocabulary: recap transcript summary meeting notes recording action items discus
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Meeting Recaps & Transcripts
 
 Access meeting recaps, AI-generated summaries, transcripts, and extracted action items from past meetings.

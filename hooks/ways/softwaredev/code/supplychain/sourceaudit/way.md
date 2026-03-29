@@ -4,6 +4,7 @@ vocabulary: eval exec obfuscated base64 pickle deserialize exfiltration shell in
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Source Code Audit
 
 Scan for dangerous patterns before running unfamiliar code. Language-agnostic — the patterns show up everywhere.

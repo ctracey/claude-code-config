@@ -5,6 +5,7 @@ threshold: 2.0
 scope: agent, subagent
 macro: prepend
 ---
+<!-- epistemic: convention -->
 # ADR Context — Read Before You Build
 
 Before diving into implementation, check if the project has Architecture Decision Records that inform the work.

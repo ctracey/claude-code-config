@@ -5,6 +5,7 @@ files: \.env|config\.(json|yaml|yml|toml)$
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Configuration Way
 
 ## Hierarchy

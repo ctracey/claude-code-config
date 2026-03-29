@@ -6,6 +6,7 @@ threshold: 2.5
 embed_threshold: 0.28
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Visualization Opportunity
 
 When explaining something structural — a workflow, a lifecycle, how components interact — consider whether a diagram would communicate it better than prose.

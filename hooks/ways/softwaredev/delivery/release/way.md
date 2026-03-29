@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: release|changelog|tag|version.?bump|bump.?version|npm.?publish|cargo.?publish
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Release Way
 
 ## First: Check for `make release`

@@ -6,6 +6,7 @@ threshold: 2.0
 embed_threshold: 0.35
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Terminal Diagrams with mmaid
 
 ## Finding mmaid

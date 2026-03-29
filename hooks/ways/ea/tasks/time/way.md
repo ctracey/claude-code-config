@@ -4,6 +4,7 @@ vocabulary: time tracking log hours billable timesheet EOD end of day wrap up in
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Time Tracking & Billing
 
 Log billable hours against clients and projects. Always confirm before logging.

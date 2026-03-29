@@ -4,6 +4,7 @@ vocabulary: teams chat message slack channel unread conversation direct message 
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Communications — Chat & Messaging
 
 Access team chat and messaging platforms (Teams, Slack, etc.) for reading conversations, checking unread messages, and composing replies.

@@ -4,6 +4,7 @@ vocabulary: catch up morning briefing what's my day start of day need to know ov
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Catch-Me-Up Briefing
 
 Unified morning briefing using parallel data gathering for speed. This is the most comprehensive EA workflow — it combines email triage, calendar review, task status, and chat scanning into a single synthesized brief.

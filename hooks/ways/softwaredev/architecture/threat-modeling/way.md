@@ -4,6 +4,7 @@ vocabulary: threat model stride attack surface trust boundary mitigation adversa
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Threat Modeling Way
 
 Threat modeling is security at design altitude. Where the Security Way catches code-level issues (injection, exposed secrets), this way maps adversaries, trust boundaries, and systemic risks.

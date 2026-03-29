@@ -4,6 +4,7 @@ vocabulary: osv-scanner pip-audit npm audit cargo audit govulncheck dependency s
 threshold: 1.8
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Dependency Scanning
 
 Scan lockfiles before installing. The install step itself runs arbitrary code.

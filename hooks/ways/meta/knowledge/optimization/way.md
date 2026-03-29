@@ -5,6 +5,7 @@ threshold: 2.0
 macro: prepend
 scope: agent
 ---
+<!-- epistemic: heuristic -->
 # Way Optimization
 
 ## Workflow

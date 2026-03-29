@@ -4,6 +4,7 @@ vocabulary: voice attribution ghostwrite tone style identity mode credited signe
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Voice — Identity and Attribution
 
 When Claude writes through the human's communication channels, there is always a voice decision. Who is speaking? The human, Claude, or both?

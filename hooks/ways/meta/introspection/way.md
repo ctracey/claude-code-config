@@ -7,6 +7,7 @@ commands: gh\ pr\ create
 macro: prepend
 scope: agent
 ---
+<!-- epistemic: heuristic -->
 # Introspection Way
 
 A pull request is a natural boundary of work — a moment to pause and reflect before closing the loop. Regardless of what the PR contains (code, config, docs, process), this is the right time to ask: did we learn something this session that should become a way?

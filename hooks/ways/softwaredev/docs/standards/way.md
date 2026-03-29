@@ -4,6 +4,7 @@ vocabulary: convention norm guideline accessibility style guide linting rule agr
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Standards Way
 
 Standards define how a team works. They're distinct from quality metrics (the Quality Way measures adherence) — this way is about establishing and documenting the norms themselves.

@@ -4,6 +4,7 @@ vocabulary: github action dependabot codeql security scanning automation ci pipe
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Scanning Automation
 
 Match the scanning approach to the project's maturity. Don't propose a CodeQL pipeline for a repo without CI, and don't suggest manual `osv-scanner` for a team project with GitHub Actions already running.

@@ -5,6 +5,7 @@ commands: npm\ test|yarn\ test|jest|pytest|cargo\ test|go\ test|rspec
 threshold: 1.8
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Testing Way
 
 ## What to Cover

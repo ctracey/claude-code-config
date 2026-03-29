@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: skill|SKILL\.md|skill.?(creation|author|write)|claude.?code.?skill|~\/\.claude\/skills
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Skills Way
 
 ## What is a Skill?

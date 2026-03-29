@@ -6,6 +6,7 @@ threshold: 2.0
 embed_threshold: 0.32
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Charts Way
 
 ## chart-tool

@@ -4,6 +4,7 @@ vocabulary: authentication authorization middleware guard permission role rbac a
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # Auth Way
 
 ## Endpoint Protection

@@ -4,6 +4,7 @@ vocabulary: draft reply respond compose email write message tone voice style thr
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Email Drafting
 
 Compose draft replies in the user's voice. Never send directly — always create drafts for review.

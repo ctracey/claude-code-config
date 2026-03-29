@@ -4,6 +4,7 @@ vocabulary: meeting prep weekly review cross-reference intelligence synthesize p
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Cross-Service Intelligence
 
 Pull data across email, calendar, file storage, chat, meeting recordings, and tasks to build a complete picture.

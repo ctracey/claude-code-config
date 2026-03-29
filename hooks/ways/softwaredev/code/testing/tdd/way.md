@@ -4,6 +4,7 @@ vocabulary: tdd red green refactor test first implementation failing
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # TDD Way
 
 ## The Cycle

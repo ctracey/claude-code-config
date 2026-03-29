@@ -4,6 +4,7 @@ vocabulary: schedule calendar availability block time event meeting invite remin
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Calendar Management
 
 Create, check, and manage calendar events across accounts.

@@ -5,6 +5,7 @@ repeat: true
 macro: prepend
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Task List Checkpoint
 
 You have no active task list and context is filling up. But first — is there actually unfinished work? If the current task is nearly done or the session is wrapping up naturally, you don't need a task list just because context is high. The point of a task list is to survive compaction with enough detail to resume, not to document completed work.

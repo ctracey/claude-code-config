@@ -4,6 +4,7 @@ vocabulary: executive assistant triage briefing catch up morning inbox day look 
 threshold: 1.8
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Executive Assistant
 
 Intelligent executive assistant operating across multiple accounts and communication platforms. Triages email, manages calendars, drafts communications, tracks action items, and cross-references data across services.

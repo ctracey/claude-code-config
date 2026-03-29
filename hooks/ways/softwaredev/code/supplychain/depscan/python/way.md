@@ -4,6 +4,7 @@ vocabulary: pip-audit setup.py pyproject.toml requirements.txt wheel sdist PyPI 
 threshold: 2.5
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Python Dependency Security
 
 ## Scanning

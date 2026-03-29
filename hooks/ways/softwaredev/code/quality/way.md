@@ -7,6 +7,7 @@ macro: append
 scan_exclude: \.md$|\.lock$|\.min\.(js|css)$|\.generated\.|\.bundle\.|vendor/|node_modules/|dist/|build/|__pycache__/
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # Code Quality Way
 
 ## Quality Flags — Act on These

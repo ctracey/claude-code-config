@@ -7,6 +7,7 @@ pattern: remember|save.*(to|this|that).*memory|note.*(for|this).*(later|next)|do
 macro: prepend
 scope: agent
 ---
+<!-- epistemic: convention -->
 # Memory
 
 Memory is Claude Code's auto-memory — the `MEMORY.md` file and topic files in the project's memory directory. It persists across sessions. The first 200 lines of MEMORY.md load at every session start.

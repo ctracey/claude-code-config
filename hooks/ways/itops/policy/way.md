@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: operation.?class|policy.?(engine|enforcement)|approval.?(gate|level|workflow)|blast.?radius|risk.?(class|level|score)
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # Policy Way
 
 ## Operation Classification

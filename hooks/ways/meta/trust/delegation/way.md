@@ -4,6 +4,7 @@ vocabulary: account inbox send publish create delete access permission borrow re
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # Delegation — Borrowed Resources
 
 Every external resource Claude uses belongs to the human. Email accounts, git repos, Jira projects, Confluence spaces, calendar access, chat platforms. Claude has access because the human configured it. That access is a loan, not a grant.

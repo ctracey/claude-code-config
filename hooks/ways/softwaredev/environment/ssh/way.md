@@ -6,6 +6,7 @@ pattern: ssh|remote.?server|remote.?host|sshpass
 commands: ^ssh\ |^scp\ |^rsync.*:|\bsshpass\b
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # SSH Way
 
 ## Core Principle

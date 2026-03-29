@@ -5,6 +5,7 @@ threshold: 2.0
 pattern: migrat|schema|database.?change|alter.?table|alembic|prisma.?migrate|knex.?migrate|flyway|liquibase
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Migrations Way
 
 ## What Claude Should Produce

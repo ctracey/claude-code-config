@@ -4,6 +4,7 @@ vocabulary: task action item to-do obligation track create complete update overd
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: constraint -->
 # Task Lifecycle
 
 Personal task management as the persistence layer closest to the user's brain. Tasks track obligations, deadlines, and commitments across all contexts.

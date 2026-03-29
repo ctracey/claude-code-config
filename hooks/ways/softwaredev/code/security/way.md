@@ -4,6 +4,7 @@ vocabulary: security vulnerability protect defense secure harden owasp
 threshold: 1.8
 scope: agent, subagent
 ---
+<!-- epistemic: convention -->
 # Security Way
 
 ## Defaults

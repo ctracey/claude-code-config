@@ -4,6 +4,7 @@ vocabulary: endpoint api rest route http status pagination versioning graphql re
 threshold: 2.0
 scope: agent, subagent
 ---
+<!-- epistemic: heuristic -->
 # API Design Way
 
 ## Common Claude Omissions
