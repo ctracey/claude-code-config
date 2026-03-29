@@ -415,6 +415,34 @@ else
     scan_dir "$WAYS_DIR" "Global"
 fi
 
+# ── Provenance sidecar validation ────────────────────────────────
+# Check provenance.yaml files for basic structural validity.
+
+lint_provenance_sidecars() {
+    local dir="$1"
+    [[ ! -d "$dir" ]] && return
+
+    while IFS= read -r -d '' pfile; do
+        local relpath="${pfile#$WAYS_DIR/}"
+        relpath="${relpath#$PROJECT_DIR/.claude/ways/}"
+
+        # Must be valid YAML with at least one of: policy, controls
+        if ! python3 -c "
+import yaml, sys
+data = yaml.safe_load(open(sys.argv[1]))
+if not isinstance(data, dict):
+    print('not a YAML mapping', file=sys.stderr)
+    sys.exit(1)
+if not data.get('policy') and not data.get('controls'):
+    print('missing policy or controls', file=sys.stderr)
+    sys.exit(1)
+" "$pfile" 2>/dev/null; then
+            echo -e "  ${RED}ERROR:${RESET} $relpath — invalid provenance sidecar (needs policy or controls)"
+            ((ERRORS++))
+        fi
+    done < <(find -L "$dir" -name "provenance.yaml" -print0 2>/dev/null | sort -z)
+}
+
 # ── Sibling vocabulary isolation (Jaccard) ───────────────────────
 # After per-file checks, find way trees and flag sibling vocabulary overlap.
 # A "tree" is any directory containing nested way.md files (depth > 0).
@@ -463,13 +491,16 @@ lint_jaccard() {
     done
 }
 
-# Run Jaccard checks on all scanned directories
+# Run Jaccard checks and provenance sidecar validation on all scanned directories
 if [[ -n "$TARGET" ]]; then
+    lint_provenance_sidecars "$TARGET"
     lint_jaccard "$TARGET"
 else
     if [[ -n "$PROJECT_DIR" && -d "$PROJECT_DIR/.claude/ways" ]]; then
+        lint_provenance_sidecars "$PROJECT_DIR/.claude/ways"
         lint_jaccard "$PROJECT_DIR/.claude/ways"
     fi
+    lint_provenance_sidecars "$WAYS_DIR"
     lint_jaccard "$WAYS_DIR"
 fi
 
