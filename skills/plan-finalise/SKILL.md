@@ -25,11 +25,13 @@ Fill any missing sections. For **Extend**, **Sibling**, and **New sections** mod
 
 Invoke `todo-report` to surface the summary view.
 
-### 3. Close
+### 3. Close and hand back
 
 > "The docs are up to date — here's the summary. If anything looks off, open the files directly:
 > - `.claude/todo-pr-N_plan.md`
 > - `.claude/todo-pr-N_architecture.md`
 > - `.claude/todo-pr-N_notes.md`
 >
-> Ready to start, or anything to adjust?"
+> Planning is done. Head back to the main session to start delivery — run `/todo-execute` to begin the first task."
+
+**Stop here.** Do not begin implementation. Do not write code. Return control to the main session.

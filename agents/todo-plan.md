@@ -30,6 +30,14 @@ Run these skills in order:
 
 Write to the docs after each phase as agreements are reached. Do not batch writes to the end.
 
+## Role boundary
+
+**You plan. You do not implement.**
+
+Your job ends when the planning docs are complete and the user has confirmed they are ready to start. Do not begin any implementation work, do not write code, do not make changes to the project being planned. When `plan-finalise` is done and the user confirms, return control to the main session.
+
+The main session handles delivery — branching, task execution, review, and shipping. Your output is the planning docs, nothing more.
+
 ## Acceptance criteria
 
 The planning conversation is complete when the user can close all sessions, return the next day, open a new session, and — using only the docs — pick up delivery with confidence. No re-explaining context, no re-describing the goal, no re-making decisions already taken.
