@@ -490,7 +490,22 @@ fn load_metrics(session_id: &str) -> HashMap<String, MetricEntry> {
 }
 
 fn detect_session() -> Option<String> {
-    // Find the session directory with the newest modification time
+    // Best source: most recent session_start event for this project
+    let project = std::env::var("CLAUDE_PROJECT_DIR")
+        .ok()
+        .or_else(detect_project_dir);
+
+    if let Some(ref proj) = project {
+        if let Some(sid) = latest_session_for_project(proj) {
+            // Verify the session directory exists
+            let dir = format!("/tmp/.claude-sessions/{sid}");
+            if std::path::Path::new(&dir).is_dir() {
+                return Some(sid);
+            }
+        }
+    }
+
+    // Fallback: newest session directory by mtime
     let sessions = session::list_sessions();
     if sessions.is_empty() {
         return None;
@@ -510,6 +525,48 @@ fn detect_session() -> Option<String> {
         }
     }
     newest.map(|(_, s)| s)
+}
+
+/// Find the most recent session_start event for a project directory.
+fn latest_session_for_project(project: &str) -> Option<String> {
+    let home = std::env::var("HOME").ok()?;
+    let path = format!("{home}/.claude/stats/events.jsonl");
+    let content = std::fs::read_to_string(&path).ok()?;
+
+    let mut latest: Option<String> = None;
+    for line in content.lines() {
+        if !line.contains("session_start") {
+            continue;
+        }
+        if let Ok(v) = serde_json::from_str::<serde_json::Value>(line) {
+            if v["event"].as_str() == Some("session_start") {
+                if let Some(p) = v["project"].as_str() {
+                    if p == project {
+                        if let Some(s) = v["session"].as_str() {
+                            latest = Some(s.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    latest
+}
+
+fn detect_project_dir() -> Option<String> {
+    let cwd = std::env::current_dir().ok()?;
+    let mut dir = cwd.as_path();
+    loop {
+        let claude_dir = dir.join(".claude");
+        if claude_dir.is_dir()
+            && (claude_dir.join("settings.json").exists()
+                || dir.join("CLAUDE.md").exists()
+                || claude_dir.join("settings.local.json").exists())
+        {
+            return Some(dir.to_string_lossy().to_string());
+        }
+        dir = dir.parent()?;
+    }
 }
 
 fn fmt_epoch(n: u64) -> String {
