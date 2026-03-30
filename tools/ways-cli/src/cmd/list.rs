@@ -83,17 +83,60 @@ pub fn run(session: Option<&str>, sort: &str, json_out: bool) -> Result<()> {
     );
     println!();
 
+    // Assign pin symbols to re-disclosure clusters
+    // Group ways by their bar position (re-disclosure point mapped to bar)
+    let bar_width: usize = 60;
+    let pin_symbols = ['●', '◆', '■', '▲', '◉', '▶', '★', '◈', '♦', '▪'];
+    let pin_colors = [
+        "\x1b[38;2;99;179;237m",  // blue
+        "\x1b[38;2;78;205;196m",  // teal
+        "\x1b[38;2;126;211;33m",  // green
+        "\x1b[38;2;255;234;167m", // yellow
+        "\x1b[38;2;253;203;110m", // orange
+        "\x1b[38;2;255;118;117m", // red
+        "\x1b[38;2;162;155;254m", // purple
+        "\x1b[38;2;253;121;168m", // magenta
+        "\x1b[38;2;116;185;255m", // sky
+        "\x1b[38;2;85;239;196m",  // mint
+    ];
+
+    // Map each way to its bar position
+    let way_bar_positions: Vec<Option<usize>> = ways
+        .iter()
+        .map(|w| {
+            if context_window_k == 0 {
+                return None;
+            }
+            let fire_pos_k = w.token_pos / 1000;
+            let redisclose_at_k = fire_pos_k + redisclose_threshold_k;
+            let bar_pos = ((redisclose_at_k * bar_width as u64) / context_window_k) as usize;
+            Some(bar_pos.min(bar_width - 1))
+        })
+        .collect();
+
+    // Assign a cluster index to each unique bar position
+    let mut unique_positions: Vec<usize> = way_bar_positions
+        .iter()
+        .filter_map(|p| *p)
+        .collect();
+    unique_positions.sort();
+    unique_positions.dedup();
+
+    let cluster_of = |bar_pos: usize| -> usize {
+        unique_positions.iter().position(|&p| p == bar_pos).unwrap_or(0) % pin_symbols.len()
+    };
+
     // Column headers
     println!(
-        "  \x1b[1m{:<34} {:>5} {:>5} {:<16} {}\x1b[0m",
-        "Way", "Epoch", "Dist", "Trigger", "Next"
+        "  \x1b[1m{:<34} {:>5} {:>5} {:<11} {} {}\x1b[0m",
+        "Way", "Epoch", "Dist", "Trigger", "⌖", "Next"
     );
     println!(
         "  \x1b[2m{}\x1b[0m",
-        "─".repeat(82)
+        "─".repeat(85)
     );
 
-    for w in &ways {
+    for (i, w) in ways.iter().enumerate() {
         let distance = current_epoch.saturating_sub(w.epoch_at_fire);
         let next = predict_next(&w, current_epoch, current_tokens_k, redisclose_threshold_k);
 
@@ -107,24 +150,33 @@ pub fn run(session: Option<&str>, sort: &str, json_out: bool) -> Result<()> {
         let display_id = format!("{prefix}{}", w.id);
         let trigger_display = format_trigger(&w.trigger);
 
-        // Color distance: green (fresh) → yellow (mid) → red (stale)
+        // Color distance
         let dist_color = if distance == 0 {
-            "\x1b[0;32m" // green
+            "\x1b[0;32m"
         } else if distance < current_epoch / 3 {
             "\x1b[0;32m"
         } else if distance < current_epoch * 2 / 3 {
             "\x1b[1;33m"
         } else {
-            "\x1b[0;31m" // red
+            "\x1b[0;31m"
+        };
+
+        // Pin symbol for this way's re-disclosure cluster
+        let pin = if let Some(bar_pos) = way_bar_positions[i] {
+            let ci = cluster_of(bar_pos);
+            format!("{}{}\x1b[0m", pin_colors[ci], pin_symbols[ci])
+        } else {
+            " ".to_string()
         };
 
         println!(
-            "  {:<34} {:>5} {}{:>5}\x1b[0m {:<16} {}",
+            "  {:<34} {:>5} {}{:>5}\x1b[0m {:<11} {} {}",
             truncate(&display_id, 34),
             w.epoch_at_fire,
             dist_color,
             distance,
             trigger_display,
+            pin,
             next,
         );
 
@@ -138,10 +190,19 @@ pub fn run(session: Option<&str>, sort: &str, json_out: bool) -> Result<()> {
         }
     }
 
-    // Token position bar with re-disclosure markers
+    // Token timeline with re-disclosure markers
     if current_tokens_k > 0 {
         println!();
-        print_token_timeline(&ways, current_tokens_k, context_window_k, redisclose_threshold_k);
+        print_token_timeline(
+            &ways,
+            &way_bar_positions,
+            &unique_positions,
+            &pin_symbols,
+            &pin_colors,
+            current_tokens_k,
+            context_window_k,
+            redisclose_threshold_k,
+        );
     }
 
     println!();
@@ -199,6 +260,10 @@ fn predict_next(w: &FiredWay, current_epoch: u64, current_tokens_k: u64, rediscl
 
 fn print_token_timeline(
     ways: &[FiredWay],
+    way_bar_positions: &[Option<usize>],
+    unique_positions: &[usize],
+    pin_symbols: &[char],
+    pin_colors: &[&str],
     current_tokens_k: u64,
     context_window_k: u64,
     redisclose_threshold_k: u64,
@@ -211,34 +276,19 @@ fn print_token_timeline(
     };
     let filled = (pct as usize * bar_width / 100).min(bar_width);
 
-    // Compute re-disclosure positions for each way
-    // Re-disclosure fires when: current_tokens - way.token_pos > threshold
-    // So the re-disclosure point is at: way.token_pos + threshold
-    let mut markers: Vec<(usize, bool)> = Vec::new(); // (bar_position, already_past)
-    let mut zone_soon = 0u32; // within next 25% of threshold
+    // Count zones
+    let mut zone_past = 0u32;
+    let mut zone_soon = 0u32;
     let mut zone_later = 0u32;
-    let mut zone_past = 0u32; // already past re-disclosure point
 
     for w in ways {
         let fire_pos_k = w.token_pos / 1000;
         let redisclose_at_k = fire_pos_k + redisclose_threshold_k;
-
-        if context_window_k == 0 {
-            continue;
-        }
-
-        let bar_pos = ((redisclose_at_k * bar_width as u64) / context_window_k) as usize;
-        let bar_pos = bar_pos.min(bar_width - 1);
-        let past = current_tokens_k >= redisclose_at_k;
-
-        markers.push((bar_pos, past));
-
-        if past {
+        if current_tokens_k >= redisclose_at_k {
             zone_past += 1;
         } else {
-            let distance_to_redisclose = redisclose_at_k.saturating_sub(current_tokens_k);
-            let quarter_threshold = redisclose_threshold_k / 4;
-            if distance_to_redisclose <= quarter_threshold {
+            let dist = redisclose_at_k.saturating_sub(current_tokens_k);
+            if dist <= redisclose_threshold_k / 4 {
                 zone_soon += 1;
             } else {
                 zone_later += 1;
@@ -246,57 +296,33 @@ fn print_token_timeline(
         }
     }
 
-    // Layer 1: Re-disclosure markers
-    // Count how many ways share each bar position
-    let mut marker_counts: Vec<u32> = vec![0; bar_width];
-    let mut marker_colors: Vec<u8> = vec![0; bar_width]; // 0=none, 1=green(past), 2=yellow(soon), 3=dim(later)
+    // Layer 1: Pin symbols at their bar positions
+    // Each unique position gets the same symbol/color as the table rows
+    let mut marker_line: Vec<Option<usize>> = vec![None; bar_width]; // cluster index
 
-    for (pos, past) in &markers {
-        let p = *pos;
-        if p >= bar_width {
-            continue;
-        }
-        marker_counts[p] += 1;
-
-        // Color priority: past(green) > soon(yellow) > later(dim)
-        if *past {
-            marker_colors[p] = 1;
-        } else if marker_colors[p] != 1 {
-            let redisclose_at_k = ways.iter()
-                .filter(|w| {
-                    let rk = w.token_pos / 1000 + redisclose_threshold_k;
-                    ((rk * bar_width as u64) / context_window_k.max(1)) as usize == p
-                })
-                .map(|w| w.token_pos / 1000 + redisclose_threshold_k)
-                .next()
-                .unwrap_or(0);
-            let dist = redisclose_at_k.saturating_sub(current_tokens_k);
-            if dist <= redisclose_threshold_k / 4 {
-                marker_colors[p] = marker_colors[p].max(2);
-            } else if marker_colors[p] == 0 {
-                marker_colors[p] = 3;
-            }
+    for bp in way_bar_positions.iter().filter_map(|p| *p) {
+        if bp < bar_width {
+            let ci = unique_positions
+                .iter()
+                .position(|&p| p == bp)
+                .unwrap_or(0)
+                % pin_symbols.len();
+            marker_line[bp] = Some(ci);
         }
     }
 
-    // Render marker line: ▼=1, ◆=2-3, digit for 4+
     let mut marker_str = String::from("  ");
     for i in 0..bar_width {
-        let count = marker_counts[i];
-        if count == 0 {
-            marker_str.push(' ');
-        } else {
-            let color = match marker_colors[i] {
-                1 => "\x1b[0;32m",
-                2 => "\x1b[1;33m",
-                _ => "\x1b[2m",
-            };
-            let ch = match count {
-                1 => "▼".to_string(),
-                2..=3 => "◆".to_string(),
-                n => format!("{}", n.min(9)),
-            };
-            marker_str.push_str(&format!("{color}{ch}\x1b[0m"));
+        match marker_line[i] {
+            Some(ci) => {
+                marker_str.push_str(&format!(
+                    "{}{}{}",
+                    pin_colors[ci],
+                    pin_symbols[ci],
+                    "\x1b[0m"
+                ));
+            }
+            None => marker_str.push(' '),
         }
     }
     println!("{marker_str}");
@@ -322,18 +348,16 @@ fn print_token_timeline(
         "  {bar_color}{bar}\x1b[0m {pct}% ({current_tokens_k}K / {context_window_k}K)"
     );
 
-    // Layer 3: Zone summary
+    // Layer 3: Zone summary with re-disclosure interval
     let mut zones = Vec::new();
     if zone_past > 0 {
-        zones.push(format!("\x1b[0;32m{zone_past} re-disclose now\x1b[0m"));
+        zones.push(format!("\x1b[0;32m● {zone_past} re-disclose now\x1b[0m"));
     }
     if zone_soon > 0 {
-        zones.push(format!("\x1b[1;33m{zone_soon} approaching\x1b[0m"));
+        zones.push(format!("\x1b[1;33m◐ {zone_soon} approaching\x1b[0m"));
     }
-    let total_ways = ways.len();
-    let stable = total_ways as u32 - zone_past - zone_soon - zone_later;
     if zone_later > 0 {
-        zones.push(format!("\x1b[2m{zone_later} distant\x1b[0m"));
+        zones.push(format!("\x1b[2m○ {zone_later} distant\x1b[0m"));
     }
 
     let redisclose_pct = if context_window_k > 0 {
@@ -342,10 +366,10 @@ fn print_token_timeline(
         0
     };
     let summary = if zones.is_empty() {
-        format!("\x1b[2mre-disclosure at {redisclose_pct}% interval ({redisclose_threshold_k}K tokens)\x1b[0m")
+        format!("\x1b[2mre-disclosure: {redisclose_pct}% interval ({redisclose_threshold_k}K tokens)\x1b[0m")
     } else {
         format!(
-            "{}  \x1b[2m│ {redisclose_pct}% interval ({redisclose_threshold_k}K)\x1b[0m",
+            "{}  \x1b[2m│ {redisclose_threshold_k}K interval\x1b[0m",
             zones.join("  ")
         )
     };
