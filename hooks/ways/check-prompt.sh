@@ -24,8 +24,8 @@ WAYS_DIR="${HOME}/.claude/hooks/ways"
 source "${WAYS_DIR}/match-way.sh"
 detect_semantic_engine
 
-# Clean up embedding cache on exit (ephemeral per-prompt eval cycle)
-[[ -n "${EMBED_CACHE:-}" ]] && trap 'rm -f "$EMBED_CACHE" 2>/dev/null' EXIT
+# Clean up match caches on exit (ephemeral per-prompt eval cycle)
+trap 'rm -f "${EMBED_CACHE:-}" "${BM25_CACHE:-}" 2>/dev/null' EXIT
 
 # Epoch counter
 source "${WAYS_DIR}/epoch.sh"
