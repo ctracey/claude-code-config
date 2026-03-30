@@ -4,6 +4,7 @@
 # Track these directories
 !.gitignore
 !CLAUDE.md
+!todo-*.md
 !Makefile
 !README.md
 !LICENSE
