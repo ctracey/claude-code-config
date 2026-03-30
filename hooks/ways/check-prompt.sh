@@ -91,7 +91,7 @@ scan_ways() {
 
     # Additive matching: pattern OR semantic (either channel can fire)
     if match_way_prompt "$PROMPT" "$pattern" "$description" "$vocabulary" "$effective_threshold" "$waypath"; then
-      ~/.claude/hooks/ways/show-way.sh "$waypath" "$SESSION_ID" "${MATCH_CHANNEL:-prompt}"
+      "${HOME}/.claude/bin/ways" show way "$waypath" --session "$SESSION_ID" --trigger "${MATCH_CHANNEL:-prompt}"
     fi
   done < <(find_way_files "$dir")
 }

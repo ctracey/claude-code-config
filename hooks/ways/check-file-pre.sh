@@ -58,7 +58,7 @@ scan_ways() {
 
     # Check file path against pattern
     if [[ -n "$files" && "$FP" =~ $files ]]; then
-      CONTEXT+=$(~/.claude/hooks/ways/show-way.sh "$waypath" "$SESSION_ID" "file")
+      CONTEXT+=$("${HOME}/.claude/bin/ways" show way "$waypath" --session "$SESSION_ID" --trigger "file")
     fi
   done < <(find_way_files "$dir")
 }
@@ -120,7 +120,7 @@ scan_checks() {
     # Let show-check.sh handle the curve scoring and threshold
     if [[ "$MATCH_SCORE" != "0" ]]; then
       local check_out
-      check_out=$("${HOME}/.claude/hooks/ways/show-check.sh" "$waypath" "$SESSION_ID" "file" "$MATCH_SCORE")
+      check_out=$("${HOME}/.claude/bin/ways" show check "$waypath" --session "$SESSION_ID" --trigger "file" --score "$MATCH_SCORE")
       [[ -n "$check_out" ]] && CONTEXT+="$check_out"
     fi
   done < <(find -L "$dir" -name "*.check.md" -print0 2>/dev/null)

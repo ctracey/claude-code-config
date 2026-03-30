@@ -61,12 +61,12 @@ scan_ways() {
 
     # Check command patterns
     if [[ -n "$commands" && "$CMD" =~ $commands ]]; then
-      CONTEXT+=$(~/.claude/hooks/ways/show-way.sh "$waypath" "$SESSION_ID" "bash")
+      CONTEXT+=$("${HOME}/.claude/bin/ways" show way "$waypath" --session "$SESSION_ID" --trigger "bash")
     fi
 
     # Check description against pattern (for tool description matching)
     if [[ -n "$DESC" && -n "$pattern" && "$DESC" =~ $pattern ]]; then
-      CONTEXT+=$(~/.claude/hooks/ways/show-way.sh "$waypath" "$SESSION_ID" "bash")
+      CONTEXT+=$("${HOME}/.claude/bin/ways" show way "$waypath" --session "$SESSION_ID" --trigger "bash")
     fi
   done < <(find_way_files "$dir")
 }
@@ -124,7 +124,7 @@ scan_checks() {
 
     if [[ "$MATCH_SCORE" != "0" ]]; then
       local check_out
-      check_out=$("${HOME}/.claude/hooks/ways/show-check.sh" "$waypath" "$SESSION_ID" "bash" "$MATCH_SCORE")
+      check_out=$("${HOME}/.claude/bin/ways" show check "$waypath" --session "$SESSION_ID" --trigger "bash" --score "$MATCH_SCORE")
       [[ -n "$check_out" ]] && CONTEXT+="$check_out"
     fi
   done < <(find -L "$dir" -name "*.check.md" -print0 2>/dev/null)

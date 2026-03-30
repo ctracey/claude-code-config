@@ -156,13 +156,13 @@ scan_state_triggers() {
             fi
           else
             # One-shot way: use standard marker-based gating via show-way.sh
-            local output=$("${WAYS_DIR}/show-way.sh" "$waypath" "$SESSION_ID" "state")
+            local output=$("${HOME}/.claude/bin/ways" show way "$waypath" --session "$SESSION_ID" --trigger "state")
             [[ -n "$output" ]] && CONTEXT+="$output"$'\n\n'
           fi
           ;;
         *)
           # Other triggers use standard once-per-session marker
-          local output=$("${WAYS_DIR}/show-way.sh" "$waypath" "$SESSION_ID" "state")
+          local output=$("${HOME}/.claude/bin/ways" show way "$waypath" --session "$SESSION_ID" --trigger "state")
           [[ -n "$output" ]] && CONTEXT+="$output"$'\n\n'
           ;;
       esac
@@ -179,7 +179,7 @@ CORE_MARKER="/tmp/.claude-core-${SESSION_ID}"
 if [[ -n "$SESSION_ID" ]]; then
   if [[ ! -f "$CORE_MARKER" ]]; then
     # No marker at all — session_id changed or first run without SessionStart
-    CORE_OUTPUT=$("${WAYS_DIR}/show-core.sh" <<< "{\"session_id\":\"${SESSION_ID}\"}")
+    CORE_OUTPUT=$("${HOME}/.claude/bin/ways" show core --session "$SESSION_ID")
     [[ -n "$CORE_OUTPUT" ]] && CONTEXT+="$CORE_OUTPUT"$'\n\n'
   else
     # Marker exists — check for stale injection (context cleared under us)
@@ -190,7 +190,7 @@ if [[ -n "$SESSION_ID" ]]; then
     if [[ $ctx_size -lt 5000 && $age -gt 30 ]]; then
       # Small context + marker older than 30s = context was cleared
       rm -f "$CORE_MARKER"
-      CORE_OUTPUT=$("${WAYS_DIR}/show-core.sh" <<< "{\"session_id\":\"${SESSION_ID}\"}")
+      CORE_OUTPUT=$("${HOME}/.claude/bin/ways" show core --session "$SESSION_ID")
       [[ -n "$CORE_OUTPUT" ]] && CONTEXT+="$CORE_OUTPUT"$'\n\n'
     fi
   fi
