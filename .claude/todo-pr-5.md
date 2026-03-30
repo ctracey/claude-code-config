@@ -46,8 +46,10 @@
 - [ ] **9. Story mapping**
   - [ ] 9.1. Consider story mapping as a complement to task breakdown — logical user journey vs delivery roadmap with outcome/learning milestones
 
-- [ ] **10. Workflow visualisation**
-  - [ ] 10.1. Visualise workflow progress and active step — show which phase the current session is in (planning, executing, reviewing, shipping) and progress within it
+- [-] **10. Workflow visualisation**
+  - [x] 10.1. Visualise workflow progress and active step — show which phase the current session is in (planning, executing, reviewing, shipping) and progress within it
+  - [ ] 10.2. Explore a workflow config skill or script — single source of truth for step names used by `todo-begin` and the progress banner, avoiding drift between the `steps=` string and the numbered step list
+  - [ ] 10.3. Build an abstracted workflow skill — generic workflow engine that any multi-stage process (planning, executing, reviewing, shipping) can use, rather than hardcoding stage logic in individual skills
 
 - [ ] **11. Agent identity**
   - [ ] 11.1. Explore surfacing a clear agent name visible to the user — e.g. "Planner" or "Implementer" — so the user always knows which agent they are talking to and what its role boundary is
@@ -60,3 +62,6 @@
 
 - [ ] **14. Ways hygiene**
   - [ ] 14.1. Audit existing ways for content that belongs in a different scope or file — ensure new planning/subagent guidance lives in the right way rather than being patched into unrelated ways
+
+- [ ] **15. MCP service for todo list management**
+  - [ ] 15.1. Design MCP service interface — expose todo file read/write/query operations as MCP tools so any agent or skill can manage todos via a standard protocol rather than direct file I/O

@@ -141,6 +141,23 @@ Candidate approaches: a standalone shell script, a small Node/Python CLI, or a B
 
 Decision not yet made — captured here as a direction worth exploring when building todo-add (2.7). The `todo-update` skill was built without a CLI backing and works reliably for direct markdown edits — revisit for todo-add if complexity warrants it.
 
+## MCP server for todo management
+
+An MCP server is an alternative (or complement) to the CLI approach. Rather than skills invoking a shell command, they would call structured MCP tools — `todo_list`, `todo_update`, `todo_add`, `todo_status` — backed by a server that owns the file I/O.
+
+Benefits over a plain CLI:
+
+- Native tool calls — no shell invocation, no output parsing
+- Structured input/output — schemas enforced at the protocol level
+- Stateful if needed — server can hold parsed state across calls in a session
+- Accessible to any agent or subagent in the session, not just the skill that invoked a command
+
+The skills would become even thinner: call the MCP tool, present the result. The MCP server handles all reads and writes to `todo-pr-N.md` files.
+
+Candidate implementation: a small Node or Python MCP server registered in `~/.claude/settings.json`. Could expose the same operations as the CLI — making the two approaches complementary rather than competing.
+
+Decision not yet made — captured here as a direction worth exploring alongside the CLI tool idea.
+
 ## Packaging this workflow
 
 The skills, ways, hooks, and agents that make up this workflow should be distributable as a unit. Options:
@@ -167,6 +184,45 @@ Practical implications:
 - **Main session** — ways fire once per session. In a long session, guidance injected early may be far back in context. Spawning a subagent to handle a bounded task (rather than doing it inline) keeps the main session clean and ways fresh where they matter.
 
 This is a reason to prefer subagents for implementation and review work even when the main session *could* do it — fresh ways are a form of context hygiene.
+
+## Terminology: stage vs step
+
+Workflow progression units are called **stages**, not steps.
+
+**Why:** A stage has a clear entry/exit criteria — a stage gate — that must be satisfied before moving on. The word "stage" carries that gate semantics naturally. "Step" is reserved for the finer-grained activities *within* a stage, so using it at the workflow level creates ambiguous overlap.
+
+**Applies to:**
+- The progress banner — the `steps` parameter and concept should be `stages`
+- `todo-begin` — the planning sequence is a series of stages (`context`, `intent`, `solution`, `delivery`, `breakdown`, `finalise`)
+- Any future workflow config or tree visualisation
+
+## Workflow tree with breadcrumb visualisation (10.x)
+
+The current progress banner is flat — a single-level step list. Consider a tree structure for nested workflows where a top-level workflow (e.g. plan → execute → review → ship) contains sub-steps within each node. A breadcrumb would show both where you are in the outer workflow and where you are within the current inner workflow.
+
+Example:
+```
+plan > context > intent > solution > ...
+```
+
+Open questions:
+- Does the progress script extend to support a `parent` context, or is this a separate visualisation?
+- How does this interact with the workflow config idea (10.2) — a tree config would be a natural extension of a flat step list.
+- What is the right depth? Two levels (workflow > step) is probably enough.
+
+Captured as a direction to consider alongside 10.2 before the visualisation layer solidifies.
+
+## Workflow config — single source of truth for step names (10.2)
+
+`todo-begin` currently defines the planning step names in two places: the `steps=` string passed to the progress banner, and the numbered step list. These will drift when steps are added or renamed.
+
+A workflow config — a skill or script that owns the canonical step list — would give both `todo-begin` and the progress banner a single source to pull from. Open questions:
+
+- Should this be a JSON block inside a skill, a standalone script that emits the config, or something else?
+- Does it generalise beyond planning? `todo-execute` could have its own step list (e.g. `brief,implement,test,handoff`).
+- If it's a script, can `todo-begin` call it to get the `steps=` value at runtime rather than hardcoding it?
+
+Decision not yet made — captured here as task 10.2. Explore before adding more workflows that need progress banners.
 
 ## Workflow components inventory
 

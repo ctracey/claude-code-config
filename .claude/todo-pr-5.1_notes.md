@@ -36,13 +36,13 @@ These move to the planning way. Captured here as the canonical reference.
 
 **One question at a time.** Don't front-load a list of questions. Ask the most important one, listen, then follow up if needed.
 
-**Play back before moving on.** At the end of each step, briefly reflect the picture back. A single sentence: *"So the goal is X, and the main thing you're solving for is Y — does that sound right?"* Correct and re-confirm before proceeding.
+**Play back before moving on.** At the end of each stage, briefly reflect the picture back. A single sentence: *"So the goal is X, and the main thing you're solving for is Y — does that sound right?"* Correct and re-confirm before proceeding.
 
-**Read the room on depth.** Short answers → stay high-level and move forward. Elaborating → follow deeper. Match their energy and vocabulary. Explicitly ask at intent step how much detail they want.
+**Read the room on depth.** Short answers → stay high-level and move forward. Elaborating → follow deeper. Match their energy and vocabulary. Explicitly ask at intent stage how much detail they want.
 
 **Show the picture building.** At natural transition points (intent→solution, solution→delivery, delivery→breakdown), briefly surface what you've understood so far — a one or two sentence summary — before asking the next question. Helps the user see the plan forming and correct early.
 
-**Be mindful of their time.** If the work is simple and the user clearly knows what they want, compress. Multiple steps can collapse into a single short exchange. The process should scale down for small work, not be a ritual that must be completed in full.
+**Be mindful of their time.** If the work is simple and the user clearly knows what they want, compress. Multiple stages can collapse into a single short exchange. The process should scale down for small work, not be a ritual that must be completed in full.
 
 ---
 
@@ -346,3 +346,17 @@ Implementation acceptance:
 
 - Story mapping integration (task 9.1) — how `todo-plan-delivery` and `todo-plan-breakdown` could support outcome/learning milestones as an alternative to pure task lists. Deferred until the core architecture is stable.
 - Changelog creation — confirmed: `_changelog.md` is created as part of the execution workflow (`todo-execute`), not planning. No action needed here.
+
+---
+## Workflow progress banner
+
+`todo-begin` now emits a progress banner at the start of each stage and on completion via the `todo-workflow-progress` skill. The banner shows the workflow title, stage progression bar, position counter, and the stage list with the active stage highlighted.
+
+Example output:
+```
+WORKFLOW(**planning**)                                    ■■▣□□□(3/6)
+──────────────────────────────────────────────────────────────────
+[ context → intent → **SOLUTION** → delivery → breakdown → finalise ]
+```
+
+Stage names: `context`, `intent`, `solution`, `delivery`, `breakdown`, `finalise`. Pass `active=""` to show all-done state.
