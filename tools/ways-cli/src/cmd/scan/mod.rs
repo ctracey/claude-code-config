@@ -280,19 +280,25 @@ fn match_prompt(
     bm25: &[(String, f64)],
     embed: &[(String, f64)],
 ) -> Option<String> {
-    // Channel 1: Regex pattern
+    // Channel 1: Regex pattern — always checked first
     if let Some(ref pat) = pattern {
         if regex_matches(pat, query) {
             return Some("keyword".to_string());
         }
     }
 
-    // Channel 2: Embedding (highest priority semantic)
-    if embed.iter().any(|(id, _)| id == way_id) {
-        return Some("semantic:embedding".to_string());
+    // Channel 2: Embedding — primary semantic engine when available.
+    // If embed returned ANY results (engine is working), it's authoritative.
+    // Only fall through to BM25 when embed returned nothing (engine unavailable).
+    if !embed.is_empty() {
+        if embed.iter().any(|(id, _)| id == way_id) {
+            return Some("semantic:embedding".to_string());
+        }
+        // Embed is working but didn't match this way — don't fall through to BM25
+        return None;
     }
 
-    // Channel 3: BM25
+    // Channel 3: BM25 — fallback when embedding engine is unavailable
     if let Some((_, score)) = bm25.iter().find(|(id, _)| id == way_id) {
         if *score >= threshold {
             return Some("semantic:bm25".to_string());
