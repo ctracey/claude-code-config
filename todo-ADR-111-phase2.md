@@ -1,158 +1,114 @@
 # ADR-111 Phase 2: Hook Infrastructure Consolidation
 
 **Branch:** `staging/ADR-111`
-**Predecessor:** Phase 1 built the `ways` CLI (9 subcommands), rewired callers, deleted replaced scripts (15 commits).
-**Context:** The `ways` binary is the runtime. Hooks are bash dispatchers that call it. Next step: absorb the heavy hook infrastructure scripts into `ways` subcommands, leaving hooks as truly thin glue.
+**Status:** Phase 2 complete. All absorbable scripts consolidated.
 
-## What stays as bash (and why)
+## What's done (25 commits on this branch)
 
-Hook entry points must be bash — Claude Code invokes them as shell commands:
-- `check-prompt.sh` — reads stdin JSON, dispatches to matchers
-- `check-bash-pre.sh` — command pattern intercept
-- `check-file-pre.sh` — file edit intercept
-- `check-task-pre.sh` — task intercept
-- `check-response.sh` — response topic extraction
+### Phase 1 — ways CLI binary (Rust, 3.1 MB, 15 subcommands)
+- `lint`, `corpus`, `graph`, `match`, `embed`, `siblings`, `tree`, `provenance`
+- `suggest`, `show` (way/check/core), `scan` (prompt/command/file/state)
+- `status`, `stats`, `list`, `init`
+- Pure Rust BM25 (rust-stemmers), scores match C version within 0.005
+- Embedding via subprocess to existing way-embed binary
 
-Tiny utilities (under 40 lines, no logic worth compiling):
-- `epoch.sh` — writes /tmp markers
-- `detect-scope.sh` — checks env vars
-- `clear-markers.sh` — rm markers
-- `log-event.sh` — appends JSONL
-- `mark-tasks-active.sh` — 6 lines
+### Phase 1 tool replacement (-7,869 lines deleted)
+- `way-match.c` + `snowball/` (2,110 lines C) → `ways match`
+- `generate-corpus.sh` (250 lines) → `ways corpus`
+- `lint-ways.sh` (525 lines) → `ways lint`
+- `way-tree-analyze.sh` (270 lines) → `ways tree`
+- `provenance-scan.py` (330 lines) → `ways provenance`
+- `embed-lib.sh` (190 lines) → absorbed into `ways corpus`
+- `embed-suggest.sh` (100 lines) → `ways suggest`
+- `bin/way-match` (C binary) → `ways match`
 
-Macros are bash by design — they run arbitrary shell:
-- `macro.sh` + all domain-specific `macro.sh` files
+### Phase 2 — session state + display
+- `session.rs`: markers, epochs, token positions, scope, event logging
+- `show-way.sh` (222 lines) → `ways show way`
+- `show-check.sh` (169 lines) → `ways show check`
+- `show-core.sh` (162 lines) → `ways show core`
+- `token-position.sh` (111 lines) → `session.rs`
 
-## Phase 2.1: Delete lint-ways.sh
+### Phase 2 — hook rewrite + script absorption
+- `check-prompt.sh`: 101 → 27 lines (one `ways scan prompt` call)
+- `check-bash-pre.sh`: 142 → 18 lines (one `ways scan command` call)
+- `check-file-pre.sh`: 138 → 18 lines (one `ways scan file` call)
+- `check-state.sh`: 217 → 17 lines (one `ways scan state` call)
+- `match-way.sh` (183 lines) DELETED
+- `detect-scope.sh` (39 lines) DELETED
+- `epoch.sh` (35 lines) DELETED
+- `log-event.sh` (18 lines) DELETED — inlined where still needed
+- `embed-status.sh` (301 lines) DELETED → `ways status`
+- `stats.sh` (348 lines) DELETED → `ways stats`
+- `list-triggered.sh` (71 lines) DELETED → `ways list`
+- `check-embedding-staleness.sh` (60 lines) DELETED → `ways corpus --if-stale`
+- `init-project-ways.sh` (81 lines) DELETED → `ways init`
+- `model-match.sh` (27 lines) DELETED
+- `check-smart-trigger.sh` (125 lines) DELETED (broken, needs redesign)
 
-**Why:** `ways lint` is a complete replacement. The only remaining caller is `lint-ways.sh` itself being invoked from test pipelines and the `/ways-tests` skill.
+### Infrastructure
+- Makefile: build-only (`make ways`, `make setup`, `make install`, `make test`)
+- `make install` symlinks to `~/.local/bin/ways` (globally available)
+- `way-embed/Makefile` updated to call `ways corpus`
+- `settings.json` updated: staleness check → `ways corpus --if-stale`, init → `ways init`
+- Code quality: `scan.rs` and `show.rs` split into module directories (all under 500 lines)
 
-**Steps:**
-1. Search for all references to `lint-ways.sh` in hooks, skills, commands, tests
-2. Replace with `ways lint` (or `ways lint <path>` for targeted linting)
-3. Delete `lint-ways.sh`
-4. Verify: `ways lint` and `ways lint --check` still work
+### Net: +6,138 / -7,869 lines. 15 subcommands. 595 lines of bash remain.
 
-## Phase 2.2: `ways show` — absorb the display cluster
+## What remains (permanent bash — stays by design)
 
-**Why:** `show-way.sh` (222 lines), `show-check.sh` (169 lines), and `show-core.sh` (162 lines) = 553 lines of content rendering. They handle session markers, frontmatter stripping, macro dispatch, and content formatting. This is the second most-called code path after matching.
+| Script | Lines | Reason |
+|--------|-------|--------|
+| `macro.sh` | 161 | Runs arbitrary bash (macros are shell by design) |
+| `inject-subagent.sh` | 146 | Two-phase subagent injection, complex state |
+| `check-task-pre.sh` | 128 | Subagent stash pattern |
+| `check-response.sh` | 48 | Response topic extraction |
+| `check-prompt.sh` | 27 | Thin dispatcher → `ways scan prompt` |
+| `clear-markers.sh` | 26 | Tiny, rm markers |
+| `check-file-pre.sh` | 18 | Thin dispatcher → `ways scan file` |
+| `check-bash-pre.sh` | 18 | Thin dispatcher → `ways scan command` |
+| `check-state.sh` | 17 | Thin dispatcher → `ways scan state` |
+| `mark-tasks-active.sh` | 6 | 6 lines, trivial |
 
-**New subcommand:**
-```
-ways show <way-id> --session <SESSION_ID> [--channel <keyword|semantic>]
-ways show --core --session <SESSION_ID>
-ways show --check <way-id> --session <SESSION_ID>
-```
+## What's next (future sessions)
 
-**What it does:**
-- Check session marker (`/tmp/.claude-way-{name}-{SESSION_ID}`) — skip if already shown
-- Read way file, strip frontmatter
-- Output content to stdout (the hook captures and injects this)
-- Create session marker
-- Return exit code: 0 = shown, 1 = already shown (idempotent)
+### Session simulator integration test
+- Spec at `tools/ways-cli/tests/SIMULATION-SPEC.md`
+- Deterministic replay of synthetic Claude Code sessions
+- 8 scenarios covering matching, idempotency, checks, progressive disclosure, scope, re-disclosure
+- Build as cargo integration tests
 
-**What stays in bash:**
-- Macro dispatch (`macro.sh`) — must stay bash, `ways show` calls it via subprocess if the way has `macro: prepend|append`
-- The hook entry point still reads the show output and prints it
+### Cross-compilation + CI
+- `cargo-zigbuild` for 4-platform matrix (linux-x86_64, linux-aarch64, darwin-x86_64, darwin-arm64)
+- GitHub Actions workflow replacing the way-embed-only CI
+- `make release` target producing tarballs with checksums
 
-**Files deleted after:**
-- `show-way.sh`
-- `show-check.sh`
-- `show-core.sh`
+### Governance consolidation
+- `governance.sh` (543 lines) + `provenance-verify.sh` → `ways governance`
+- Already calls `ways provenance` for scanning; the report/query modes are the remaining work
 
-## Phase 2.3: `ways status` — absorb embed-status.sh
+### Smart trigger redesign
+- Old `check-smart-trigger.sh` deleted (was broken)
+- Needs rethinking for the binary architecture — model-confirmed matching could be a `ways scan` flag
 
-**Why:** 301 lines of diagnostic reporting. Already partially broken by `embed-lib.sh` deletion (we patched it but it's fragile). Natural fit as `ways status`.
+### Possible future absorptions
+- `inject-subagent.sh` (146) — complex but could become `ways inject`
+- `check-task-pre.sh` (128) — could become `ways scan task`
+- These are lower priority; the current thin-dispatch pattern works fine
 
-**New subcommand:**
-```
-ways status [--json]
-```
-
-**Reports:** engine in use, binary/model/corpus state, way counts, project inclusion, staleness.
-
-**File deleted after:** `embed-status.sh`
-
-## Phase 2.4: `ways check-state` — absorb check-state.sh
-
-**Why:** 206 lines handling state-based triggers (context-threshold, file-exists, session-start). These are deterministic checks that don't need bash.
-
-**New subcommand:**
-```
-ways check-state --session <SESSION_ID> --project <PROJECT_DIR> [--json]
-```
-
-**Output:** list of way IDs whose state triggers are satisfied.
-
-**File deleted after:** `check-state.sh`
-
-## Phase 2.5: `ways stats` — absorb stats.sh
-
-**Why:** 348 lines of event/usage statistics. Reads `stats/events.jsonl`, computes firing counts, timing, etc.
-
-**New subcommand:**
-```
-ways stats [--json] [--since <date>]
-```
-
-**File deleted after:** `stats.sh`
-
-## Phase 2.6: Simplify remaining hook scripts
-
-After phases 2.1-2.5, the hook entry points become much thinner:
-
-**check-prompt.sh** (currently 101 lines) becomes ~30 lines:
-```bash
-INPUT=$(cat)
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' | tr '[:upper:]' '[:lower:]')
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
-
-# Bump epoch
-source "${WAYS_DIR}/epoch.sh"
-bump_epoch "$SESSION_ID"
-
-# Scan and show matching ways
-for way_id in $(ways scan --prompt "$PROMPT" --session "$SESSION_ID"); do
-  ways show "$way_id" --session "$SESSION_ID"
-done
-```
-
-This requires a `ways scan` subcommand that combines matching + filtering:
-```
-ways scan --prompt <text> --session <SESSION_ID> [--project <dir>]
-```
-Output: one way ID per line for ways that match AND pass scope/precondition gates.
-
-## Phase 2.7: Governance consolidation
-
-**Why:** `governance.sh` (543 lines) and `provenance-verify.sh` orchestrate provenance reporting. Most of the logic is JSON manipulation that `ways` handles better.
-
-**New subcommand:**
-```
-ways governance [--trace <way>] [--control <pattern>] [--gaps] [--json]
-```
-
-**Files deleted after:** `governance.sh`, `provenance-verify.sh`
-
-## Execution order
-
-```
-2.1 (delete lint-ways.sh)  ─→ trivial, do first
-2.2 (ways show)            ─→ biggest win, most complex
-2.3 (ways status)          ─→ standalone, no dependencies
-2.4 (ways check-state)     ─→ after 2.2 (show depends on state)
-2.5 (ways stats)           ─→ standalone
-2.6 (simplify hooks)       ─→ after 2.2 and 2.4
-2.7 (governance)           ─→ standalone, can defer
-```
-
-2.1 is safe to do immediately. 2.2 is the high-value target. 2.3 and 2.5 are independent. 2.6 is the payoff that makes hooks truly thin.
+### Ship PRs
+- `staging/ADR-110` → `main` (file rename + docs, 10 commits)
+- `staging/ADR-111` → `main` (ways CLI + consolidation, 25 commits)
+- Or squash-merge both into one PR if preferred
 
 ## How to resume
 
 ```
 git checkout staging/ADR-111
 cat .claude/todo-ADR-111-phase2.md
+ways --help
+make test
 ```
 
-The branch has all Phase 1 work. Start with 2.1 (trivial), then 2.2 (the big one).
+The ways binary is LIVE — hooks fire against it every message.
+All 15 embedding tests pass. Smoke tests pass. BM25 parity confirmed.
