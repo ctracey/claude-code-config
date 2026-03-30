@@ -8,7 +8,7 @@
 #   lint-ways.sh --fix               # show suggested fixes (does not auto-apply)
 #   lint-ways.sh --schema            # print the frontmatter schema
 #
-# Validates way.md and check.md frontmatter against frontmatter-schema.yaml.
+# Validates way and check file frontmatter against frontmatter-schema.yaml.
 # Flags unknown fields, invalid values, and incomplete conditional pairs.
 # Also checks sibling vocabulary isolation (Jaccard) across way trees.
 # Does NOT flag absence of optional fields.
@@ -340,14 +340,14 @@ lint_file() {
         done
     fi
 
-    # check.md specific: verify anchor and check sections
+    # *.check.md specific: verify anchor and check sections
     if [[ "$filetype" == "check" ]]; then
         if ! grep -q '^## anchor' "$filepath"; then
-            echo -e "  ${RED}ERROR:${RESET} $relpath — check.md missing '## anchor' section"
+            echo -e "  ${RED}ERROR:${RESET} $relpath — check file missing '## anchor' section"
             ((file_errors++))
         fi
         if ! grep -q '^## check' "$filepath"; then
-            echo -e "  ${RED}ERROR:${RESET} $relpath — check.md missing '## check' section"
+            echo -e "  ${RED}ERROR:${RESET} $relpath — check file missing '## check' section"
             ((file_errors++))
         fi
     fi
@@ -447,7 +447,7 @@ if not data.get('policy') and not data.get('controls'):
 
 # ── Sibling vocabulary isolation (Jaccard) ───────────────────────
 # After per-file checks, find way trees and flag sibling vocabulary overlap.
-# A "tree" is any directory containing nested way.md files (depth > 0).
+# A "tree" is any directory containing nested way files (depth > 0).
 
 TREE_ANALYZER="${HOME}/.claude/tools/way-tree-analyze.sh"
 
@@ -456,7 +456,7 @@ lint_jaccard() {
     [[ ! -d "$dir" ]] && return
     [[ ! -x "$TREE_ANALYZER" ]] && return
 
-    # Find outermost tree roots: directories with way.md that have child way.md files.
+    # Find outermost tree roots: directories with way files that have child way files.
     # way-tree-analyze.sh jaccard handles all sibling groups recursively within a tree,
     # so we only need outermost roots to avoid redundant checks.
     local -a roots=()

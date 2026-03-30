@@ -1,5 +1,5 @@
 ---
-files: \.claude/ways/.*way\.md$
+files: \.claude/ways/.*\.md$
 scope: agent, subagent
 ---
 <!-- epistemic: convention -->
@@ -7,7 +7,7 @@ scope: agent, subagent
 
 ## Way File Format
 
-Each way lives in `{domain}/{wayname}/way.md` with YAML frontmatter.
+Each way lives in `{domain}/{wayname}/{wayname}.md` with YAML frontmatter.
 
 ## Matching Strategy
 
@@ -84,11 +84,11 @@ Ways without a `when:` block fire everywhere (the default). Use `when:` sparingl
    - Global: `~/.claude/hooks/ways/{domain}/{wayname}/`
    - Project: `$PROJECT/.claude/ways/{domain}/{wayname}/`
 
-2. Add `way.md` with frontmatter + guidance
+2. Add `{wayname}.md` with frontmatter + guidance
 
 3. Optionally add `macro.sh` for dynamic context
 
-**That's it.** No config files to update. Project ways override global ways with the same path. Ways can nest arbitrarily: `{domain}/{parent}/{child}/way.md`.
+**That's it.** No config files to update. Project ways override global ways with the same path. Ways can nest arbitrarily: `{domain}/{parent}/{child}/{child}.md`.
 
 ## Writing Ways Well
 

@@ -116,7 +116,7 @@ if ! $WAY_HAS_FIRED; then
   fi
 fi
 
-# Extract anchor and check sections from check.md
+# Extract anchor and check sections from the check file
 # Anchor is included when epoch distance >= 5 (way is getting cold)
 INCLUDE_ANCHOR=$(awk "BEGIN { print (${EPOCH_DISTANCE} >= 5) ? 1 : 0 }")
 

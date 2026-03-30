@@ -117,7 +117,7 @@ check:
       default: agent
 
 # Provenance sidecar schema (ADR-110)
-# Lives in provenance.yaml alongside way.md, not in frontmatter.
+# Lives in provenance.yaml alongside the way file, not in frontmatter.
 # Consumed by governance.sh and provenance-scan.py only.
 provenance_sidecar:
   policy:

@@ -43,7 +43,7 @@ How the implementation works. The reference layer (`docs/hooks-and-ways.md`) des
 
 ### 4. Implementation
 
-The actual way files (`hooks/ways/*/way.md`) and macros (`macro.sh`). These are tuned for Claude's context window - terse, directive, structured for a language model. They read differently from normal documentation because every token in the context window has a cost.
+The actual way files (`hooks/ways/*/{name}.md`) and macros (`macro.sh`). These are tuned for Claude's context window - terse, directive, structured for a language model. They read differently from normal documentation because every token in the context window has a cost.
 
 ## Where Things Live
 
@@ -76,9 +76,9 @@ flowchart TD
 
     subgraph MAC ["Machine Layer (LLM prompts)"]
         direction TB
-        W1["hooks/ways/softwaredev/*/way.md"]
-        W2["hooks/ways/itops/*/way.md"]
-        W3["hooks/ways/meta/*/way.md"]
+        W1["hooks/ways/softwaredev/*/{name}.md"]
+        W2["hooks/ways/itops/*/{name}.md"]
+        W3["hooks/ways/meta/*/{name}.md"]
         M1["*/macro.sh"]
     end
 
@@ -92,7 +92,7 @@ flowchart TD
 | Guide | `docs/hooks-and-ways/*.md` | Humans | Rationale, 5W1H, how-to guides |
 | Policy source | `governance/policies/*.md` | Governance chain | Source docs that ways compile from |
 | Reference | `docs/hooks-and-ways.md` | Humans + Claude | System mechanics, diagrams, data flow |
-| Machine | `hooks/ways/*/way.md` | Claude (via hooks) | Terse, directive, context-optimized guidance |
+| Machine | `hooks/ways/*/{name}.md` | Claude (via hooks) | Terse, directive, context-optimized guidance |
 
 ## Ways, Rules, and Skills
 
@@ -180,7 +180,7 @@ A skill for rotating an AWS key works better when the security way has already e
 
 ## Adding a New Way: The Process
 
-Don't start by writing `way.md`. Start at stage 1.
+Don't start by writing the way file. Start at stage 1.
 
 ### Step 1: Articulate the principle
 
@@ -209,7 +209,7 @@ Add this to the reference doc if the trigger mechanism is novel.
 
 ### Step 4: Implement the way
 
-Write `way.md` with the frontmatter and guidance content. The content should be the governance interpretation *compressed for context efficiency*. Strip rationale, strip explanation, keep directives and examples.
+Write `{wayname}.md` with the frontmatter and guidance content. The content should be the governance interpretation *compressed for context efficiency*. Strip rationale, strip explanation, keep directives and examples.
 
 If the way needs dynamic content, add `macro.sh`.
 

@@ -4,12 +4,12 @@
 # TRIGGER FLOW:
 # ┌──────────────────┐     ┌─────────────────┐     ┌──────────────┐
 # │ UserPromptSubmit │────▶│ scan_ways()     │────▶│ show-way.sh  │
-# │ (hook event)     │     │ for each way.md │     │ (idempotent) │
+# │ (hook event)     │     │ for each way   │     │ (idempotent) │
 # └──────────────────┘     │  if pattern OR  │     └──────────────┘
 #                          │  semantic match │
 #                          └─────────────────┘
 #
-# Ways are nested: domain/wayname/way.md (e.g., softwaredev/delivery/github/way.md)
+# Ways are nested: domain/wayname/{name}.md (e.g., softwaredev/delivery/github/github.md)
 # Matching is ADDITIVE: pattern (regex/keyword) and semantic are OR'd.
 # Semantic matching: embedding → BM25 binary → skip.
 # Project-local ways are scanned first (and take precedence).
@@ -50,7 +50,7 @@ scan_ways() {
   local dir="$1"
   [[ ! -d "$dir" ]] && return
 
-  # Find all way.md files recursively
+  # Find all way files recursively
   while IFS= read -r -d '' wayfile; do
     # Extract way path relative to ways dir (e.g., "softwaredev/delivery/github")
     waypath="${wayfile#$dir/}"

@@ -156,7 +156,7 @@ flowchart LR
     classDef both fill:#00695C,stroke:#004D40,color:#fff
     classDef skip fill:#78909C,stroke:#546E7A,color:#fff
 
-    Way["way.md<br/>scope: ?"]
+    Way["{name}.md<br/>scope: ?"]
 
     Way -->|"scope: agent"| AG["Agent only<br/>check-prompt / bash / file"]:::agent
     Way -->|"scope: subagent"| SB["Subagent only<br/>check-task-pre → inject"]:::sub
@@ -233,7 +233,7 @@ flowchart LR
     end
 
     subgraph Scan["Recursive Scan"]
-        Find["find */way.md"]:::scan
+        Find["find */{name}.md"]:::scan
         Extract["Extract frontmatter:<br/>pattern, commands, files, scope"]:::scan
     end
 
@@ -329,7 +329,7 @@ sequenceDiagram
     participant Hook as check-*.sh
     participant Show as show-way.sh
     participant Macro as macro.sh
-    participant Way as way.md
+    participant Way as {name}.md
     participant Out as Output
 
     Hook->>Show: waypath, session_id
@@ -395,20 +395,20 @@ sequenceDiagram
 ├── mark-tasks-active.sh        # PreToolUse:TaskCreate → context nag gate
 │
 ├── softwaredev/                # Domain: software development
-│   ├── commits/way.md          #   git commit format
-│   ├── testing/way.md          #   test practices
-│   ├── security/way.md         #   auth, secrets, vulnerabilities
-│   ├── github/                 #   PR workflow
-│   │   ├── way.md
-│   │   └── macro.sh            #   detects solo vs team
-│   └── ...                     #   18 ways total
-├── itops/                      # Domain: IT operations
-│   └── ...                     #   4 ways
-└── meta/                       # Domain: meta-system
-    └── ...                     #   5 ways
+│   ├── commits/commits.md       #   git commit format
+│   ├── testing/testing.md       #   test practices
+│   ├── security/security.md     #   auth, secrets, vulnerabilities
+│   ├── github/                  #   PR workflow
+│   │   ├── github.md
+│   │   └── macro.sh             #   detects solo vs team
+│   └── ...                      #   18 ways total
+├── itops/                       # Domain: IT operations
+│   └── ...                      #   4 ways
+└── meta/                        # Domain: meta-system
+    └── ...                      #   5 ways
 
-$PROJECT/.claude/ways/          # Project-local overrides
-└── {domain}/{wayname}/way.md   # Same structure, takes precedence
+$PROJECT/.claude/ways/           # Project-local overrides
+└── {domain}/{wayname}/{wayname}.md  # Same structure, takes precedence
 ```
 
 ### Script Relationships

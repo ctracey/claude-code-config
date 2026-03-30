@@ -1,7 +1,7 @@
 #!/bin/bash
 # Implementation way macro — progressive disclosure of parallelization guidance
 #
-# Lightweight: way.md always shows the briefing protocol
+# Lightweight: the way file always shows the briefing protocol
 # This macro adds detailed planning tables only when the project
 # signals enough complexity to warrant parallelization thinking.
 

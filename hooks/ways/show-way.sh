@@ -3,7 +3,7 @@
 # Usage: show-way.sh <way-path> <session-id>
 #
 # Way paths can be nested: "softwaredev/delivery/github", "awsops/iam", etc.
-# Looks for: {way-path}/way.md and optionally {way-path}/macro.sh
+# Looks for: {way-path}/{name}.md and optionally {way-path}/macro.sh
 #
 # STATE MACHINE (ADR-104: token-gated re-disclosure):
 # ┌─────────────────────────────┬────────────────────────────────────┐

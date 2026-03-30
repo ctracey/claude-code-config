@@ -4,12 +4,12 @@
 # TRIGGER FLOW:
 # ┌─────────────────┐     ┌─────────────────┐     ┌──────────────┐
 # │ PreToolUse:Bash │────▶│ scan_ways()     │────▶│ show-way.sh  │
-# │ (hook event)    │     │ for each way.md │     │ (idempotent) │
+# │ (hook event)    │     │ for each way   │     │ (idempotent) │
 # └─────────────────┘     │  if commands OR │     └──────────────┘
 #                         │  keywords match │
 #                         └─────────────────┘
 #
-# Ways are nested: domain/wayname/way.md (e.g., softwaredev/delivery/github/way.md)
+# Ways are nested: domain/wayname/{name}.md (e.g., softwaredev/delivery/github/github.md)
 # Multiple ways can match a single command - CONTEXT accumulates
 # all matching way outputs. Markers prevent duplicate content.
 # Output is returned as additionalContext JSON for Claude to see.
@@ -38,7 +38,7 @@ scan_ways() {
   local dir="$1"
   [[ ! -d "$dir" ]] && return
 
-  # Find all way.md files recursively
+  # Find all way files recursively
   while IFS= read -r -d '' wayfile; do
     # Extract way path relative to ways dir (e.g., "softwaredev/delivery/github")
     waypath="${wayfile#$dir/}"

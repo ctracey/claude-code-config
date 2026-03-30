@@ -74,7 +74,7 @@ Control Requirement     CM-3: Configuration Change Control
        ↓
 Policy Document         code-lifecycle.md: "Atomic commits, conventional format"
        ↓
-Way File                commits/way.md: 30 lines of directive guidance
+Way File                commits/commits.md: 30 lines of directive guidance
        ↓
 Agent Context           Injected when git commit triggers
 ```

@@ -58,7 +58,7 @@ All trigger evaluation scripts respect the `scope:` frontmatter field - ways wit
 ### Way Display
 
 - **`show-way.sh`** - The central display function. Given a way path and session ID: checks domain disable list, checks marker, runs macro if configured, outputs content (stripping frontmatter), creates marker.
-- **`macro.sh`** - Generates the dynamic Available Ways table by scanning all `way.md` files and extracting their trigger patterns.
+- **`macro.sh`** - Generates the dynamic Available Ways table by scanning all way files and extracting their trigger patterns.
 
 ## Session Lifecycle
 
@@ -141,7 +141,7 @@ flowchart TD
     classDef decision fill:#E65100,stroke:#BF360C,color:#fff
     classDef result fill:#00695C,stroke:#004D40,color:#fff
 
-    W[way.md frontmatter]
+    W["{name}.md frontmatter"]
     W -->|"pattern: / commands: / files:"| R
     W -->|"description: + vocabulary:"| S
 
@@ -400,7 +400,7 @@ sequenceDiagram
 
 ## Macros
 
-Ways can include a `macro.sh` alongside `way.md`. Frontmatter declares positioning:
+Ways can include a `macro.sh` alongside the way file. Frontmatter declares positioning:
 
 ```yaml
 macro: prepend   # macro output before static content
@@ -416,7 +416,7 @@ Macros generate dynamic content. Examples:
 
 ## Project-Local Ways
 
-Projects can override or add ways at `$PROJECT/.claude/ways/{domain}/{way}/way.md`. Project-local takes precedence over global. Same-path ways share a marker, so only one fires.
+Projects can override or add ways at `$PROJECT/.claude/ways/{domain}/{way}/{way}.md`. Project-local takes precedence over global. Same-path ways share a marker, so only one fires.
 
 ```mermaid
 flowchart TD
@@ -427,9 +427,9 @@ flowchart TD
 
     T["Trigger fires for softwaredev/delivery/github"] --> PL
 
-    PL{"$PROJECT/.claude/ways/<br/>softwaredev/delivery/github/way.md<br/>exists?"}
+    PL{"$PROJECT/.claude/ways/<br/>softwaredev/delivery/github/github.md<br/>exists?"}
     PL -->|yes| USE_P["Use project-local way"]:::project
-    PL -->|no| GL{"~/.claude/hooks/ways/<br/>softwaredev/delivery/github/way.md<br/>exists?"}:::global
+    PL -->|no| GL{"~/.claude/hooks/ways/<br/>softwaredev/delivery/github/github.md<br/>exists?"}:::global
     GL -->|yes| USE_G["Use global way"]:::global
     GL -->|no| SKIP["No output"]
 

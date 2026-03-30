@@ -61,7 +61,7 @@ Spawn a subagent (`subagent_type: "general-purpose"`) with:
 > 2. **Check for overlap** — do any existing ways already cover the signals above? If so, note whether they need updating or are sufficient.
 >
 > 3. **Propose new ways** for uncovered signals. For each proposal, specify:
->    - File path: `$PROJECT/.claude/ways/{domain}/{topic}/way.md`
+>    - File path: `$PROJECT/.claude/ways/{domain}/{topic}/{topic}.md`
 >    - Trigger type and pattern (keyword, command, or file pattern)
 >    - A draft of the way content in collaborative voice
 >
@@ -83,7 +83,7 @@ Take the subagent's proposals and present them. Don't silently create ways.
 > **Existing ways:** [list or "none yet"]
 >
 > **Proposed new ways:**
-> - `project/domain/topic/way.md` — triggered by [pattern], covering [what]
+> - `project/domain/topic/{topic}.md` — triggered by [pattern], covering [what]
 > - ...
 >
 > Want me to create any of these?"

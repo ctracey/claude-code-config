@@ -41,11 +41,11 @@ Three observations converged:
 
 ### 1. Extract provenance to a sidecar file
 
-Move governance data from way.md frontmatter to a separate `provenance.yaml` in the same directory:
+Move governance data from way frontmatter to a separate `provenance.yaml` in the same directory:
 
 ```
 hooks/ways/softwaredev/code/quality/
-  way.md              # matching frontmatter + guidance body
+  quality.md          # matching frontmatter + guidance body ({dirname}.md)
   macro.sh            # dynamic content (already separated)
   provenance.yaml     # governance instrumentation (newly separated)
 ```
@@ -63,7 +63,7 @@ controls:
       - Nesting depth limit maintains modifiability by controlling complexity
 ```
 
-`governance.sh` reads `provenance.yaml` files instead of parsing way.md frontmatter. The governance pipeline never needs to parse markdown again.
+`governance.sh` reads `provenance.yaml` files instead of parsing way frontmatter. The governance pipeline never needs to parse markdown again.
 
 Way files that have no governance mapping simply don't have a `provenance.yaml`. Absence is the default, not an empty block.
 
@@ -100,7 +100,7 @@ These are readable as plain text, parseable by any tool that knows the conventio
 
 ### 3. Keep frontmatter matching-only
 
-After provenance extraction, way.md frontmatter contains only fields the matching pipeline reads:
+After provenance extraction, `{name}.md` frontmatter contains only fields the matching pipeline reads:
 
 ```yaml
 ---
@@ -125,9 +125,10 @@ Following the `mandb` pattern, a generator script reads all way files and produc
 |----------|--------|----------|---------|
 | `ways-corpus.jsonl` | JSONL | `way-match`, `way-embed` | Matching fields (already exists per ADR-107) |
 | `ways-graph.jsonl` | JSONL | Any graph tool, export scripts | Nodes (ways) + edges (See Also, sibling scores) |
-| `.vault/` | Logseq-compatible markdown | Logseq (optional) | Uniquely-named files with wikilinks |
 
 All artifacts are gitignored or explicitly regenerated. None are authoritative. The generator is idempotent — running it twice produces identical output.
+
+The `.vault/` directory previously described in this ADR (Logseq-compatible markdown with uniquely-named symlinks) is no longer needed. The file rename from `way.md` to `{dirname}.md` (see Section 7) gives every way file a unique name, making symlink indirection unnecessary. Any graph tool can consume the source files directly or use `ways-graph.jsonl`.
 
 The `ways-graph.jsonl` format is deliberately simple:
 
@@ -163,13 +164,38 @@ The compass metaphor is deliberate: it points north, it doesn't steer. The autho
 
 The way file format does not reference or optimize for any specific visualization tool. Logseq, Obsidian, Cytoscape, a plain text editor, or `grep` are all valid ways to interact with the corpus:
 
-- **vim/emacs**: Edit way.md directly. Frontmatter is short YAML. Body is markdown. See Also is readable text.
-- **Logseq/Obsidian**: Open the `.vault/` generated directory. Graph view shows relationships. Edit way.md in the source directory; regenerate vault.
+- **vim/emacs**: Edit `{name}.md` directly. Frontmatter is short YAML. Body is markdown. See Also is readable text.
+- **Logseq/Obsidian**: Open the ways tree directly. Every file has a unique name, so graph view works without a generated vault. Edit in place; regenerate graph JSONL if needed.
 - **Cytoscape/D3**: Import `ways-graph.jsonl`. Visualize clusters and edge weights.
 - **CLI**: `way-embed siblings`, `governance.sh --trace`, `lint-ways.sh`. Same data, terminal interface.
-- **Claude**: Reads way.md as today. New sections are markdown it can interpret. Sibling scores inform vocabulary tuning.
+- **Claude**: Reads `{name}.md` as today. New sections are markdown it can interpret. Sibling scores inform vocabulary tuning.
 
 If a tool requires a format the source files don't provide, the answer is a generator that produces the format — not modifying the source files to accommodate the tool.
+
+### 7. File rename: `way.md` to `{dirname}.md`
+
+Way files are renamed from the generic `way.md` to `{dirname}.md` — the file takes its name from its parent directory. For example:
+
+```
+hooks/ways/softwaredev/code/quality/quality.md
+hooks/ways/softwaredev/code/testing/testing.md
+hooks/ways/softwaredev/delivery/commits/commits.md
+hooks/ways/meta/trust/trust.md
+```
+
+Similarly, check files are renamed from `check.md` to `{dirname}.check.md` (e.g., `quality.check.md`).
+
+**Rationale:** Every way file being named `way.md` created several problems:
+
+1. **Graph tool compatibility.** Logseq, Obsidian, and similar tools identify documents by filename. With 84 files all named `way.md`, these tools see 84 identically-named nodes — useless for navigation or graph visualization. The original plan (Section 4) required a `.vault/` directory with uniquely-named symlinks to work around this. Unique filenames eliminate that workaround entirely.
+
+2. **Editor tab ambiguity.** Opening multiple ways in any editor shows tabs all labeled `way.md`. The developer must check the path to know which way they're editing. `quality.md` vs `testing.md` is immediately distinguishable.
+
+3. **Search result clarity.** `grep` and `ripgrep` output includes the filename. Results from `quality.md` are self-documenting; results from `way.md` require reading the full path.
+
+4. **Shell completion.** Tab-completing into a way directory and hitting tab again now shows a meaningful filename, not the generic `way.md` that every directory shares.
+
+The rename is a one-time migration. Scanner scripts (`check-prompt.sh`, `check-bash-pre.sh`, `check-file-pre.sh`) discover way files by glob pattern, updated from `way.md` to `*.md` with exclusions for known non-way files (`macro.sh`, `provenance.yaml`, `*.check.md`). The `lint-ways.sh` and corpus generator scripts are updated correspondingly.
 
 ## Consequences
 
@@ -182,31 +208,32 @@ If a tool requires a format the source files don't provide, the answer is a gene
 - Epistemic stance makes the authority level of each way inspectable — both by humans choosing how firmly to follow guidance and by agents assessing which ways may need revision as models improve.
 - Format is tool-agnostic. No vendor lock-in to any visualization tool.
 - Sibling scoring gives authors (human and agent) a calibration tool for vocabulary sparseness.
+- Unique filenames per way eliminate the need for a `.vault/` symlink directory and make the corpus directly navigable by graph tools, editors, and search.
 
 ### Negative
 
 - Provenance extraction is a migration across 84 files. Each way with a `provenance:` block needs the block moved to `provenance.yaml` and the frontmatter cleaned. This is mechanical but must be validated by `governance.sh` and `lint-ways.sh` after migration.
-- `governance.sh` and `provenance-scan.py` need to read `provenance.yaml` sidecar files instead of way.md frontmatter. The scan logic changes from "parse YAML frontmatter from markdown" to "read YAML file directly" — simpler, but a code change.
+- `governance.sh` and `provenance-scan.py` need to read `provenance.yaml` sidecar files instead of way frontmatter. The scan logic changes from "parse YAML frontmatter from markdown" to "read YAML file directly" — simpler, but a code change.
 - `frontmatter-schema.yaml` needs updating: `provenance` moves from way schema to a separate provenance schema.
 - Generator tooling is new code to write and maintain.
 - `See Also` sections need to be added to existing ways. This is authoring work — each cross-reference should be intentional, not bulk-generated.
+- The file rename requires updating all scanner scripts and any tooling that hardcodes `way.md`. This was a one-time migration but touched every scanner and the linter.
 
 ### Neutral
 
 - `macro.sh` is unchanged. It was already separated correctly.
-- The matching pipeline (`way-match`, `way-embed`, scanner scripts) is unchanged. It reads the same frontmatter fields.
+- The matching pipeline (`way-match`, `way-embed`, scanner scripts) requires a glob pattern update for file discovery but reads the same frontmatter fields.
 - `show-way.sh` is unchanged except for removing the provenance-stripping step (no longer needed).
 - `lint-ways.sh` gains new checks: validate `provenance.yaml` schema, validate `See Also` references point to existing ways, validate `epistemic` value if present.
-- The `.vault/` directory is optional. Projects that don't use graph visualization simply don't run the generator.
-- ADR-107's locale convention (`way-es.md`, `way-fr.md`) applies only to way files. `macro.sh` and `provenance.yaml` are shared across locales — macros execute the same logic regardless of language, and controls don't change by locale.
+- ADR-107's locale convention (`{name}-es.md`, `{name}-fr.md`) applies only to way files. `macro.sh` and `provenance.yaml` are shared across locales — macros execute the same logic regardless of language, and controls don't change by locale.
 
 ## Interaction with ADR-107
 
-ADR-107 Phase 3 defines locale support with `way-{lang}.md` files. This ADR clarifies which files are locale-specific and which are shared:
+ADR-107 Phase 3 defines locale support with `{name}-{lang}.md` files (e.g., `quality-es.md`, `quality-fr.md`). This ADR clarifies which files are locale-specific and which are shared:
 
 | File | Per-locale? | Rationale |
 |------|-------------|-----------|
-| `way.md` / `way-{lang}.md` | Yes | Matching vocabulary and guidance body vary by language |
+| `{name}.md` / `{name}-{lang}.md` | Yes | Matching vocabulary and guidance body vary by language |
 | `macro.sh` | No | Detection logic is language-independent |
 | `provenance.yaml` | No | Controls and policies don't vary by language |
 

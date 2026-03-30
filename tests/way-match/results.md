@@ -69,7 +69,7 @@ The 4 shared false negatives (both scorers miss) represent genuine vocabulary ga
 
 ## Integration Tests (real way files)
 
-31 test prompts scored against actual `way.md` files extracted from the live ways directory. This tests the real pipeline: frontmatter extraction, vocabulary parsing, threshold behavior.
+31 test prompts scored against actual way files extracted from the live ways directory. This tests the real pipeline: frontmatter extraction, vocabulary parsing, threshold behavior.
 
 ```
 === Integration Test: Real Way Files ===

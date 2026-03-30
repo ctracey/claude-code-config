@@ -66,9 +66,9 @@ esac
 # Extract way ID from file path
 WAY_ID=""
 if [[ "$FILE" == *"/hooks/ways/"* ]]; then
-    WAY_ID="${FILE#*hooks/ways/}"; WAY_ID="${WAY_ID%/way.md}"
+    WAY_ID="${FILE#*hooks/ways/}"; WAY_ID="${WAY_ID%/*}"
 elif [[ "$FILE" == *"/.claude/ways/"* ]]; then
-    WAY_ID="${FILE#*.claude/ways/}"; WAY_ID="${WAY_ID%/way.md}"
+    WAY_ID="${FILE#*.claude/ways/}"; WAY_ID="${WAY_ID%/*}"
 fi
 [[ -z "$WAY_ID" ]] && { echo "error: could not extract way ID from path: $FILE" >&2; exit 1; }
 

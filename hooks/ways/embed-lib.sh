@@ -9,7 +9,7 @@
 #   enumerate_projects   — iterate all projects with .claude/ways/
 #   resolve_tool         — find a tool binary (system PATH → XDG → not found)
 
-# Content-addressed hash of all way.md files in a directory.
+# Content-addressed hash of all way files in a directory.
 # Immune to clock skew, catches uncommitted edits.
 content_hash() {
   local dir="$1"

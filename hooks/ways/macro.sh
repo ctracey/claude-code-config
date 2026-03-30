@@ -1,6 +1,6 @@
 #!/bin/bash
 # Dynamic table generator for core.md
-# Scans all way.md files and generates a table of triggers
+# Scans all way files and generates a table of triggers
 
 WAYS_DIR="${HOME}/.claude/hooks/ways"
 
@@ -30,7 +30,7 @@ echo ""
 # Track current domain for section headers
 CURRENT_DOMAIN=""
 
-# Find all way.md files, sorted by path
+# Find all way files, sorted by path
 while IFS= read -r wayfile; do
   # Extract relative path (e.g., "softwaredev/delivery/github")
   relpath="${wayfile#$WAYS_DIR/}"

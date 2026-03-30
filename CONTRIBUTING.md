@@ -6,7 +6,7 @@ When you build something that would benefit everyone — a new domain, a better 
 
 ## Adding a Way
 
-1. Create `hooks/ways/{domain}/{wayname}/way.md` with YAML frontmatter
+1. Create `hooks/ways/{domain}/{wayname}/{wayname}.md` with YAML frontmatter
 2. Define your trigger: `pattern:` for regex, `match: semantic` for fuzzy matching
 3. Write compact, actionable guidance (every token costs context)
 4. Test it: trigger the pattern and verify the guidance appears once

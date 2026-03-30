@@ -1,5 +1,5 @@
 #!/bin/bash
-# Generate ways-corpus.jsonl from all semantic way.md files
+# Generate ways-corpus.jsonl from all semantic way files
 #
 # Scans global ways and project-local ways into a unified corpus.
 # Extracts frontmatter fields and emits one JSON line per way.

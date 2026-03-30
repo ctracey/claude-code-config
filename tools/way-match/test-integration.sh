@@ -1,5 +1,5 @@
 #!/bin/bash
-# Integration test: run way-match against actual way.md files
+# Integration test: run way-match against actual way files
 # Reads frontmatter from real semantic ways and scores test prompts
 #
 # This tests the real pipeline: way files → frontmatter extraction → BM25 scoring

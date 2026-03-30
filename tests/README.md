@@ -29,7 +29,7 @@ Options: `--verbose`
 
 ### 2. Integration Tests (real way files)
 
-Scores 34 test prompts (including 3 co-activation) against actual `way.md` files extracted from the live ways directory. Tests the real frontmatter extraction pipeline.
+Scores 34 test prompts (including 3 co-activation) against actual way files extracted from the live ways directory. Tests the real frontmatter extraction pipeline.
 
 ```bash
 tests/way-match/run-tests.sh integration

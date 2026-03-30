@@ -128,7 +128,7 @@ cmd_tree() {
 
   echo "TREE_ROOT	$(relpath "$tree_path")"
 
-  # Find all way.md and check.md files
+  # Find all way and check files
   while IFS= read -r wayfile; do
     local rel dir depth threshold vocab description type
     rel=$(relpath "$wayfile")

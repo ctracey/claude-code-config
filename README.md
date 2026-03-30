@@ -134,7 +134,7 @@ Disabled domains are completely ignored — no pattern matching, no output. The 
 
 ## Creating Ways
 
-Each way is a `way.md` file with YAML frontmatter in `~/.claude/hooks/ways/{domain}/{wayname}/`:
+Each way is a `{wayname}.md` file with YAML frontmatter in `~/.claude/hooks/ways/{domain}/{wayname}/`:
 
 ```yaml
 ---
@@ -152,7 +152,7 @@ scope: agent,subagent         # injection scope
 
 Matching is **additive** — regex and semantic are OR'd. A way with both can fire from either channel.
 
-**Project-local ways** live in `$PROJECT/.claude/ways/{domain}/{wayname}/way.md` and override global ways with the same path. Project macros are disabled by default — trust a project with `echo "/path/to/project" >> ~/.claude/trusted-project-macros`.
+**Project-local ways** live in `$PROJECT/.claude/ways/{domain}/{wayname}/{wayname}.md` and override global ways with the same path. Project macros are disabled by default — trust a project with `echo "/path/to/project" >> ~/.claude/trusted-project-macros`.
 
 For the full authoring guide: [extending.md](docs/hooks-and-ways/extending.md) | For matching strategy: [matching.md](docs/hooks-and-ways/matching.md) | For macros: [macros.md](docs/hooks-and-ways/macros.md)
 
@@ -173,7 +173,7 @@ bash tools/way-embed/compare-engines.sh
 # BM25 scorer against synthetic corpus (32 tests)
 bash tools/way-match/test-harness.sh --verbose
 
-# Score against real way.md files
+# Score against real way files
 bash tools/way-match/test-integration.sh
 
 # Interactive: full hook pipeline with subagent injection (6 steps)
