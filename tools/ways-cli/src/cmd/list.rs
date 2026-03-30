@@ -180,11 +180,14 @@ fn predict_next(w: &FiredWay, current_epoch: u64, current_tokens_k: u64, rediscl
         // distance_factor ≥ 2/(3×decay) → ln(d+1)+1 ≥ that → solve for d
         let needed_factor = 2.0 / (3.0 * decay);
         let needed_distance = ((needed_factor - 1.0).exp() - 1.0).max(0.0) as u64;
+        let next_epoch = w.epoch_at_fire + needed_distance;
         if epoch_distance < needed_distance {
-            return format!(
-                "\x1b[2mcheck at epoch ~{}\x1b[0m",
-                w.epoch_at_fire + needed_distance
-            );
+            if needed_distance > 500 {
+                return format!(
+                    "\x1b[2mcheck ~e{next_epoch} (suppressed — exceeds session)\x1b[0m"
+                );
+            }
+            return format!("\x1b[2mcheck at epoch ~{next_epoch}\x1b[0m");
         }
     }
 
