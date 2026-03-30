@@ -1,12 +1,12 @@
 # claude-code-config
-# Top-level Makefile — canonical entry point for setup and maintenance.
+# Top-level Makefile — build, install, and release.
 #
 # Quick start:   make setup
-# Full install:  make install  (hooks + ways CLI + embedding + corpus)
-# Update:        make update   (pull + setup)
+# Full install:  make install
+# Update:        make update
 
 .DEFAULT_GOAL := help
-.PHONY: setup install update test test-all corpus lint clean help ways
+.PHONY: setup install update clean help ways test
 
 WAYS_BIN = bin/ways
 
@@ -15,19 +15,15 @@ WAYS_BIN = bin/ways
 help:
 	@echo "claude-code-config"
 	@echo ""
-	@echo "  make setup      Set up ways CLI + embedding engine + corpus"
-	@echo "  make install    Full first-time setup (hooks + tools + corpus)"
+	@echo "  make setup      Build ways CLI + fetch embedding model"
+	@echo "  make install    Full first-time setup (hooks + tools)"
 	@echo "  make update     Pull latest changes and re-run setup"
-	@echo "  make test       Run embedding smoke tests"
-	@echo "  make test-all   Run all tests (embedding + BM25)"
-	@echo "  make corpus     Regenerate the ways corpus"
-	@echo "  make lint       Lint all way frontmatter"
-	@echo "  make ways       Build the ways CLI (Rust)"
+	@echo "  make ways       Build the ways CLI binary (Rust)"
+	@echo "  make test       Smoke test the ways binary"
 	@echo "  make clean      Remove build artifacts"
 	@echo ""
 
-# Set up the ways CLI, embedding engine, and corpus.
-# This is the most common target — run it after cloning or pulling.
+# Build ways CLI + set up embedding engine + generate initial corpus.
 setup: ways
 	@echo "Setting up embedding engine..."
 	$(MAKE) -C tools/way-embed setup
@@ -35,52 +31,20 @@ setup: ways
 	@echo "Setting up mmaid diagram renderer..."
 	@bash tools/mmaid/download-mmaid.sh || echo "  (mmaid optional — skipping)"
 	@echo ""
-	@echo "Regenerating corpus..."
-	$(WAYS_BIN) corpus --quiet
+	@echo "Generating corpus..."
+	@$(WAYS_BIN) corpus --quiet
 
 # Full first-time install.
 install: hooks-executable setup
 	@echo ""
 	@echo "Install complete. Restart Claude Code for ways to take effect."
-	@echo "  Review hooks at: ~/.claude/hooks/"
 
-# Pull upstream changes and re-run setup.
+# Pull upstream and re-setup.
 update:
-	@echo "Pulling latest changes..."
 	git pull --ff-only
-	@echo ""
 	$(MAKE) install
 
-# --- Supporting targets ---
-
-hooks-executable:
-	@find hooks -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
-	@echo "Hooks marked executable."
-
-# --- Tests ---
-
-test: corpus
-	bash tools/way-embed/test-embedding.sh
-
-test-bm25: ways corpus
-	@echo "Testing BM25 via ways match..."
-	$(WAYS_BIN) match "write a unit test" >/dev/null && echo "  PASS: match returned results" || echo "  FAIL: no match results"
-	$(WAYS_BIN) match "configure ssh remote server" >/dev/null && echo "  PASS: match returned results" || echo "  FAIL: no match results"
-
-test-compare:
-	bash tools/way-embed/compare-engines.sh
-
-test-all: test test-bm25
-
-# --- Corpus & Lint ---
-
-corpus: ways
-	@$(WAYS_BIN) corpus --quiet
-
-lint: ways
-	@$(WAYS_BIN) lint
-
-# --- Ways CLI ---
+# --- Build ---
 
 ways:
 	@if [ ! -x $(WAYS_BIN) ] || [ tools/ways-cli/src/main.rs -nt $(WAYS_BIN) ]; then \
@@ -90,7 +54,21 @@ ways:
 		echo "Built: $(WAYS_BIN)"; \
 	fi
 
-# --- Clean ---
+# --- Test ---
+
+test: ways
+	@echo "Smoke testing ways binary..."
+	@$(WAYS_BIN) --version
+	@$(WAYS_BIN) lint --check && echo "  lint: PASS"
+	@$(WAYS_BIN) match "write a unit test" >/dev/null && echo "  match: PASS"
+	@$(WAYS_BIN) graph --output /dev/null && echo "  graph: PASS"
+	@echo "All smoke tests passed."
+
+# --- Supporting ---
+
+hooks-executable:
+	@find hooks -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
+	@echo "Hooks marked executable."
 
 clean:
 	$(MAKE) -C tools/way-embed clean
