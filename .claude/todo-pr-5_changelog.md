@@ -112,6 +112,14 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Aligns the planning skill family with the `todo-` prefix convention established in Task 2.1
 - Old `plan-*` directories removed after rename confirmed
 
+## Task 10.3 — Build abstracted workflow orchestrator skill `2026-03-30`
+
+- Built `todo-workflow-orchestrator` skill: generic engine driven by a JSON workflow definition passed by the calling skill
+- Manages stage sequencing, banner emission, and gate enforcement — extracted from `todo-begin` to avoid duplicating this logic in every multi-stage workflow
+- `todo-begin` refactored to a thin entry point that delegates to the orchestrator
+- Test scaffolding added: `todo-test-workflow` (two-stage greeting sequence), `todo-test-stage1` (greet), `todo-test-stage2` (goodbye) — validates the orchestrator pattern end-to-end
+- Workflow definition format: JSON with `title`, `stages` array (each with `name` and `skill`), and `active_stage` index
+
 ## Task 10.1 — Workflow progress banner `2026-03-30`
 
 - Built `todo-workflow-progress` skill: emits a visual banner showing all stages with the active stage highlighted
