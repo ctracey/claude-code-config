@@ -138,10 +138,10 @@ pub fn run(session: Option<&str>, sort: &str, json_out: bool) -> Result<()> {
         }
     }
 
-    // Token position bar
+    // Token position bar with re-disclosure markers
     if current_tokens_k > 0 {
         println!();
-        print_token_bar(current_tokens_k, context_window_k);
+        print_token_timeline(&ways, current_tokens_k, context_window_k, redisclose_threshold_k);
     }
 
     println!();
@@ -195,48 +195,161 @@ fn predict_next(w: &FiredWay, current_epoch: u64, current_tokens_k: u64, rediscl
     "\x1b[2m─\x1b[0m".to_string()
 }
 
-// ── Token position bar ─────────────────────────────────────────
+// ── Token timeline ─────────────────────────────────────────────
 
-fn print_token_bar(current_tokens_k: u64, context_window_k: u64) {
+fn print_token_timeline(
+    ways: &[FiredWay],
+    current_tokens_k: u64,
+    context_window_k: u64,
+    redisclose_threshold_k: u64,
+) {
+    let bar_width: usize = 60;
     let pct = if context_window_k > 0 {
         (current_tokens_k * 100 / context_window_k).min(100)
     } else {
         0
     };
-
-    let bar_width = 60;
     let filled = (pct as usize * bar_width / 100).min(bar_width);
-    let empty = bar_width - filled;
 
+    // Compute re-disclosure positions for each way
+    // Re-disclosure fires when: current_tokens - way.token_pos > threshold
+    // So the re-disclosure point is at: way.token_pos + threshold
+    let mut markers: Vec<(usize, bool)> = Vec::new(); // (bar_position, already_past)
+    let mut zone_soon = 0u32; // within next 25% of threshold
+    let mut zone_later = 0u32;
+    let mut zone_past = 0u32; // already past re-disclosure point
+
+    for w in ways {
+        let fire_pos_k = w.token_pos / 1000;
+        let redisclose_at_k = fire_pos_k + redisclose_threshold_k;
+
+        if context_window_k == 0 {
+            continue;
+        }
+
+        let bar_pos = ((redisclose_at_k * bar_width as u64) / context_window_k) as usize;
+        let bar_pos = bar_pos.min(bar_width - 1);
+        let past = current_tokens_k >= redisclose_at_k;
+
+        markers.push((bar_pos, past));
+
+        if past {
+            zone_past += 1;
+        } else {
+            let distance_to_redisclose = redisclose_at_k.saturating_sub(current_tokens_k);
+            let quarter_threshold = redisclose_threshold_k / 4;
+            if distance_to_redisclose <= quarter_threshold {
+                zone_soon += 1;
+            } else {
+                zone_later += 1;
+            }
+        }
+    }
+
+    // Layer 1: Re-disclosure markers
+    // Count how many ways share each bar position
+    let mut marker_counts: Vec<u32> = vec![0; bar_width];
+    let mut marker_colors: Vec<u8> = vec![0; bar_width]; // 0=none, 1=green(past), 2=yellow(soon), 3=dim(later)
+
+    for (pos, past) in &markers {
+        let p = *pos;
+        if p >= bar_width {
+            continue;
+        }
+        marker_counts[p] += 1;
+
+        // Color priority: past(green) > soon(yellow) > later(dim)
+        if *past {
+            marker_colors[p] = 1;
+        } else if marker_colors[p] != 1 {
+            let redisclose_at_k = ways.iter()
+                .filter(|w| {
+                    let rk = w.token_pos / 1000 + redisclose_threshold_k;
+                    ((rk * bar_width as u64) / context_window_k.max(1)) as usize == p
+                })
+                .map(|w| w.token_pos / 1000 + redisclose_threshold_k)
+                .next()
+                .unwrap_or(0);
+            let dist = redisclose_at_k.saturating_sub(current_tokens_k);
+            if dist <= redisclose_threshold_k / 4 {
+                marker_colors[p] = marker_colors[p].max(2);
+            } else if marker_colors[p] == 0 {
+                marker_colors[p] = 3;
+            }
+        }
+    }
+
+    // Render marker line: ▼=1, ◆=2-3, digit for 4+
+    let mut marker_str = String::from("  ");
+    for i in 0..bar_width {
+        let count = marker_counts[i];
+        if count == 0 {
+            marker_str.push(' ');
+        } else {
+            let color = match marker_colors[i] {
+                1 => "\x1b[0;32m",
+                2 => "\x1b[1;33m",
+                _ => "\x1b[2m",
+            };
+            let ch = match count {
+                1 => "▼".to_string(),
+                2..=3 => "◆".to_string(),
+                n => format!("{}", n.min(9)),
+            };
+            marker_str.push_str(&format!("{color}{ch}\x1b[0m"));
+        }
+    }
+    println!("{marker_str}");
+
+    // Layer 2: Usage bar
     let bar_color = if pct < 50 {
-        "\x1b[0;32m" // green
+        "\x1b[0;32m"
     } else if pct < 75 {
-        "\x1b[1;33m" // yellow
+        "\x1b[1;33m"
     } else {
-        "\x1b[0;31m" // red
+        "\x1b[0;31m"
     };
-
-    // Mark the 25% re-disclosure zone
-    let redisclose_pos = bar_width * 25 / 100;
 
     let mut bar = String::new();
     for i in 0..bar_width {
         if i < filled {
             bar.push('█');
-        } else if i == redisclose_pos {
-            bar.push('┊');
         } else {
             bar.push('░');
         }
     }
+    println!(
+        "  {bar_color}{bar}\x1b[0m {pct}% ({current_tokens_k}K / {context_window_k}K)"
+    );
 
-    println!(
-        "  {bar_color}{bar}\x1b[0m {pct}% ({current_tokens_k}K / {context_window_k}K tokens)"
-    );
-    println!(
-        "  \x1b[2m{}↑ 25% re-disclosure zone\x1b[0m",
-        " ".repeat(redisclose_pos)
-    );
+    // Layer 3: Zone summary
+    let mut zones = Vec::new();
+    if zone_past > 0 {
+        zones.push(format!("\x1b[0;32m{zone_past} re-disclose now\x1b[0m"));
+    }
+    if zone_soon > 0 {
+        zones.push(format!("\x1b[1;33m{zone_soon} approaching\x1b[0m"));
+    }
+    let total_ways = ways.len();
+    let stable = total_ways as u32 - zone_past - zone_soon - zone_later;
+    if zone_later > 0 {
+        zones.push(format!("\x1b[2m{zone_later} distant\x1b[0m"));
+    }
+
+    let redisclose_pct = if context_window_k > 0 {
+        redisclose_threshold_k * 100 / context_window_k
+    } else {
+        0
+    };
+    let summary = if zones.is_empty() {
+        format!("\x1b[2mre-disclosure at {redisclose_pct}% interval ({redisclose_threshold_k}K tokens)\x1b[0m")
+    } else {
+        format!(
+            "{}  \x1b[2m│ {redisclose_pct}% interval ({redisclose_threshold_k}K)\x1b[0m",
+            zones.join("  ")
+        )
+    };
+    println!("  {summary}");
 }
 
 // ── Data collection ────────────────────────────────────────────
