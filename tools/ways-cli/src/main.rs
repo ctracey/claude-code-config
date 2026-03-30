@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+mod bm25;
 mod cmd;
 mod frontmatter;
 mod scanner;
