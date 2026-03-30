@@ -1,9 +1,12 @@
 # Ignore everything by default
 *
 
-# Todo tracking files (task breakdowns, plans, notes, changelogs — treated as specs/docs)
+# SWC workload tracking (persistent cross-session planning docs)
 !.claude/
-!.claude/todo-pr-*.md
+!.claude/.swc/
+!.claude/.swc/meta.json
+!.claude/.swc/*/
+!.claude/.swc/**/*.md
 
 # Track these directories
 !.gitignore

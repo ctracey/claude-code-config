@@ -120,6 +120,10 @@
           {
             "type": "command",
             "command": "${HOME}/.claude/hooks/ways/check-file-pre.sh"
+          },
+          {
+            "type": "command",
+            "command": "${HOME}/.claude/hooks/swc/workload-guard.sh"
           }
         ]
       },
