@@ -6,9 +6,10 @@
 # Update:        make update
 
 .DEFAULT_GOAL := help
-.PHONY: setup install update clean help ways test
+.PHONY: setup install uninstall update clean help ways test
 
 WAYS_BIN = bin/ways
+XDG_BIN = $(or $(XDG_BIN_HOME),$(HOME)/.local/bin)
 
 # --- Primary targets ---
 
@@ -20,6 +21,7 @@ help:
 	@echo "  make update     Pull latest changes and re-run setup"
 	@echo "  make ways       Build the ways CLI binary (Rust)"
 	@echo "  make test       Smoke test the ways binary"
+	@echo "  make uninstall   Remove ways from PATH"
 	@echo "  make clean      Remove build artifacts"
 	@echo ""
 
@@ -34,10 +36,19 @@ setup: ways
 	@echo "Generating corpus..."
 	@$(WAYS_BIN) corpus --quiet
 
-# Full first-time install.
+# Full install: build, setup, symlink to PATH.
 install: hooks-executable setup
+	@mkdir -p $(XDG_BIN)
+	@ln -sf $(CURDIR)/$(WAYS_BIN) $(XDG_BIN)/ways
 	@echo ""
-	@echo "Install complete. Restart Claude Code for ways to take effect."
+	@echo "Install complete."
+	@echo "  ways binary: $(XDG_BIN)/ways → $(CURDIR)/$(WAYS_BIN)"
+	@echo "  Restart Claude Code for ways to take effect."
+
+# Remove symlink from PATH.
+uninstall:
+	@rm -f $(XDG_BIN)/ways
+	@echo "Removed $(XDG_BIN)/ways"
 
 # Pull upstream and re-setup.
 update:
