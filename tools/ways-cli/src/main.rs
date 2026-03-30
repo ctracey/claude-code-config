@@ -5,6 +5,7 @@ mod bm25;
 mod cmd;
 mod frontmatter;
 mod scanner;
+pub mod session;
 
 #[derive(Parser)]
 #[command(name = "ways", version, about = "Unified CLI for ways knowledge guidance")]
@@ -91,6 +92,11 @@ enum Commands {
         #[arg(long)]
         ways_dir: Option<String>,
     },
+    /// Display a way, check, or core guidance (session-aware)
+    Show {
+        #[command(subcommand)]
+        what: ShowCommand,
+    },
     /// Analyze a way file and suggest vocabulary improvements
     Suggest {
         /// Path to a way file
@@ -98,6 +104,41 @@ enum Commands {
         /// Minimum term frequency for suggestions
         #[arg(long, default_value = "2")]
         min_freq: u32,
+    },
+}
+
+#[derive(Subcommand)]
+enum ShowCommand {
+    /// Display a way (session-aware, idempotent)
+    Way {
+        /// Way ID (e.g., "softwaredev/code/quality")
+        id: String,
+        /// Session ID
+        #[arg(long)]
+        session: String,
+        /// Trigger channel (keyword, semantic:embedding, semantic:bm25)
+        #[arg(long, default_value = "unknown")]
+        trigger: String,
+    },
+    /// Display a check (with scoring curve)
+    Check {
+        /// Way ID containing the check
+        id: String,
+        /// Session ID
+        #[arg(long)]
+        session: String,
+        /// Trigger channel
+        #[arg(long, default_value = "unknown")]
+        trigger: String,
+        /// Match score from the matching engine
+        #[arg(long, default_value = "0")]
+        score: f64,
+    },
+    /// Display core guidance (session start)
+    Core {
+        /// Session ID
+        #[arg(long)]
+        session: String,
     },
 }
 
@@ -115,6 +156,15 @@ fn main() -> Result<()> {
         Commands::Graph { ways_dir, output } => cmd::graph::run(ways_dir, output),
         Commands::Tree { path, jaccard } => cmd::tree::run(path, jaccard),
         Commands::Provenance { ways_dir } => cmd::provenance::run(ways_dir),
+        Commands::Show { what } => match what {
+            ShowCommand::Way { id, session, trigger } => {
+                cmd::show::way(&id, &session, &trigger)
+            }
+            ShowCommand::Check { id, session, trigger, score } => {
+                cmd::show::check(&id, &session, &trigger, score)
+            }
+            ShowCommand::Core { session } => cmd::show::core(&session),
+        },
         Commands::Suggest { file, min_freq } => cmd::suggest::run(file, min_freq),
     }
 }
