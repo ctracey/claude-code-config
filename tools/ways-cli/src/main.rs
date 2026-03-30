@@ -191,6 +191,9 @@ enum Commands {
         /// Machine-readable JSON output
         #[arg(long, global = true)]
         json: bool,
+        /// Scan global ways (ignore project-local)
+        #[arg(long, global = true)]
+        global: bool,
     },
 }
 
@@ -367,7 +370,7 @@ fn main() -> Result<()> {
         Commands::Reset { session, all, confirm } => {
             cmd::reset::run(session.as_deref(), all, confirm)
         }
-        Commands::Governance { mode, json } => {
+        Commands::Governance { mode, json, global } => {
             let gov_mode = match mode {
                 GovernanceCommand::Report => cmd::governance::Mode::Report,
                 GovernanceCommand::Trace { way } => cmd::governance::Mode::Trace(way),
@@ -379,7 +382,7 @@ fn main() -> Result<()> {
                 GovernanceCommand::Matrix => cmd::governance::Mode::Matrix,
                 GovernanceCommand::Lint => cmd::governance::Mode::Lint,
             };
-            cmd::governance::run(gov_mode, json)
+            cmd::governance::run(gov_mode, json, global)
         }
     }
 }

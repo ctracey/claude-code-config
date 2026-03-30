@@ -23,9 +23,15 @@ pub enum Mode {
     Lint,
 }
 
-pub fn run(mode: Mode, json_out: bool) -> Result<()> {
-    // Generate provenance manifest
-    let manifest = provenance::generate_manifest(None)?;
+pub fn run(mode: Mode, json_out: bool, global: bool) -> Result<()> {
+    // Determine ways directory: project-local first, then global
+    let ways_dir = if !global {
+        detect_project_ways()
+    } else {
+        None
+    };
+
+    let manifest = provenance::generate_manifest(ways_dir)?;
 
     match mode {
         Mode::Report => report(&manifest, json_out),
@@ -841,6 +847,34 @@ fn count_fires(events: &[Value]) -> HashMap<String, u64> {
         }
     }
     counts
+}
+
+/// Detect project-local ways directory from CLAUDE_PROJECT_DIR or cwd.
+fn detect_project_ways() -> Option<String> {
+    let project_dir = std::env::var("CLAUDE_PROJECT_DIR")
+        .ok()
+        .or_else(|| {
+            let cwd = std::env::current_dir().ok()?;
+            let mut dir = cwd.as_path();
+            loop {
+                let claude_dir = dir.join(".claude");
+                if claude_dir.is_dir()
+                    && (claude_dir.join("settings.json").exists()
+                        || dir.join("CLAUDE.md").exists()
+                        || claude_dir.join("settings.local.json").exists())
+                {
+                    return Some(dir.to_string_lossy().to_string());
+                }
+                dir = dir.parent()?;
+            }
+        })?;
+
+    let project_ways = std::path::PathBuf::from(&project_dir).join(".claude/ways");
+    if project_ways.is_dir() {
+        Some(project_ways.to_string_lossy().to_string())
+    } else {
+        None // No project-local ways, fall through to global
+    }
 }
 
 fn print_firing_history(way_id: &str) {
