@@ -61,7 +61,7 @@
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           },
           {
             "type": "command",
@@ -82,7 +82,7 @@
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           }
         ]
       },
@@ -91,7 +91,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           }
         ]
       },
@@ -104,7 +104,7 @@
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           },
           {
             "type": "command",
