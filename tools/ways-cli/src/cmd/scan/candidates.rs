@@ -132,6 +132,9 @@ fn parse_candidate(id: &str, path: &Path, content: &str) -> Option<WayCandidate>
         scope: get_fm_field(&fm, "scope").unwrap_or_else(|| "agent".to_string()),
         when_project: get_when_field(&fm, "project"),
         when_file_exists: get_when_field(&fm, "file_exists"),
+        trigger: get_fm_field(&fm, "trigger"),
+        repeat: get_fm_field(&fm, "repeat").as_deref() == Some("true"),
+        trigger_path: get_fm_field(&fm, "path"),
     })
 }
 

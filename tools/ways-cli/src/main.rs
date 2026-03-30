@@ -159,6 +159,18 @@ enum ScanCommand {
         #[arg(long)]
         project: Option<String>,
     },
+    /// Evaluate state-based triggers (context-threshold, file-exists, session-start)
+    State {
+        /// Session ID
+        #[arg(long)]
+        session: String,
+        /// Project directory
+        #[arg(long)]
+        project: Option<String>,
+        /// Transcript path (for context-threshold)
+        #[arg(long)]
+        transcript: Option<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -220,6 +232,9 @@ fn main() -> Result<()> {
             }
             ScanCommand::File { path, session, project } => {
                 cmd::scan::file(&path, &session, project.as_deref())
+            }
+            ScanCommand::State { session, project, transcript } => {
+                cmd::scan::state(&session, project.as_deref(), transcript.as_deref())
             }
         },
         Commands::Show { what } => match what {
