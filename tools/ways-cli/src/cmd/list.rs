@@ -346,6 +346,8 @@ fn detect_session() -> Option<String> {
 
 /// Resolve a dash-separated marker name to a way ID by testing against the filesystem.
 /// e.g., "meta-knowledge-authoring-pii-free" → "meta/knowledge/authoring/pii-free"
+/// Handles ambiguous cases like "adr-context" (sibling to "adr") by preferring
+/// paths where every segment maps to an existing directory.
 fn resolve_way_id(marker_name: &str) -> String {
     let ways_dir = std::env::var("HOME")
         .map(|h| PathBuf::from(h).join(".claude/hooks/ways"))
@@ -353,36 +355,39 @@ fn resolve_way_id(marker_name: &str) -> String {
 
     let parts: Vec<&str> = marker_name.split('-').collect();
 
-    // Try progressively splitting: first dash is /, second is /, etc.
-    // Stop when the remaining segment is a valid directory leaf.
-    fn try_resolve(parts: &[&str], base: &std::path::Path, depth: usize) -> Option<String> {
+    fn try_resolve(parts: &[&str], base: &std::path::Path) -> Option<String> {
         if parts.is_empty() {
             return None;
         }
 
-        // Try each split point: parts[0..i] as this segment, rest recursively
-        for i in 1..=parts.len() {
+        // Try split points from longest prefix to shortest.
+        // For each, the segment must be an existing directory.
+        // At the leaf (all parts consumed), the directory must exist.
+        for i in (1..=parts.len()).rev() {
             let segment = parts[..i].join("-");
             let candidate = base.join(&segment);
 
-            if i == parts.len() {
-                // Leaf — check if this directory has a way file
-                if candidate.is_dir() {
-                    return Some(segment);
-                }
-            } else if candidate.is_dir() {
-                // Try recursing into this directory
-                if let Some(rest) = try_resolve(&parts[i..], &candidate, depth + 1) {
-                    return Some(format!("{segment}/{rest}"));
-                }
+            if !candidate.is_dir() {
+                continue;
             }
+
+            if i == parts.len() {
+                // All parts consumed, directory exists — match
+                return Some(segment);
+            }
+
+            // Recurse for remaining parts
+            if let Some(rest) = try_resolve(&parts[i..], &candidate) {
+                return Some(format!("{segment}/{rest}"));
+            }
+            // Recursion failed — this split doesn't lead to a valid full path.
+            // Try a shorter prefix (the loop continues).
         }
 
-        // Fallback: treat everything as one segment
-        Some(parts.join("-"))
+        None
     }
 
-    try_resolve(&parts, &ways_dir, 0).unwrap_or_else(|| marker_name.replace('-', "/"))
+    try_resolve(&parts, &ways_dir).unwrap_or_else(|| marker_name.replace('-', "/"))
 }
 
 fn format_trigger(trigger: &str) -> String {
@@ -411,14 +416,15 @@ fn read_u64(path: &str) -> u64 {
         .unwrap_or(0)
 }
 
-fn print_json(ways: &[FiredWay], current_epoch: u64, current_tokens: u64, context_window: u64, redisclose_threshold: u64) {
+fn print_json(ways: &[FiredWay], current_epoch: u64, current_tokens_k: u64, context_window_k: u64, redisclose_threshold_k: u64) {
     let entries: Vec<serde_json::Value> = ways
         .iter()
         .map(|w| {
             let distance = current_epoch.saturating_sub(w.epoch_at_fire);
-            let token_distance = current_tokens.saturating_sub(w.token_pos / 1000);
-            let token_pct = if redisclose_threshold > 0 {
-                token_distance * 100 / (redisclose_threshold / 1000)
+            let token_pos_k = w.token_pos / 1000;
+            let token_distance_k = current_tokens_k.saturating_sub(token_pos_k);
+            let token_pct = if redisclose_threshold_k > 0 {
+                token_distance_k * 100 / redisclose_threshold_k
             } else {
                 0
             };
@@ -426,8 +432,8 @@ fn print_json(ways: &[FiredWay], current_epoch: u64, current_tokens: u64, contex
                 "id": w.id,
                 "epoch_at_fire": w.epoch_at_fire,
                 "epoch_distance": distance,
-                "token_pos_k": w.token_pos / 1000,
-                "token_distance_k": token_distance,
+                "token_pos_k": token_pos_k,
+                "token_distance_k": token_distance_k,
                 "redisclose_pct": token_pct,
                 "trigger": w.trigger,
                 "depth": w.depth,
@@ -440,8 +446,8 @@ fn print_json(ways: &[FiredWay], current_epoch: u64, current_tokens: u64, contex
     let output = json!({
         "session": "current",
         "current_epoch": current_epoch,
-        "current_tokens_k": current_tokens,
-        "context_window_k": context_window,
+        "current_tokens_k": current_tokens_k,
+        "context_window_k": context_window_k,
         "ways_fired": entries.len(),
         "ways": entries,
     });
