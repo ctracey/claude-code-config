@@ -2,6 +2,7 @@ pub mod corpus;
 pub mod embed;
 pub mod graph;
 pub mod lint;
+pub mod list;
 pub mod match_bm25;
 pub mod provenance;
 pub mod siblings;

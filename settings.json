@@ -69,7 +69,7 @@
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/check-embedding-staleness.sh"
+            "command": "${HOME}/.claude/bin/ways corpus --if-stale --quiet"
           }
         ]
       },

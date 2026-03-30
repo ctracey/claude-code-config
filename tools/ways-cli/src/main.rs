@@ -35,6 +35,9 @@ enum Commands {
         /// Suppress progress output
         #[arg(long, short)]
         quiet: bool,
+        /// Only regenerate if corpus is stale (newer way files exist)
+        #[arg(long)]
+        if_stale: bool,
     },
     /// Score a query against ways using BM25
     Match {
@@ -104,6 +107,12 @@ enum Commands {
         /// Minimum term frequency for suggestions
         #[arg(long, default_value = "2")]
         min_freq: u32,
+    },
+    /// List ways triggered in the current session
+    List {
+        /// Session ID (if omitted, shows all recent markers)
+        #[arg(long)]
+        session: Option<String>,
     },
     /// Engine health dashboard — binary, model, corpus, project status
     Status {
@@ -213,7 +222,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::Lint { path, schema, check } => cmd::lint::run(path, schema, check),
-        Commands::Corpus { ways_dir, quiet } => cmd::corpus::run(ways_dir, quiet),
+        Commands::Corpus { ways_dir, quiet, if_stale } => cmd::corpus::run(ways_dir, quiet, if_stale),
         Commands::Match { query, corpus } => cmd::match_bm25::run(query, corpus),
         Commands::Embed { query, corpus, model } => cmd::embed::run(query, corpus, model),
         Commands::Siblings { id, threshold, corpus, model } => {
@@ -222,6 +231,7 @@ fn main() -> Result<()> {
         Commands::Graph { ways_dir, output } => cmd::graph::run(ways_dir, output),
         Commands::Tree { path, jaccard } => cmd::tree::run(path, jaccard),
         Commands::Provenance { ways_dir } => cmd::provenance::run(ways_dir),
+        Commands::List { session } => cmd::list::run(session.as_deref()),
         Commands::Status { json } => cmd::status::run(json),
         Commands::Scan { mode } => match mode {
             ScanCommand::Prompt { query, session, project } => {

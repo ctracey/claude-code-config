@@ -7,12 +7,25 @@ use walkdir::WalkDir;
 
 use crate::frontmatter;
 
-pub fn run(ways_dir: Option<String>, quiet: bool) -> Result<()> {
+pub fn run(ways_dir: Option<String>, quiet: bool, if_stale: bool) -> Result<()> {
     let global_dir = ways_dir
         .map(PathBuf::from)
         .unwrap_or_else(|| home_dir().join(".claude/hooks/ways"));
 
     let xdg_way = xdg_cache_dir().join("claude-ways/user");
+
+    // Staleness check: skip regen if corpus is fresh
+    if if_stale {
+        let manifest = xdg_way.join("embed-manifest.json");
+        let corpus = xdg_way.join("ways-corpus.jsonl");
+        if manifest.is_file() && corpus.is_file() {
+            let project_dir = std::env::var("CLAUDE_PROJECT_DIR").unwrap_or_default();
+            if !is_stale(&manifest, &global_dir, &project_dir) {
+                return Ok(());
+            }
+        }
+        // Missing manifest/corpus → always regen
+    }
     std::fs::create_dir_all(&xdg_way)?;
     let output = xdg_way.join("ways-corpus.jsonl");
 
@@ -352,4 +365,51 @@ fn xdg_cache_dir() -> PathBuf {
     std::env::var("XDG_CACHE_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|_| home_dir().join(".cache"))
+}
+
+/// Check if any way file is newer than the manifest.
+fn is_stale(manifest: &Path, global_dir: &Path, project_dir: &str) -> bool {
+    // Check global ways
+    for entry in WalkDir::new(global_dir)
+        .follow_links(true)
+        .into_iter()
+        .filter_map(|e| e.ok())
+    {
+        let path = entry.path();
+        if path.is_file() && path.extension().and_then(|e| e.to_str()) == Some("md") {
+            if is_newer_than(path, manifest) {
+                return true;
+            }
+        }
+    }
+
+    // Check project ways
+    if !project_dir.is_empty() {
+        let project_ways = Path::new(project_dir).join(".claude/ways");
+        if project_ways.is_dir() {
+            for entry in WalkDir::new(&project_ways)
+                .follow_links(true)
+                .into_iter()
+                .filter_map(|e| e.ok())
+            {
+                let path = entry.path();
+                if path.is_file() && path.extension().and_then(|e| e.to_str()) == Some("md") {
+                    if is_newer_than(path, manifest) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    false
+}
+
+fn is_newer_than(file: &Path, reference: &Path) -> bool {
+    let file_mtime = file.metadata().and_then(|m| m.modified()).ok();
+    let ref_mtime = reference.metadata().and_then(|m| m.modified()).ok();
+    match (file_mtime, ref_mtime) {
+        (Some(f), Some(r)) => f > r,
+        _ => false,
+    }
 }
