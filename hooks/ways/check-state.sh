@@ -22,9 +22,20 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(echo "$INPUT" | jq -r '.cwd // empty')}"
 WAYS_DIR="${HOME}/.claude/hooks/ways"
 CONTEXT=""
 
-# Detect execution scope (agent vs teammate)
-source "${WAYS_DIR}/detect-scope.sh"
-CURRENT_SCOPE=$(detect_scope "$SESSION_ID")
+# Detect execution scope
+CURRENT_SCOPE="agent"
+[[ -f "/tmp/.claude-teammate-${SESSION_ID}" ]] && CURRENT_SCOPE="teammate"
+
+# Scope matching helper
+scope_matches() { echo "${1:-agent}" | grep -qw "$2"; }
+
+# Inline event logger (replaces log-event.sh)
+_log_event() {
+  mkdir -p "${HOME}/.claude/stats" 2>/dev/null
+  local args=(--arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)") obj="ts:\$ts"
+  for kv in "$@"; do args+=(--arg "${kv%%=*}" "${kv#*=}"); obj+=",${kv%%=*}:\$${kv%%=*}"; done
+  jq -nc "${args[@]}" "{${obj}}" >> "${HOME}/.claude/stats/events.jsonl" 2>/dev/null
+}
 
 # Get transcript size since last compaction (bytes after last summary line)
 # Caches line number to avoid repeated full-file scans
@@ -149,7 +160,7 @@ scan_state_triggers() {
               local output=$(awk 'BEGIN{fm=0} /^---$/{fm++; next} fm!=1' "$wayfile")
               if [[ -n "$output" ]]; then
                 CONTEXT+="$output"$'\n\n'
-                "${WAYS_DIR}/log-event.sh" \
+                _log_event \
                   event=way_fired way="$waypath" domain="${waypath%%/*}" \
                   trigger="state" scope="$CURRENT_SCOPE" project="$PROJECT_DIR" session="$SESSION_ID"
               fi

@@ -19,12 +19,42 @@ SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(echo "$INPUT" | jq -r '.cwd // empty')}"
 WAYS_DIR="${HOME}/.claude/hooks/ways"
 
-# Shared matching logic (engine detection + additive match function)
-source "${WAYS_DIR}/match-way.sh"
-detect_semantic_engine
+# Ways binary for matching
+WAYS_BIN="${HOME}/.claude/bin/ways"
 
-# Clean up embedding cache on exit (ephemeral per-prompt eval cycle)
-[[ -n "${EMBED_CACHE:-}" ]] && trap 'rm -f "$EMBED_CACHE" 2>/dev/null' EXIT
+# File discovery (inline, replaces match-way.sh dependency)
+find_way_files() {
+  local dir="$1"
+  find -L "$dir" -name "*.md" ! -name "*.check.md" -print0 2>/dev/null | while IFS= read -r -d '' f; do
+    head -1 "$f" 2>/dev/null | grep -q '^---$' && printf '%s\0' "$f"
+  done
+}
+way_id_from_path() {
+  local filepath="$1" basedir="$2"
+  local rel="${filepath#$basedir/}"
+  echo "${rel%/*}"
+}
+
+# BM25 batch cache (one call scores all)
+BM25_CACHE=""
+_get_bm25_cache() {
+  if [[ -z "$BM25_CACHE" && -x "$WAYS_BIN" ]]; then
+    BM25_CACHE=$("$WAYS_BIN" match "$TASK_PROMPT" 2>/dev/null || true)
+  fi
+}
+# Simple prompt matching: pattern OR BM25
+match_way_prompt() {
+  local prompt="$1" pattern="$2" desc="$3" vocab="$4" threshold="$5" way_id="$6"
+  MATCH_CHANNEL=""
+  if [[ -n "$pattern" && "$prompt" =~ $pattern ]]; then
+    MATCH_CHANNEL="keyword"; return 0
+  fi
+  _get_bm25_cache
+  if [[ -n "$BM25_CACHE" ]] && echo "$BM25_CACHE" | grep -qF "${way_id}	"; then
+    MATCH_CHANNEL="semantic:bm25"; return 0
+  fi
+  return 1
+}
 
 # Detect teammate spawn (Task tool with team_name parameter)
 TEAM_NAME=$(echo "$INPUT" | jq -r '.tool_input.team_name // empty')
