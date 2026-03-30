@@ -153,7 +153,7 @@ pub fn token_distance_exceeded(way_id: &str, session_id: &str) -> Option<u64> {
 }
 
 /// Detect context window size from the model in use.
-fn detect_context_window(session_id: &str) -> u64 {
+pub fn detect_context_window(session_id: &str) -> u64 {
     let project_dir = std::env::var("CLAUDE_PROJECT_DIR")
         .unwrap_or_else(|_| std::env::var("PWD").unwrap_or_else(|_| ".".to_string()));
     let project_slug = project_dir.replace(['/', '.'], "-");

@@ -135,11 +135,17 @@ enum Commands {
         #[arg(long)]
         global: bool,
     },
-    /// List ways triggered in the current session
+    /// List ways triggered in the current session with epoch and disclosure state
     List {
-        /// Session ID (if omitted, shows all recent markers)
+        /// Session ID (if omitted, auto-detects current session)
         #[arg(long)]
         session: Option<String>,
+        /// Sort order: epoch (default, conversation order), name, distance
+        #[arg(long, default_value = "epoch")]
+        sort: String,
+        /// Machine-readable JSON output
+        #[arg(long)]
+        json: bool,
     },
     /// Engine health dashboard — binary, model, corpus, project status
     Status {
@@ -322,7 +328,7 @@ fn main() -> Result<()> {
         Commands::Stats { days, project, json, global } => {
             cmd::stats::run(days, project.as_deref(), json, global)
         }
-        Commands::List { session } => cmd::list::run(session.as_deref()),
+        Commands::List { session, sort, json } => cmd::list::run(session.as_deref(), &sort, json),
         Commands::Status { json } => cmd::status::run(json),
         Commands::Scan { mode } => match mode {
             ScanCommand::Prompt { query, session, project } => {
