@@ -17,6 +17,7 @@
   - [x] 2.6. Build the todo-update skill
   - [ ] 2.7. Build the todo-add skill
   - [x] 2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
+  - [ ] 2.9. Rename this skillset and consider tracking decoupling — the `todo-*` prefix ties skills to a specific file format; evaluate whether the skills should be renamed to reflect the workflow concept rather than the storage mechanism, and whether tracking (the todo files) should be decoupled from the workflow skills themselves
 
 - [x] **3. Todo list creation skills**
   - [x] 3.1. Build the todo-begin skill (scaffold todo + plan + architecture from a documented plan)

@@ -90,3 +90,31 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Step 6 asks the user how they want to navigate the breakdown (logical map, user/persona, feature set, journey/scenario) before proposing tasks
 - Step 5 surfaces delivery shape (milestones, phases, priorities) before task granularity — informs ordering in step 6
 - Skill is a draft — further improvements planned
+
+## Task 3.2 — Explicit git state check in plan-context `2026-03-29`
+
+- Added explicit git repo state check as the first step of `todo-plan-context`
+- Surfaces branch, remote, and open PRs in a single exchange before any planning begins
+- Motivation: avoids assuming PR number from context; user confirms before proceeding
+- Tasks 12.1 and 13.1 added to the breakdown at the same time (branch naming convention, new-project setup)
+
+## Refactor — Migrate todo-begin from agent to main-session skill `2026-03-29`
+
+- `agents/todo-plan.md` retired; `todo-begin` rewritten to invoke `todo-plan-*` skills in sequence directly from the main session
+- Root cause: agents are for autonomous work; interactive planning conversations require back-and-forth that belongs in the main session. The agent approach caused double-spawning bugs and split context
+- All six `plan-*` skills gained `## Exit criteria` sections (done-when + return control) so `todo-begin` owns the sequence and each skill is decoupled
+- Planning way updated: "compress" means fewer questions, not fewer outputs
+- Acceptance criteria checklist moved into `plan-finalise`
+
+## Refactor — Rename plan-* skills to todo-plan-* `2026-03-29`
+
+- All six planning phase skills renamed: `plan-context`, `plan-intent`, `plan-solution`, `plan-delivery`, `plan-breakdown`, `plan-finalise` → `todo-plan-*`
+- Aligns the planning skill family with the `todo-` prefix convention established in Task 2.1
+- Old `plan-*` directories removed after rename confirmed
+
+## Task 10.1 — Workflow progress banner `2026-03-30`
+
+- Built `todo-workflow-progress` skill: emits a visual banner showing all stages with the active stage highlighted
+- Wired into `todo-begin` — banner fires at the start of each planning stage
+- All "step" references standardised to "stage" across `todo-begin` and the plan-* skills to align with gate semantics
+- Tasks 10.2, 10.3, and 15 (MCP service) added to the breakdown with supporting notes
