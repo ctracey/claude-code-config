@@ -102,10 +102,17 @@ while IFS= read -r wf; do
   echo "$fm" | grep -q '^description:' && echo "$fm" | grep -q '^vocabulary:' && SEMANTIC_WAY_COUNT=$((SEMANTIC_WAY_COUNT + 1))
 done < <(find -L "$WAYS_DIR" -name "*.md" ! -name "*.check.md" -type f 2>/dev/null)
 
-# --- Shared library ---
-EMBED_LIB="${HOME}/.claude/hooks/ways/embed-lib.sh"
-# shellcheck source=embed-lib.sh
-source "$EMBED_LIB"
+# Content hash (inlined from former embed-lib.sh)
+content_hash() {
+  local dir="$1"
+  if command -v sha256sum &>/dev/null; then
+    find -L "$dir" -name "*.md" ! -name "*.check.md" -type f -exec sha256sum {} + 2>/dev/null | sort | sha256sum | cut -d' ' -f1
+  elif command -v shasum &>/dev/null; then
+    find -L "$dir" -name "*.md" ! -name "*.check.md" -type f -exec shasum -a 256 {} + 2>/dev/null | sort | shasum -a 256 | cut -d' ' -f1
+  else
+    echo "no-hash-tool"
+  fi
+}
 
 GLOBAL_HASH=$(content_hash "$WAYS_DIR")
 
@@ -119,39 +126,22 @@ if [[ -f "$MANIFEST" ]] && command -v jq &>/dev/null; then
   [[ "$MANIFEST_GLOBAL_HASH" != "$GLOBAL_HASH" ]] && GLOBAL_STALE=true
 fi
 
-# --- Project-local ways (enumerate_projects from embed-lib.sh) ---
-# Augments with marker state, staleness, and embedded count per project.
-
+# --- Project-local ways (from manifest) ---
 PROJECT_COUNT=0
 PROJECT_WAYS=0
 PROJECT_EMBEDDED=0
 PROJECT_LIST=""
 
-while IFS='|' read -r encoded project_path way_count sem_count; do
-    ways_dir="${project_path}/.claude/ways"
+if $MANIFEST_EXISTS && command -v jq &>/dev/null; then
+  while IFS=$'\t' read -r encoded path ways_count; do
+    [[ -z "$encoded" ]] && continue
 
     # Check marker state
-    marker="${project_path}/.claude/.ways-embed"
+    marker="${path}/.claude/.ways-embed"
     if [[ -f "$marker" ]]; then
       state=$(cat "$marker" 2>/dev/null | tr -d '[:space:]')
     else
       state="no-marker"
-    fi
-
-    # Check staleness from manifest
-    stale="unknown"
-    if $MANIFEST_EXISTS; then
-      manifest_hash=$(jq -r --arg k "$encoded" '.projects[$k].ways_hash // empty' "$MANIFEST" 2>/dev/null)
-      if [[ -z "$manifest_hash" ]]; then
-        stale="not-in-manifest"
-      else
-        current_hash=$(content_hash "$ways_dir")
-        if [[ "$manifest_hash" == "$current_hash" ]]; then
-          stale="fresh"
-        else
-          stale="stale"
-        fi
-      fi
     fi
 
     # Count embedded ways in corpus for this project
@@ -162,12 +152,12 @@ while IFS='|' read -r encoded project_path way_count sem_count; do
     fi
 
     PROJECT_COUNT=$((PROJECT_COUNT + 1))
-    PROJECT_WAYS=$((PROJECT_WAYS + way_count))
+    PROJECT_WAYS=$((PROJECT_WAYS + ways_count))
     PROJECT_EMBEDDED=$((PROJECT_EMBEDDED + embedded))
-    PROJECT_LIST="${PROJECT_LIST}${project_path}|${way_count}|${sem_count}|${state}|${stale}|${embedded}
+    PROJECT_LIST="${PROJECT_LIST}${path}|${ways_count}|${embedded}|${state}|fresh|${embedded}
 "
-
-done < <(enumerate_projects || true)
+  done < <(jq -r '.projects // {} | to_entries[] | [.key, .value.path, .value.ways_count] | @tsv' "$MANIFEST" 2>/dev/null)
+fi
 
 # --- JSON output ---
 if $JSON; then

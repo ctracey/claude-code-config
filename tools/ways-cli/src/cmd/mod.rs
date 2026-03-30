@@ -5,4 +5,5 @@ pub mod lint;
 pub mod match_bm25;
 pub mod provenance;
 pub mod siblings;
+pub mod suggest;
 pub mod tree;

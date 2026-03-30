@@ -91,6 +91,14 @@ enum Commands {
         #[arg(long)]
         ways_dir: Option<String>,
     },
+    /// Analyze a way file and suggest vocabulary improvements
+    Suggest {
+        /// Path to a way file
+        file: String,
+        /// Minimum term frequency for suggestions
+        #[arg(long, default_value = "2")]
+        min_freq: u32,
+    },
 }
 
 fn main() -> Result<()> {
@@ -107,5 +115,6 @@ fn main() -> Result<()> {
         Commands::Graph { ways_dir, output } => cmd::graph::run(ways_dir, output),
         Commands::Tree { path, jaccard } => cmd::tree::run(path, jaccard),
         Commands::Provenance { ways_dir } => cmd::provenance::run(ways_dir),
+        Commands::Suggest { file, min_freq } => cmd::suggest::run(file, min_freq),
     }
 }

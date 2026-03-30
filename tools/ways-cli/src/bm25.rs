@@ -9,7 +9,7 @@ use std::collections::HashMap;
 const BM25_K1: f64 = 1.2;
 const BM25_B: f64 = 0.75;
 
-static STOPWORDS: &[&str] = &[
+pub static STOPWORDS: &[&str] = &[
     "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
     "have", "has", "had", "do", "does", "did", "will", "would", "could",
     "should", "may", "might", "must", "shall", "can", "this", "that",
