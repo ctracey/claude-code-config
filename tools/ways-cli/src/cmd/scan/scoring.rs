@@ -1,0 +1,120 @@
+//! Batch scoring and subprocess calls for matching engines.
+
+use std::path::PathBuf;
+
+use crate::bm25;
+
+// ── Batch scoring ───────────────────────────────────────────────
+
+pub(crate) fn batch_bm25_score(query: &str) -> Vec<(String, f64)> {
+    let corpus_path = default_corpus();
+    if !corpus_path.exists() {
+        return Vec::new();
+    }
+
+    let stemmer = bm25::new_stemmer();
+    let corpus = match bm25::load_corpus_jsonl(corpus_path.to_str().unwrap_or(""), &stemmer) {
+        Ok(c) => c,
+        Err(_) => return Vec::new(),
+    };
+
+    let query_tokens = bm25::tokenize(query, &stemmer);
+    corpus
+        .docs
+        .iter()
+        .map(|doc| {
+            let score = corpus.bm25_score(doc, &query_tokens);
+            let threshold = if doc.threshold > 0.0 {
+                doc.threshold
+            } else {
+                2.0
+            };
+            (doc.id.clone(), if score >= threshold { score } else { 0.0 })
+        })
+        .filter(|(_, s)| *s > 0.0)
+        .collect()
+}
+
+pub(crate) fn batch_embed_score(query: &str) -> Vec<(String, f64)> {
+    let ways_bin = home_dir().join(".claude/bin/ways");
+    if !ways_bin.is_file() {
+        return Vec::new();
+    }
+
+    let output = std::process::Command::new(&ways_bin)
+        .args(["embed", query])
+        .output();
+
+    match output {
+        Ok(o) if o.status.success() => {
+            String::from_utf8_lossy(&o.stdout)
+                .lines()
+                .filter_map(|line| {
+                    let mut parts = line.split('\t');
+                    let id = parts.next()?.to_string();
+                    let score: f64 = parts.next()?.parse().ok()?;
+                    Some((id, score))
+                })
+                .collect()
+        }
+        _ => Vec::new(),
+    }
+}
+
+// ── Subprocess capture ─────────────────────────────────────────
+
+pub(crate) fn capture_show_way(id: &str, session_id: &str, trigger: &str) -> String {
+    // Capture stdout from show::way by redirecting
+    let output = std::process::Command::new(std::env::current_exe().unwrap_or_else(|_| PathBuf::from("ways")))
+        .args(["show", "way", id, "--session", session_id, "--trigger", trigger])
+        .env(
+            "CLAUDE_PROJECT_DIR",
+            std::env::var("CLAUDE_PROJECT_DIR").unwrap_or_default(),
+        )
+        .output();
+
+    match output {
+        Ok(o) if o.status.success() => String::from_utf8_lossy(&o.stdout).to_string(),
+        _ => String::new(),
+    }
+}
+
+pub(crate) fn capture_show_check(id: &str, session_id: &str, trigger: &str, score: f64) -> String {
+    let output = std::process::Command::new(std::env::current_exe().unwrap_or_else(|_| PathBuf::from("ways")))
+        .args([
+            "show", "check", id,
+            "--session", session_id,
+            "--trigger", trigger,
+            "--score", &format!("{score:.2}"),
+        ])
+        .env(
+            "CLAUDE_PROJECT_DIR",
+            std::env::var("CLAUDE_PROJECT_DIR").unwrap_or_default(),
+        )
+        .output();
+
+    match output {
+        Ok(o) if o.status.success() => String::from_utf8_lossy(&o.stdout).to_string(),
+        _ => String::new(),
+    }
+}
+
+// ── Path helpers ───────────────────────────────────────────────
+
+pub(crate) fn default_project() -> String {
+    std::env::var("CLAUDE_PROJECT_DIR")
+        .unwrap_or_else(|_| std::env::var("PWD").unwrap_or_else(|_| ".".to_string()))
+}
+
+pub(crate) fn default_corpus() -> PathBuf {
+    let xdg = std::env::var("XDG_CACHE_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| home_dir().join(".cache"));
+    xdg.join("claude-ways/user/ways-corpus.jsonl")
+}
+
+pub(crate) fn home_dir() -> PathBuf {
+    std::env::var("HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from("/tmp"))
+}
