@@ -105,6 +105,12 @@ enum Commands {
         #[arg(long, default_value = "2")]
         min_freq: u32,
     },
+    /// Engine health dashboard — binary, model, corpus, project status
+    Status {
+        /// Machine-readable JSON output
+        #[arg(long)]
+        json: bool,
+    },
     /// Scan ways and output matched content (replaces hook scan loops)
     Scan {
         #[command(subcommand)]
@@ -204,6 +210,7 @@ fn main() -> Result<()> {
         Commands::Graph { ways_dir, output } => cmd::graph::run(ways_dir, output),
         Commands::Tree { path, jaccard } => cmd::tree::run(path, jaccard),
         Commands::Provenance { ways_dir } => cmd::provenance::run(ways_dir),
+        Commands::Status { json } => cmd::status::run(json),
         Commands::Scan { mode } => match mode {
             ScanCommand::Prompt { query, session, project } => {
                 cmd::scan::prompt(&query, &session, project.as_deref())
