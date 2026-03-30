@@ -128,6 +128,35 @@ Todo files (`todo-pr-N*.md`) are first-class documentation — equivalent to spe
 - `.gitignore` allowlist pattern: un-ignore `.claude/` directory, then `!.claude/todo-pr-*.md`
 - Motivation: these files give reviewers full context on intent, decisions, and task breakdown — valuable PR documentation that should live in version control
 
+## todo-add skill — scenarios and requirements (2.7)
+
+Deferred for later. Scenarios to handle when built:
+
+### Task content
+- Accept a title plus optional description and acceptance criteria (`**Done when:**`) inline or via prompt
+- Title-only is the common case; description/criteria are optional but the skill should support them
+
+### Adding a top-level task
+- Append as the next numbered parent (e.g. 16 if 15 is last)
+- Status defaults to `[ ]`
+
+### Adding a subtask
+- Append under the specified parent as the next N.x number
+- If the parent had no subtasks, it becomes a container — status rolls up from the new subtask (stays `[ ]`)
+- If the parent is already `[x]` (done), auto-update it to `[-]` — same rollup rule as todo-update; confirm in the output line rather than prompting
+
+### File resolution
+- Same logic as todo-update: most recently modified `todo-pr-N.md`, or explicit PR number if supplied
+
+### Confirmation
+- Single output line, e.g.: `✔ Added 2.7 under task 2. Parent task 2 updated to [-].`
+
+### Out of scope for now
+- Inserting mid-list (always append)
+- Duplicate detection
+
+---
+
 ## CLI tool for todo management
 
 The todo skills (todo-list, todo-update, todo-add, etc.) could be backed by a small CLI tool rather than Claude reading/writing markdown directly. Benefits:
