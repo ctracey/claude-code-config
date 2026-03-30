@@ -124,6 +124,8 @@ hooks/ways/.obsidian/
 !tools/mmaid/*
 !tools/ways-cli/
 !tools/ways-cli/**
+# ways-cli build artifacts (tracked via .gitignore inside ways-cli/)
+tools/ways-cli/target/
 
 # Standalone tools (user-facing CLI utilities)
 !tools/
