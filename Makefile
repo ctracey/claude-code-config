@@ -6,7 +6,7 @@
 # Update:        make update
 
 .DEFAULT_GOAL := help
-.PHONY: setup install uninstall update clean help ways test
+.PHONY: setup install uninstall update clean help ways test test-sim release
 
 WAYS_BIN = bin/ways
 XDG_BIN = $(or $(XDG_BIN_HOME),$(HOME)/.local/bin)
@@ -21,6 +21,8 @@ help:
 	@echo "  make update     Pull latest changes and re-run setup"
 	@echo "  make ways       Build the ways CLI binary (Rust)"
 	@echo "  make test       Smoke test the ways binary"
+	@echo "  make test-sim   Run session simulator (8 scenarios)"
+	@echo "  make release    Build release tarball for current platform"
 	@echo "  make uninstall   Remove ways from PATH"
 	@echo "  make clean      Remove build artifacts"
 	@echo ""
@@ -70,10 +72,15 @@ ways:
 test: ways
 	@echo "Smoke testing ways binary..."
 	@$(WAYS_BIN) --version
-	@$(WAYS_BIN) lint --check && echo "  lint: PASS"
+	@$(WAYS_BIN) lint --check --global && echo "  lint: PASS"
 	@$(WAYS_BIN) match "write a unit test" >/dev/null && echo "  match: PASS"
 	@$(WAYS_BIN) graph --output /dev/null && echo "  graph: PASS"
 	@echo "All smoke tests passed."
+
+test-sim: ways
+	@echo "Running session simulator (8 scenarios)..."
+	@cargo test --manifest-path tools/ways-cli/Cargo.toml --test session_sim -- --test-threads=1
+	@echo "All simulation scenarios passed."
 
 # --- Supporting ---
 
@@ -81,6 +88,16 @@ hooks-executable:
 	@find hooks -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
 	@echo "Hooks marked executable."
 
+release: ways
+	@echo "Building release tarball..."
+	@mkdir -p dist
+	@PLATFORM=$$(uname -s | tr '[:upper:]' '[:lower:]')-$$(uname -m | sed 's/arm64/aarch64/'); \
+		cp $(WAYS_BIN) dist/ways-$$PLATFORM; \
+		cd dist && sha256sum ways-$$PLATFORM > ways-$$PLATFORM.sha256; \
+		echo "dist/ways-$$PLATFORM ($$(ls -lh ways-$$PLATFORM | awk '{print $$5}'))"; \
+		cat ways-$$PLATFORM.sha256
+
 clean:
 	$(MAKE) -C tools/way-embed clean
 	cargo clean --manifest-path tools/ways-cli/Cargo.toml 2>/dev/null || true
+	rm -rf dist/
