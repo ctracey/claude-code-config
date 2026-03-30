@@ -1,6 +1,8 @@
 use anyhow::{bail, Context, Result};
 use std::path::PathBuf;
 
+use crate::table::{Table, Align};
+
 struct CorpusEntry {
     id: String,
     embedding: Vec<f32>,
@@ -39,12 +41,23 @@ pub fn run(id: String, threshold: f64, corpus: Option<String>, _model: Option<St
 
         scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
-        for (other_id, score) in &scores {
-            println!("{target_id} <-> {other_id}:\t{score:.4}");
-        }
-
         if scores.is_empty() {
             eprintln!("no siblings above threshold {threshold}");
+        } else {
+            println!();
+            let mut t = Table::new(&["Way A", "Way B", "Cosine"]);
+            t.max_width(0, 36);
+            t.max_width(1, 36);
+            t.align(2, Align::Right);
+            for (other_id, score) in &scores {
+                t.add_owned(vec![
+                    target_id.clone(),
+                    other_id.to_string(),
+                    format!("{score:.4}"),
+                ]);
+            }
+            t.print();
+            println!();
         }
     }
 
@@ -52,14 +65,27 @@ pub fn run(id: String, threshold: f64, corpus: Option<String>, _model: Option<St
 }
 
 fn print_matrix(entries: &[CorpusEntry], threshold: f64) {
+    let mut t = Table::new(&["Way A", "Way B", "Cosine"]);
+    t.max_width(0, 36);
+    t.max_width(1, 36);
+    t.align(2, Align::Right);
+
     for (i, a) in entries.iter().enumerate() {
         for b in entries.iter().skip(i + 1) {
             let score = cosine_similarity(&a.embedding, &b.embedding) as f64;
             if score >= threshold {
-                println!("{}\t{}\t{:.4}", a.id, b.id, score);
+                t.add_owned(vec![
+                    a.id.clone(),
+                    b.id.clone(),
+                    format!("{score:.4}"),
+                ]);
             }
         }
     }
+
+    println!();
+    t.print();
+    println!();
 }
 
 fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {

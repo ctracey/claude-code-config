@@ -1,9 +1,9 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-use crate::frontmatter;
+use crate::table::{Table, Align};
 
 pub fn run(path: String, jaccard: bool) -> Result<()> {
     let ways_root = home_dir().join(".claude/hooks/ways");
@@ -16,11 +16,13 @@ pub fn run(path: String, jaccard: bool) -> Result<()> {
 
     let files = find_way_files(&tree_path)?;
 
+    println!();
+    println!("\x1b[1m{}\x1b[0m  \x1b[2m({} files)\x1b[0m", rel_root, files.len());
+    println!();
+
     if jaccard {
-        println!("JACCARD_ROOT\t{rel_root}");
         print_jaccard(&tree_path, &ways_root, &files)?;
     } else {
-        println!("TREE_ROOT\t{rel_root}");
         print_tree(&tree_path, &ways_root, &files)?;
     }
 
@@ -37,25 +39,36 @@ struct WayInfo {
 }
 
 fn print_tree(tree_path: &Path, ways_root: &Path, files: &[PathBuf]) -> Result<()> {
+    let mut t = Table::new(&["Way", "Depth", "Type", "Thresh", "Vocab", "Tokens"]);
+    t.max_width(0, 44);
+    t.align(1, Align::Right);
+    t.align(3, Align::Right);
+    t.align(4, Align::Right);
+    t.align(5, Align::Right);
+
     for file in files {
         let info = analyze_file(file, tree_path, ways_root)?;
-        let rel = file
-            .strip_prefix(ways_root)
-            .unwrap_or(file)
-            .display();
+        let rel = file.strip_prefix(ways_root).unwrap_or(file);
+        let way_id = rel.parent().unwrap_or(rel).display().to_string();
+        let indent = "  ".repeat(info.depth);
         let ftype = if info.is_check { "check" } else { "way" };
-        let thresh = info.threshold.map_or("none".to_string(), |t| format!("{t}"));
+        let thresh = info.threshold.map_or("─".to_string(), |t| format!("{t}"));
 
-        println!(
-            "NODE\t{}\t{}\t{}\t{}\t{}\t{}",
-            info.depth, rel, thresh, ftype, info.vocab_count, info.tokens
-        );
+        t.add_owned(vec![
+            format!("{indent}{way_id}"),
+            info.depth.to_string(),
+            ftype.to_string(),
+            thresh,
+            info.vocab_count.to_string(),
+            info.tokens.to_string(),
+        ]);
     }
+
+    t.print();
     Ok(())
 }
 
-fn print_jaccard(tree_path: &Path, ways_root: &Path, files: &[PathBuf]) -> Result<()> {
-    // Group way files (not checks) by parent directory
+fn print_jaccard(_tree_path: &Path, ways_root: &Path, files: &[PathBuf]) -> Result<()> {
     let mut by_parent: HashMap<PathBuf, Vec<(PathBuf, String)>> = HashMap::new();
 
     for file in files {
@@ -69,16 +82,15 @@ fn print_jaccard(tree_path: &Path, ways_root: &Path, files: &[PathBuf]) -> Resul
 
         let dir = file.parent().unwrap_or(file).to_path_buf();
         let parent = dir.parent().unwrap_or(&dir).to_path_buf();
-
-        // Extract vocabulary
         let content = std::fs::read_to_string(file)?;
         let vocab = extract_vocab_from_content(&content);
-
-        by_parent
-            .entry(parent)
-            .or_default()
-            .push((file.clone(), vocab));
+        by_parent.entry(parent).or_default().push((file.clone(), vocab));
     }
+
+    let mut t = Table::new(&["Way A", "Way B", "Jaccard"]);
+    t.max_width(0, 36);
+    t.max_width(1, 36);
+    t.align(2, Align::Right);
 
     for (_parent, siblings) in &by_parent {
         if siblings.len() < 2 {
@@ -87,21 +99,16 @@ fn print_jaccard(tree_path: &Path, ways_root: &Path, files: &[PathBuf]) -> Resul
         for i in 0..siblings.len() {
             for j in (i + 1)..siblings.len() {
                 let score = jaccard_similarity(&siblings[i].1, &siblings[j].1);
-                let rel_a = siblings[i]
-                    .0
-                    .strip_prefix(ways_root)
-                    .unwrap_or(&siblings[i].0)
-                    .display();
-                let rel_b = siblings[j]
-                    .0
-                    .strip_prefix(ways_root)
-                    .unwrap_or(&siblings[j].0)
-                    .display();
-                println!("PAIR\t{rel_a}\t{rel_b}\t{score:.2}");
+                let rel_a = siblings[i].0.strip_prefix(ways_root).unwrap_or(&siblings[i].0);
+                let rel_b = siblings[j].0.strip_prefix(ways_root).unwrap_or(&siblings[j].0);
+                let a_id = rel_a.parent().unwrap_or(rel_a).display().to_string();
+                let b_id = rel_b.parent().unwrap_or(rel_b).display().to_string();
+                t.add_owned(vec![a_id, b_id, format!("{score:.3}")]);
             }
         }
     }
 
+    t.print();
     Ok(())
 }
 

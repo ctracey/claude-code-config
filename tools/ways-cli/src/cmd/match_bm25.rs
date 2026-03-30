@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use std::path::PathBuf;
 
 use crate::bm25;
+use crate::table::{Table, Align};
 
 pub fn run(query: String, corpus: Option<String>) -> Result<()> {
     let corpus_path = corpus
@@ -18,7 +19,6 @@ pub fn run(query: String, corpus: Option<String>) -> Result<()> {
 
     let query_tokens = bm25::tokenize(&query, &stemmer);
 
-    // Score all documents
     let mut scored: Vec<(usize, f64)> = corpus
         .docs
         .iter()
@@ -26,31 +26,33 @@ pub fn run(query: String, corpus: Option<String>) -> Result<()> {
         .map(|(i, doc)| (i, corpus.bm25_score(doc, &query_tokens)))
         .collect();
 
-    // Sort descending by score
     scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
-    // Output matches above per-document threshold
-    let mut printed = 0;
+    let mut t = Table::new(&["Way", "Score", "Description"]);
+    t.align(1, Align::Right);
+    t.max_width(0, 38);
+    t.max_width(2, 50);
+
     for (idx, score) in &scored {
         let doc = &corpus.docs[*idx];
         let threshold = if doc.threshold > 0.0 { doc.threshold } else { 2.0 };
-
         if *score >= threshold {
-            // Truncate description for display
-            let snippet: String = if doc.description.len() > 56 {
-                format!("{}...", &doc.description[..56])
-            } else {
-                doc.description.clone()
-            };
-            println!("{}\t{:.4}\t{}", doc.id, score, snippet);
-            printed += 1;
+            t.add_owned(vec![
+                doc.id.clone(),
+                format!("{score:.4}"),
+                doc.description.clone(),
+            ]);
         }
     }
 
-    if printed == 0 {
+    if t.len() == 0 {
         eprintln!("no matches above threshold");
         std::process::exit(1);
     }
+
+    println!();
+    t.print();
+    println!();
 
     Ok(())
 }

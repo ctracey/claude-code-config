@@ -6,6 +6,7 @@ mod cmd;
 mod frontmatter;
 mod scanner;
 pub mod session;
+pub mod table;
 
 #[derive(Parser)]
 #[command(name = "ways", version, about = "Unified CLI for ways knowledge guidance")]
