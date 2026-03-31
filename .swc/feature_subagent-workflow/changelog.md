@@ -167,6 +167,13 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - `swc_init/SKILL.md` and `swc_resolver/SKILL.md` references updated to new names
 - Old `swc_begin`, `swc_plan-*`, and `swc_update` skill directories removed
 
+## Session — swc_workflow_plan-intent scope boundary `2026-03-31`
+
+- Added explicit scope boundary section to `swc_workflow_plan-intent` — skill must not drift into tech decisions
+- Deflection script added: acknowledge tech mentions, park them in `notes.md` under `## Parked (intent phase)`, then steer back to intent
+- Reworded constraints question from "things we must not break" (invites tech thinking) to "non-negotiable outcomes — things that must hold true regardless of approach"
+- Motivation: observed on multiple occasions that the skill was pulling into solution territory during intent phase; intent and solution are separate conversations
+
 ## Task 10.1 — Workflow progress banner `2026-03-30`
 
 - Built `todo-workflow-progress` skill: emits a visual banner showing all stages with the active stage highlighted

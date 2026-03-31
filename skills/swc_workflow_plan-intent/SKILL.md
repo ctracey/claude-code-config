@@ -8,6 +8,15 @@ allowed-tools: Read, Write, Edit, Glob
 
 Understand why this work exists before discussing how to do it. Intent and solution are separate conversations.
 
+## Scope boundary
+
+**Stay in the problem space. Do not drift into tech decisions.**
+
+If the user mentions approach, technology, or implementation details, acknowledge the point and note it — then steer back:
+> "Good to know — I'll make note of that. Before we get into how, I want to make sure we've got the 'why' solid first."
+
+Capture any tech mentions as a brief note in `notes.md` under `## Parked (intent phase)` so nothing is lost. But don't pull on the thread — that conversation belongs in `swc_workflow_plan-solution`. Intent is done when you can articulate what success looks like and why it matters, not how it will be built.
+
 ## Steps
 
 ### 1. Open
@@ -23,7 +32,7 @@ Calibrate depth to the complexity of the work. For small work items, one or two 
 - What does success look like? What would be different when this is done?
 - Who are the users or personas affected? What are their goals or pain points?
 - Are there specific scenarios or user journeys we need to support?
-- Are there known constraints or things we must not break?
+- Are there non-negotiable outcomes — things that must hold true regardless of approach?
 
 ### 3. Check depth
 
