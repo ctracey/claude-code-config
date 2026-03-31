@@ -174,6 +174,14 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Reworded constraints question from "things we must not break" (invites tech thinking) to "non-negotiable outcomes — things that must hold true regardless of approach"
 - Motivation: observed on multiple occasions that the skill was pulling into solution territory during intent phase; intent and solution are separate conversations
 
+## Session — add swc_push skill `2026-03-31`
+
+- Created `swc_push` skill (renamed from `swc_ship`): mid-session content prep before commit/push
+- Flow: summarise changes → confirm with user → update changelog + docs → offer PR comment → confirm ready
+- PR comment step: checks for open PR via `gh pr view`, drafts 3–5 bullet summary, posts on confirmation
+- Skill stops before git ops — commit/push is user's next step
+- Distinction from `/ship`: push = content hygiene mid-PR; ship = git delivery at merge moment
+
 ## Task 10.1 — Workflow progress banner `2026-03-30`
 
 - Built `todo-workflow-progress` skill: emits a visual banner showing all stages with the active stage highlighted
