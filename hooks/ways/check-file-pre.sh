@@ -4,6 +4,8 @@
 # The ways binary handles: file pattern matching, check scoring,
 # session state, and content output.
 
+source "$(dirname "$0")/require-ways.sh"
+
 INPUT=$(cat)
 FP=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')

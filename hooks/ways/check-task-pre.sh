@@ -5,6 +5,8 @@
 # 1. This script: ways scan task (matches ways, writes stash)
 # 2. SubagentStart: inject-subagent.sh (reads stash, emits content)
 
+source "$(dirname "$0")/require-ways.sh"
+
 INPUT=$(cat)
 TASK_PROMPT=$(echo "$INPUT" | jq -r '.tool_input.prompt // empty' | tr '[:upper:]' '[:lower:]')
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')

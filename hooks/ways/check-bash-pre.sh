@@ -4,6 +4,8 @@
 # The ways binary handles: command pattern matching, semantic scoring,
 # check curve scoring, session state, and content output.
 
+source "$(dirname "$0")/require-ways.sh"
+
 INPUT=$(cat)
 CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 DESC=$(echo "$INPUT" | jq -r '.tool_input.description // empty' | tr '[:upper:]' '[:lower:]')

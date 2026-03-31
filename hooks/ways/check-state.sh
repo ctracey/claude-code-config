@@ -4,6 +4,8 @@
 # Evaluates: context-threshold, file-exists, session-start triggers.
 # Also handles core guidance re-injection safety net.
 
+source "$(dirname "$0")/require-ways.sh"
+
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // empty')
