@@ -63,7 +63,7 @@ sequenceDiagram
 
     rect rgba(198, 40, 40, 0.15)
         Note over U,S: Auto-compact triggers — all markers cleared, ways reset
-        W->>W: clear-markers.sh → rm /tmp/.claude-way-*
+        W->>W: clear-markers.sh → rm /tmp/.claude-sessions/{session_id}/*
         W-->>C: Core guidance reloads (fresh session state)
         Note right of C: All ways can fire again on next match
     end
@@ -83,9 +83,9 @@ flowchart TB
     classDef silent fill:#78909C,stroke:#546E7A,color:#fff
 
     subgraph Session["Claude Code Session"]
-        SS[SessionStart]:::event --> Core["show-core.sh<br/>Dynamic table + core.md"]:::script
+        SS[SessionStart]:::event --> Core["ways show core<br/>Dynamic table + core.md"]:::script
 
-        UP[UserPromptSubmit]:::event --> CP["check-prompt.sh<br/>Regex · Embedding/BM25"]:::script
+        UP[UserPromptSubmit]:::event --> CP["check-prompt.sh → ways scan<br/>Regex · Embedding/BM25"]:::script
 
         subgraph PreTool["PreToolUse"]
             Bash[Bash tool]:::event --> CB["check-bash-pre.sh"]:::script
@@ -96,13 +96,10 @@ flowchart TB
         SA[SubagentStart]:::event --> IS["inject-subagent.sh"]:::script
     end
 
-    CP -->|"pattern:"| SW["show-way.sh"]:::script
-    CP -->|"description:+vocabulary:"| WM["way-match pair<br/>BM25 scorer"]:::match
-    WM --> SW
-    CB --> SW
-    CF --> SW
+    CP --> Check{Marker?}:::gate
+    CB --> Check
+    CF --> Check
 
-    SW --> Check{Marker?}:::gate
     Check -->|No| Output["Output way content<br/>Create marker"]:::output
     Check -->|Yes| Silent["No-op"]:::silent
 
@@ -156,7 +153,7 @@ flowchart LR
     classDef both fill:#00695C,stroke:#004D40,color:#fff
     classDef skip fill:#78909C,stroke:#546E7A,color:#fff
 
-    Way["way.md<br/>scope: ?"]
+    Way["{name}.md<br/>scope: ?"]
 
     Way -->|"scope: agent"| AG["Agent only<br/>check-prompt / bash / file"]:::agent
     Way -->|"scope: subagent"| SB["Subagent only<br/>check-task-pre → inject"]:::sub
@@ -233,7 +230,7 @@ flowchart LR
     end
 
     subgraph Scan["Recursive Scan"]
-        Find["find */way.md"]:::scan
+        Find["find */{name}.md"]:::scan
         Extract["Extract frontmatter:<br/>pattern, commands, files, scope"]:::scan
     end
 
@@ -252,9 +249,9 @@ flowchart LR
     Extract --> CM
     Extract --> FL
 
-    KW -->|match| SW["show-way.sh"]:::output
-    CM -->|match| SW
-    FL -->|match| SW
+    KW -->|match| Out["ways show<br/>(marker-gated output)"]:::output
+    CM -->|match| Out
+    FL -->|match| Out
 ```
 
 ## Semantic Matching
@@ -327,9 +324,9 @@ Ways with `macro: prepend|append` run dynamic scripts that query live state:
 ```mermaid
 sequenceDiagram
     participant Hook as check-*.sh
-    participant Show as show-way.sh
+    participant Show as ways show
     participant Macro as macro.sh
-    participant Way as way.md
+    participant Way as {name}.md
     participant Out as Output
 
     Hook->>Show: waypath, session_id
@@ -378,11 +375,8 @@ sequenceDiagram
 ~/.claude/hooks/ways/
 ├── core.md                     # Base guidance (loads at startup)
 ├── macro.sh                    # Generates Available Ways table
-├── show-core.sh                # Combines macro output + core.md
-├── show-way.sh                 # Once-per-session gating + output
 │
-├── match-way.sh                # Shared matching: detect engine + match function
-├── check-prompt.sh             # UserPromptSubmit → scan patterns
+├── check-prompt.sh             # UserPromptSubmit → dispatches to `ways scan prompt`
 ├── check-bash-pre.sh           # PreToolUse:Bash → scan commands
 ├── check-file-pre.sh           # PreToolUse:Edit|Write → scan files
 ├── check-task-pre.sh           # PreToolUse:Task → stash for subagent
@@ -390,25 +384,24 @@ sequenceDiagram
 ├── check-response.sh           # Stop → extract topics for next turn
 │
 ├── inject-subagent.sh          # SubagentStart → emit stashed ways (JSON hookSpecificOutput)
-├── semantic-match.sh           # Gzip NCD fallback (when way-match binary unavailable)
-├── clear-markers.sh            # SessionStart → reset all state
+├── clear-markers.sh            # SessionStart → reset session state
 ├── mark-tasks-active.sh        # PreToolUse:TaskCreate → context nag gate
 │
 ├── softwaredev/                # Domain: software development
-│   ├── commits/way.md          #   git commit format
-│   ├── testing/way.md          #   test practices
-│   ├── security/way.md         #   auth, secrets, vulnerabilities
-│   ├── github/                 #   PR workflow
-│   │   ├── way.md
-│   │   └── macro.sh            #   detects solo vs team
-│   └── ...                     #   18 ways total
-├── itops/                      # Domain: IT operations
-│   └── ...                     #   4 ways
-└── meta/                       # Domain: meta-system
-    └── ...                     #   5 ways
+│   ├── commits/commits.md       #   git commit format
+│   ├── testing/testing.md       #   test practices
+│   ├── security/security.md     #   auth, secrets, vulnerabilities
+│   ├── github/                  #   PR workflow
+│   │   ├── github.md
+│   │   └── macro.sh             #   detects solo vs team
+│   └── ...                      #   18 ways total
+├── itops/                       # Domain: IT operations
+│   └── ...                      #   4 ways
+└── meta/                        # Domain: meta-system
+    └── ...                      #   5 ways
 
-$PROJECT/.claude/ways/          # Project-local overrides
-└── {domain}/{wayname}/way.md   # Same structure, takes precedence
+$PROJECT/.claude/ways/           # Project-local overrides
+└── {domain}/{wayname}/{wayname}.md  # Same structure, takes precedence
 ```
 
 ### Script Relationships
@@ -421,18 +414,15 @@ flowchart LR
     classDef stash fill:#E65100,stroke:#BF360C,color:#fff
     classDef util fill:#00695C,stroke:#004D40,color:#fff
 
-    MW["match-way.sh<br/>(shared matching)"]:::shared --> WE["way-embed (embedding)"]:::util
-    MW -.->|"fallback"| WM["way-match (BM25)"]:::util
-    MW -.->|"fallback"| NCD["semantic-match.sh<br/>(gzip NCD)"]:::util
+    WAYS["ways binary<br/>(scan + show + session)"]:::shared --> EMB["Embedding<br/>(all-MiniLM-L6-v2)"]:::util
+    WAYS -.->|"fallback"| BM25["BM25<br/>(built-in)"]:::util
 
-    CP["check-prompt.sh"]:::trigger --> MW
-    CP --> SW["show-way.sh"]:::output
-    CB["check-bash-pre.sh"]:::trigger --> SW
-    CF["check-file-pre.sh"]:::trigger --> SW
-    CS["check-state.sh"]:::trigger --> SW
+    CP["check-prompt.sh"]:::trigger --> WAYS
+    CB["check-bash-pre.sh"]:::trigger --> WAYS
+    CF["check-file-pre.sh"]:::trigger --> WAYS
+    CS["check-state.sh"]:::trigger --> WAYS
 
-    CT["check-task-pre.sh"]:::trigger --> MW
-    CT --> ST[("stash file")]:::stash
+    CT["check-task-pre.sh"]:::trigger --> ST[("stash file")]:::stash
     ST --> IS["inject-subagent.sh"]:::output
 ```
 

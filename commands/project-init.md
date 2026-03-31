@@ -25,9 +25,9 @@ Mark each task `in_progress` as you start it, `completed` when done. This is you
 
 **Read these docs first** — you need the full landscape before your first question:
 
-1. Read `~/.claude/hooks/ways/softwaredev/architecture/adr/migration/way.md` — understand the five starting states (greenfield, flat directory, inline metadata, scattered, different tool) and migration strategies
-2. Read `~/.claude/hooks/ways/softwaredev/delivery/github/way.md` — understand PR-always stance, repo health expectations
-3. Read `~/.claude/hooks/ways/softwaredev/docs/way.md` — understand documentation scaling by project complexity
+1. Read `~/.claude/hooks/ways/softwaredev/architecture/adr/migration/migration.md` — understand the five starting states (greenfield, flat directory, inline metadata, scattered, different tool) and migration strategies
+2. Read `~/.claude/hooks/ways/softwaredev/delivery/github/github.md` — understand PR-always stance, repo health expectations
+3. Read `~/.claude/hooks/ways/softwaredev/docs/docs.md` — understand documentation scaling by project complexity
 
 Do NOT skip this step. You need the migration framework and repo health model loaded.
 
@@ -60,7 +60,7 @@ Check for each concern — report what exists and what's missing:
 |---------|---------------|
 | **ADR** | `docs/architecture/adr.yaml`, `docs/scripts/adr` (tool), any `ADR-*.md` files anywhere |
 | **GitHub** | `.github/` directory, CODEOWNERS, issue/PR templates, workflows |
-| **Ways** | `.claude/ways/` directory, any `way.md` files |
+| **Ways** | `.claude/ways/` directory, any `{name}.md` way files |
 | **CLAUDE.md** | `.claude/CLAUDE.md` or root `CLAUDE.md` |
 | **Docs** | `README.md`, `docs/` directory, `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE` |
 | **Config** | `.env.example`, `.gitignore` |
@@ -407,7 +407,7 @@ Reference: `~/.claude/hooks/ways/init-project-ways.sh`, `/ways` command
 For each elected way:
 
 1. Create directory: `.claude/ways/{domain}/{wayname}/`
-2. Write `way.md` with appropriate frontmatter (recommend matching mode based on the domain)
+2. Write `{wayname}.md` with appropriate frontmatter (recommend matching mode based on the domain)
 3. Keep content minimal — the human can expand with `/ways` later
 
 Suggested starter ways based on common ADR domains:
@@ -471,7 +471,7 @@ docs/scripts/adr list --group
 gh repo view --json description,hasIssuesEnabled
 
 # Ways (if created)
-find .claude/ways -name "way.md" -exec echo "Found: {}" \;
+find .claude/ways -name "*.md" ! -name "*.check.md" -exec echo "Found: {}" \;
 
 # General
 git status

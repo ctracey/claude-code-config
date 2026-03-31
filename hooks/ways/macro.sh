@@ -1,6 +1,6 @@
 #!/bin/bash
 # Dynamic table generator for core.md
-# Scans all way.md files and generates a table of triggers
+# Scans all way files and generates a table of triggers
 
 WAYS_DIR="${HOME}/.claude/hooks/ways"
 
@@ -30,11 +30,11 @@ echo ""
 # Track current domain for section headers
 CURRENT_DOMAIN=""
 
-# Find all way.md files, sorted by path
+# Find all way files, sorted by path
 while IFS= read -r wayfile; do
   # Extract relative path (e.g., "softwaredev/delivery/github")
   relpath="${wayfile#$WAYS_DIR/}"
-  relpath="${relpath%/way.md}"
+  relpath="${relpath%/*}"
 
   # Skip if not in a domain subdirectory
   [[ "$relpath" != */* ]] && continue
@@ -118,10 +118,10 @@ while IFS= read -r wayfile; do
 
   echo "| **${wayname}** | ${tool_trigger} | ${keyword_display} |"
 
-done < <(find -L "$WAYS_DIR" -path "*/*/way.md" -type f | sort)
+done < <(find -L "$WAYS_DIR" -path "*/*/*.md" ! -name "*.check.md" ! -name "*.yaml" -type f | sort)
 
 echo ""
-echo "Project-local ways: \`\$PROJECT/.claude/ways/{domain}/{way}/way.md\` override global."
+echo "Project-local ways: \`\$PROJECT/.claude/ways/{domain}/{way}/{way}.md\` override global."
 
 # --- AGENTS.md detection ---
 # Scan from project root for AGENTS.md files that front-load instructions

@@ -61,15 +61,15 @@
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/init-project-ways.sh"
+            "command": "${HOME}/.claude/bin/ways init"
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/check-embedding-staleness.sh"
+            "command": "${HOME}/.claude/bin/ways corpus --if-stale --quiet"
           }
         ]
       },
@@ -82,7 +82,7 @@
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           }
         ]
       },
@@ -91,7 +91,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           }
         ]
       },
@@ -104,11 +104,11 @@
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/show-core.sh"
+            "command": "${HOME}/.claude/hooks/ways/check-state.sh"
           },
           {
             "type": "command",
-            "command": "${HOME}/.claude/hooks/ways/init-project-ways.sh"
+            "command": "${HOME}/.claude/bin/ways init"
           }
         ]
       }

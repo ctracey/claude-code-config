@@ -5,11 +5,11 @@ How to create new ways, override existing ones, and manage domains.
 ## Creating a Way
 
 1. Create a directory: `~/.claude/hooks/ways/{domain}/{wayname}/`
-2. Add `way.md` with YAML frontmatter and guidance content
+2. Add `{wayname}.md` with YAML frontmatter and guidance content
 3. Optionally add `macro.sh` for dynamic content
 4. Optionally add `provenance:` to frontmatter linking to policy sources (see [provenance.md](provenance.md))
 
-No configuration files to update. No registration step. The discovery scripts scan for `way.md` files automatically.
+No configuration files to update. No registration step. The discovery scripts scan for `{wayname}.md` files automatically.
 
 ### Choosing a matching mode
 
@@ -63,14 +63,14 @@ To verify the live system, include the way's keywords in a prompt and check that
 
 ## Progressive Disclosure with Sub-Ways
 
-Ways can nest: `{domain}/{parent}/{child}/way.md`. Each level adds context only when the conversation goes deeper into that topic. This keeps token cost proportional to relevance.
+Ways can nest: `{domain}/{parent}/{child}/{child}.md`. Each level adds context only when the conversation goes deeper into that topic. This keeps token cost proportional to relevance.
 
 **Example: the knowledge domain**
 
 ```
-meta/knowledge/way.md                 — fires on "ways" (overview, ~60 lines)
-meta/knowledge/authoring/way.md       — fires when editing way.md files (format spec)
-meta/knowledge/optimization/way.md    — fires on "optimize vocabulary" (tuning workflow + live health via macro)
+meta/knowledge/knowledge.md                 — fires on "ways" (overview, ~60 lines)
+meta/knowledge/authoring/authoring.md       — fires when editing way files (format spec)
+meta/knowledge/optimization/optimization.md — fires on "optimize vocabulary" (tuning workflow + live health via macro)
 ```
 
 If you just ask "what are ways?" you get the 60-line overview. The authoring spec and optimization workflow never load. But if you start editing a way file, the authoring way fires automatically. If you discuss vocabulary tuning, the optimization way fires and its macro injects a live health dashboard of all ways.
@@ -83,16 +83,16 @@ This pattern is self-improving: the tools that analyze the system (`way-match su
 
 ## Project-Local Ways
 
-Projects can add or override ways at `$PROJECT/.claude/ways/{domain}/{way}/way.md`.
+Projects can add or override ways at `$PROJECT/.claude/ways/{domain}/{way}/{way}.md`.
 
 ### Adding project-specific guidance
 
 ```
 myproject/.claude/ways/
 └── myproject/
-    ├── api/way.md           # "Our API uses GraphQL, not REST"
-    ├── deployment/way.md    # "Deploy via Terraform in us-east-1"
-    └── testing/way.md       # "We use Vitest, not Jest"
+    ├── api/api.md           # "Our API uses GraphQL, not REST"
+    ├── deployment/deployment.md    # "Deploy via Terraform in us-east-1"
+    └── testing/testing.md       # "We use Vitest, not Jest"
 ```
 
 These are discovered alongside global ways and follow the same matching rules.
@@ -101,7 +101,7 @@ These are discovered alongside global ways and follow the same matching rules.
 
 A project-local way with the same domain/name path as a global way takes precedence. They share a single marker, so only the project-local version fires.
 
-Example: If a project has `.claude/ways/softwaredev/code/testing/way.md`, it replaces `~/.claude/hooks/ways/softwaredev/code/testing/way.md` for that project.
+Example: If a project has `.claude/ways/softwaredev/code/testing/testing.md`, it replaces `~/.claude/hooks/ways/softwaredev/code/testing/testing.md` for that project.
 
 ### Macros in project-local ways
 

@@ -134,7 +134,7 @@ Disabled domains are completely ignored — no pattern matching, no output. The 
 
 ## Creating Ways
 
-Each way is a `way.md` file with YAML frontmatter in `~/.claude/hooks/ways/{domain}/{wayname}/`:
+Each way is a `{wayname}.md` file with YAML frontmatter in `~/.claude/hooks/ways/{domain}/{wayname}/`:
 
 ```yaml
 ---
@@ -152,7 +152,7 @@ scope: agent,subagent         # injection scope
 
 Matching is **additive** — regex and semantic are OR'd. A way with both can fire from either channel.
 
-**Project-local ways** live in `$PROJECT/.claude/ways/{domain}/{wayname}/way.md` and override global ways with the same path. Project macros are disabled by default — trust a project with `echo "/path/to/project" >> ~/.claude/trusted-project-macros`.
+**Project-local ways** live in `$PROJECT/.claude/ways/{domain}/{wayname}/{wayname}.md` and override global ways with the same path. Project macros are disabled by default — trust a project with `echo "/path/to/project" >> ~/.claude/trusted-project-macros`.
 
 For the full authoring guide: [extending.md](docs/hooks-and-ways/extending.md) | For matching strategy: [matching.md](docs/hooks-and-ways/matching.md) | For macros: [macros.md](docs/hooks-and-ways/macros.md)
 
@@ -173,7 +173,7 @@ bash tools/way-embed/compare-engines.sh
 # BM25 scorer against synthetic corpus (32 tests)
 bash tools/way-match/test-harness.sh --verbose
 
-# Score against real way.md files
+# Score against real way files
 bash tools/way-match/test-integration.sh
 
 # Interactive: full hook pipeline with subagent injection (6 steps)
@@ -182,7 +182,7 @@ bash tools/way-match/test-integration.sh
 
 The embedding engine achieves 98.4% accuracy (63/64) vs BM25's 90.6% (58/64) with 0 false negatives. See `tools/way-embed/compare-engines.sh` for the full comparison.
 
-Other test tools: `scripts/doc-graph.sh --stats` checks documentation link integrity; `governance/provenance-verify.sh` validates provenance metadata. Full test guide: [tests/README.md](tests/README.md).
+Other test tools: `scripts/doc-graph.sh --stats` checks documentation link integrity; `ways governance lint` validates provenance metadata. Full test guide: [tests/README.md](tests/README.md).
 
 ## What's Included
 

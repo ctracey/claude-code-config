@@ -1,5 +1,5 @@
 # Way frontmatter schema — single source of truth
-# Read by: lint-ways.sh, ways-tests skill, authoring way
+# Read by: ways lint, ways-tests skill, authoring way
 #
 # Fields are categorized by role and marked required/recommended/optional.
 # "required" means the linter flags its absence as an error.
@@ -86,11 +86,9 @@ way:
       required: optional
       role: File patterns for macros to skip (macro-specific)
 
-  governance:
-    provenance:
-      type: block
-      required: optional
-      role: Policy URIs, controls, rationale (stripped before injection)
+  # provenance: moved to provenance.yaml sidecar (ADR-110)
+  # Presence of provenance: in frontmatter is flagged as UNKNOWN by the linter.
+  # See provenance_sidecar section below for the sidecar schema.
 
 check:
   trigger:
@@ -117,3 +115,51 @@ check:
       values: [agent, subagent, teammate]
       required: optional
       default: agent
+    when:
+      type: block
+      required: optional
+      role: Deterministic gate checked before any matching
+      subfields:
+        project:
+          type: path
+          required: optional
+          role: Only fire in this project directory
+        file_exists:
+          type: path
+          required: optional
+          role: Only fire when this file exists in the project
+
+# Provenance sidecar schema (ADR-110)
+# Lives in provenance.yaml alongside the way file, not in frontmatter.
+# Consumed by `ways governance` and `ways provenance`.
+provenance_sidecar:
+  policy:
+    type: array
+    required: optional
+    role: Policy document URIs that this way implements
+    items:
+      uri:
+        type: string
+        required: true
+      type:
+        type: string
+        required: optional
+  controls:
+    type: array
+    required: optional
+    role: Regulatory or standards controls addressed by this way
+    items:
+      id:
+        type: string
+        required: true
+      justifications:
+        type: array
+        required: optional
+  verified:
+    type: date
+    required: optional
+    role: Last date provenance was reviewed for accuracy
+  rationale:
+    type: string
+    required: optional
+    role: Brief explanation of why these controls apply

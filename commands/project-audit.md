@@ -167,10 +167,10 @@ Compare top-level directories against CODEOWNERS patterns. Flag directories with
 
 **Check: Do project-local ways exist?**
 ```bash
-find .claude/ways -name "way.md" 2>/dev/null
+find .claude/ways -name "*.md" ! -name "*.check.md" 2>/dev/null
 ```
 
-- Pass: ways directory exists with way.md files
+- Pass: ways directory exists with way files
 - Warn: `.claude/ways/` exists but empty (or only template)
 - N/A: no `.claude/` directory
 

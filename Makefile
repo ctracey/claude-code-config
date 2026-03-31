@@ -1,77 +1,129 @@
 # claude-code-config
-# Top-level Makefile — canonical entry point for setup and maintenance.
+# Top-level Makefile — build, install, and release.
 #
 # Quick start:   make setup
-# Full install:  make install  (hooks + semantic matching + corpus)
-# Update:        make update   (pull + setup)
+# Full install:  make install
+# Update:        make update
 
 .DEFAULT_GOAL := help
-.PHONY: setup install update test test-all corpus clean help
+.PHONY: setup install uninstall update clean help ways ways-rebuild test test-sim release
+
+WAYS_BIN = bin/ways
+XDG_BIN = $(or $(XDG_BIN_HOME),$(HOME)/.local/bin)
 
 # --- Primary targets ---
 
 help:
 	@echo "claude-code-config"
 	@echo ""
-	@echo "  make setup      Set up semantic matching (binary + model + corpus)"
-	@echo "  make install    Full first-time setup (hooks + semantic matching)"
-	@echo "  make update     Pull latest changes and re-run setup"
-	@echo "  make test       Run embedding smoke tests"
-	@echo "  make test-all   Run all tests (embedding + BM25 + integration)"
-	@echo "  make clean      Remove build artifacts"
+	@echo "  make setup        Build ways CLI + fetch embedding model + corpus"
+	@echo "  make install      Full first-time setup (hooks + tools + PATH)"
+	@echo "  make update       Pull latest changes and re-run install"
+	@echo "  make ways         Get ways binary (download or build from source)"
+	@echo "  make ways-rebuild Force rebuild ways from source"
+	@echo "  make test         Smoke test the ways binary"
+	@echo "  make test-sim     Run session simulator (8 scenarios)"
+	@echo "  make release      Build release binary for current platform"
+	@echo "  make uninstall    Remove ways from PATH"
+	@echo "  make clean        Remove build artifacts"
 	@echo ""
 
-# Set up the semantic matching engine + tools (embedding, mmaid, corpus).
-# This is the most common target — run it after cloning or pulling.
-setup:
-	@echo "Setting up semantic matching engine..."
+# Build ways CLI + set up embedding engine + generate initial corpus.
+setup: ways
+	@echo "Setting up embedding engine..."
 	$(MAKE) -C tools/way-embed setup
 	@echo ""
 	@echo "Setting up mmaid diagram renderer..."
 	@bash tools/mmaid/download-mmaid.sh || echo "  (mmaid optional — skipping)"
+	@echo ""
+	@echo "Generating corpus..."
+	@$(WAYS_BIN) corpus --quiet
 
-# Full first-time install: make hooks executable, build way-match if needed, set up embeddings.
+# Full install: build, setup, symlink to PATH.
 install: hooks-executable setup
+	@mkdir -p $(XDG_BIN)
+	@ln -sf $(CURDIR)/$(WAYS_BIN) $(XDG_BIN)/ways
 	@echo ""
-	@echo "Install complete. Restart Claude Code for ways to take effect."
-	@echo "  Review hooks at: ~/.claude/hooks/"
+	@echo "Install complete."
+	@echo "  ways binary: $(XDG_BIN)/ways → $(CURDIR)/$(WAYS_BIN)"
+	@echo "  Restart Claude Code for ways to take effect."
 
-# Pull upstream changes and re-run setup.
+# Remove symlink from PATH.
+uninstall:
+	@rm -f $(XDG_BIN)/ways
+	@echo "Removed $(XDG_BIN)/ways"
+
+# Pull upstream and re-setup.
 update:
-	@echo "Pulling latest changes..."
 	git pull --ff-only
-	@echo ""
 	$(MAKE) install
 
-# --- Supporting targets ---
+# --- Build ---
+
+# Get the ways binary: try existing → download → build from source.
+ways:
+	@if [ -x $(WAYS_BIN) ] && $(WAYS_BIN) --version >/dev/null 2>&1; then \
+		echo "ways already installed: $$($(WAYS_BIN) --version)"; \
+	elif bash tools/ways-cli/download-ways.sh 2>/dev/null; then \
+		echo "Pre-built binary installed."; \
+	elif command -v cargo >/dev/null 2>&1; then \
+		echo "No pre-built binary, building from source..."; \
+		cargo build --release --manifest-path tools/ways-cli/Cargo.toml; \
+		mkdir -p bin; \
+		cp tools/ways-cli/target/release/ways $(WAYS_BIN); \
+		echo "Built: $(WAYS_BIN) ($$(ls -lh $(WAYS_BIN) | awk '{print $$5}'))"; \
+	else \
+		echo "error: No pre-built binary and cargo not found."; \
+		echo "Install Rust: https://rustup.rs/"; \
+		exit 1; \
+	fi
+
+# Force rebuild from source (ignores existing binary and download).
+ways-rebuild:
+	@if ! command -v cargo >/dev/null 2>&1; then \
+		echo "error: cargo not found. Install Rust: https://rustup.rs/"; \
+		exit 1; \
+	fi
+	cargo build --release --manifest-path tools/ways-cli/Cargo.toml
+	@mkdir -p bin
+	@cp tools/ways-cli/target/release/ways $(WAYS_BIN)
+	@echo "Built: $(WAYS_BIN) ($$(ls -lh $(WAYS_BIN) | awk '{print $$5}'))"
+
+# --- Test ---
+
+test: ways
+	@echo "Smoke testing ways binary..."
+	@$(WAYS_BIN) --version
+	@$(WAYS_BIN) lint --check --global && echo "  lint: PASS"
+	@$(WAYS_BIN) match "write a unit test" >/dev/null && echo "  match: PASS"
+	@$(WAYS_BIN) graph --output /dev/null && echo "  graph: PASS"
+	@echo "All smoke tests passed."
+
+test-sim: ways
+	@echo "Running session simulator (8 scenarios)..."
+	@cargo test --manifest-path tools/ways-cli/Cargo.toml --test session_sim -- --test-threads=1
+	@echo "All simulation scenarios passed."
+
+# --- Release ---
+
+# Build release binary for current platform with checksum.
+# To publish: git tag ways-vX.Y.Z && git push --tags
+# CI builds all 4 platforms and creates a GitHub Release.
+release: ways-rebuild
+	@mkdir -p dist
+	@PLATFORM=$$(uname -s | tr '[:upper:]' '[:lower:]')-$$(uname -m | sed 's/arm64/aarch64/'); \
+		cp $(WAYS_BIN) dist/ways-$$PLATFORM; \
+		cd dist && sha256sum ways-$$PLATFORM > ways-$$PLATFORM.sha256; \
+		echo "dist/ways-$$PLATFORM ($$(ls -lh ways-$$PLATFORM | awk '{print $$5}'))"; \
+		cat ways-$$PLATFORM.sha256
+
+# --- Supporting ---
 
 hooks-executable:
 	@find hooks -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
 	@echo "Hooks marked executable."
 
-# --- Tests ---
-
-test: corpus
-	bash tools/way-embed/test-embedding.sh
-
-test-bm25:
-	$(MAKE) -C tools/way-match test
-
-test-integration:
-	$(MAKE) -C tools/way-match test-integration
-
-test-compare:
-	bash tools/way-embed/compare-engines.sh
-
-test-all: test test-bm25 test-integration
-
-# --- Corpus ---
-
-corpus:
-	@bash tools/way-match/generate-corpus.sh --quiet
-
-# --- Clean ---
-
 clean:
 	$(MAKE) -C tools/way-embed clean
-	$(MAKE) -C tools/way-match clean
+	cargo clean --manifest-path tools/ways-cli/Cargo.toml 2>/dev/null || true
+	rm -rf dist/

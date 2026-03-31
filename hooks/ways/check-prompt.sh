@@ -1,39 +1,14 @@
 #!/bin/bash
-# Check user prompts for keywords from way frontmatter
+# Check user prompts against ways — thin dispatcher to ways binary
 #
-# TRIGGER FLOW:
-# ┌──────────────────┐     ┌─────────────────┐     ┌──────────────┐
-# │ UserPromptSubmit │────▶│ scan_ways()     │────▶│ show-way.sh  │
-# │ (hook event)     │     │ for each way.md │     │ (idempotent) │
-# └──────────────────┘     │  if pattern OR  │     └──────────────┘
-#                          │  semantic match │
-#                          └─────────────────┘
-#
-# Ways are nested: domain/wayname/way.md (e.g., softwaredev/delivery/github/way.md)
-# Matching is ADDITIVE: pattern (regex/keyword) and semantic are OR'd.
-# Semantic matching: embedding → BM25 binary → skip.
-# Project-local ways are scanned first (and take precedence).
+# The ways binary handles: file walking, frontmatter extraction, pattern
+# + semantic matching, scope/precondition gating, parent threshold
+# lowering, session markers, macro dispatch, and content output.
 
 INPUT=$(cat)
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' | tr '[:upper:]' '[:lower:]')
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(echo "$INPUT" | jq -r '.cwd // empty')}"
-WAYS_DIR="${HOME}/.claude/hooks/ways"
-
-# Shared matching logic (engine detection + additive match function)
-source "${WAYS_DIR}/match-way.sh"
-detect_semantic_engine
-
-# Clean up embedding cache on exit (ephemeral per-prompt eval cycle)
-[[ -n "${EMBED_CACHE:-}" ]] && trap 'rm -f "$EMBED_CACHE" 2>/dev/null' EXIT
-
-# Epoch counter
-source "${WAYS_DIR}/epoch.sh"
-bump_epoch "$SESSION_ID"
-
-# Detect execution scope (agent vs teammate)
-source "${WAYS_DIR}/detect-scope.sh"
-CURRENT_SCOPE=$(detect_scope "$SESSION_ID")
 
 # Read response topics from Stop hook (if available)
 RESPONSE_STATE="/tmp/claude-response-topics-${SESSION_ID}"
@@ -43,59 +18,10 @@ if [[ -f "$RESPONSE_STATE" ]]; then
 fi
 
 # Combined context: user prompt + Claude's recent topics
-COMBINED_CONTEXT="$PROMPT $RESPONSE_TOPICS"
+COMBINED="${PROMPT} ${RESPONSE_TOPICS}"
 
-# Scan ways in a directory for matches (recursive)
-scan_ways() {
-  local dir="$1"
-  [[ ! -d "$dir" ]] && return
-
-  # Find all way.md files recursively
-  while IFS= read -r -d '' wayfile; do
-    # Extract way path relative to ways dir (e.g., "softwaredev/delivery/github")
-    waypath="${wayfile#$dir/}"
-    waypath="${waypath%/way.md}"
-
-    # Extract frontmatter fields
-    frontmatter=$(awk 'NR==1 && /^---$/{p=1; next} p && /^---$/{exit} p{print}' "$wayfile")
-    get_field() { echo "$frontmatter" | awk "/^$1:/"'{gsub(/^'"$1"': */, ""); print; exit}'; }
-
-    # Core fields
-    pattern=$(get_field "pattern")            # regex pattern
-    description=$(get_field "description")    # reference text for semantic matching
-    vocabulary=$(get_field "vocabulary")      # domain words for semantic matching
-    threshold=$(get_field "threshold")        # score threshold for semantic matching
-
-    # Check scope -- skip if current scope not in way's scope list
-    scope_raw=$(get_field "scope")
-    scope_raw="${scope_raw:-agent}"
-    scope_matches "$scope_raw" "$CURRENT_SCOPE" || continue
-
-    # Check when: preconditions -- deterministic gate before matching
-    check_when_preconditions "$frontmatter" || continue
-
-    # Parent-aware threshold lowering: if a parent way already fired this session,
-    # reduce the child's threshold by 20% (parent activation is evidence of domain context)
-    effective_threshold="$threshold"
-    if [[ -n "$threshold" ]]; then
-      _parent_path="$waypath"
-      while [[ "$_parent_path" == */* ]]; do
-        _parent_path="${_parent_path%/*}"
-        _parent_marker_name=$(echo "$_parent_path" | tr '/' '-')
-        if [[ -f "/tmp/.claude-way-${_parent_marker_name}-${SESSION_ID}" ]]; then
-          effective_threshold=$(awk -v t="$threshold" 'BEGIN{printf "%.1f", t * 0.8}')
-          break
-        fi
-      done
-    fi
-
-    # Additive matching: pattern OR semantic (either channel can fire)
-    if match_way_prompt "$PROMPT" "$pattern" "$description" "$vocabulary" "$effective_threshold" "$waypath"; then
-      ~/.claude/hooks/ways/show-way.sh "$waypath" "$SESSION_ID" "${MATCH_CHANNEL:-prompt}"
-    fi
-  done < <(find -L "$dir" -name "way.md" -print0 2>/dev/null)
-}
-
-# Scan project-local first, then global
-scan_ways "$PROJECT_DIR/.claude/ways"
-scan_ways "${HOME}/.claude/hooks/ways"
+export CLAUDE_PROJECT_DIR="${PROJECT_DIR}"
+"${HOME}/.claude/bin/ways" scan prompt \
+  --query "$COMBINED" \
+  --session "$SESSION_ID" \
+  --project "$PROJECT_DIR"

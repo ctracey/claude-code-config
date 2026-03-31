@@ -23,7 +23,7 @@ Before engaging the human, assess what exists:
 2. Check if `.claude/ways/` exists in the project
 3. If ways exist, list them with their matching modes:
    ```bash
-   find "$CLAUDE_PROJECT_DIR/.claude/ways" -name "way.md" 2>/dev/null
+   find "$CLAUDE_PROJECT_DIR/.claude/ways" -name "*.md" ! -name "*.check.md" 2>/dev/null
    ```
 4. For each existing way, extract the frontmatter (pattern, description, vocabulary, trigger) and show a summary table
 
@@ -85,7 +85,7 @@ If the project has existing ways, show the domains in use and suggest consistenc
 mkdir -p "$CLAUDE_PROJECT_DIR/.claude/ways/{domain}/{wayname}"
 ```
 
-### 3. Write way.md
+### 3. Write {wayname}.md
 
 The frontmatter must match the chosen trigger strategy. The body should:
 - Be directive and concise (20-60 lines ideal)
@@ -168,7 +168,7 @@ After creating or revising a way:
 
 After the way is created or revised:
 
-- Show the file location: `.claude/ways/{domain}/{wayname}/way.md`
+- Show the file location: `.claude/ways/{domain}/{wayname}/{wayname}.md`
 - Explain when it will fire: "Next session, when you [trigger condition], this guidance will load automatically"
 - Point to `/ways-tests` for ongoing tuning: "Use `/ways-tests score {wayname} 'prompt'` to test matching, `/ways-tests suggest {wayname}` to analyze vocabulary"
 - If the way has semantic matching, suggest running `/ways-tests score-all "sample prompt"` to verify it doesn't overlap with other ways
@@ -176,7 +176,7 @@ After the way is created or revised:
 
 ## Checks — Confidence Sensors
 
-Ways can have an optional paired `check.md` in the same directory. Checks fire on PreToolUse (before edits/commands) with an epoch-distance-aware scoring curve. See ADR-103 for the full design.
+Ways can have an optional paired `{wayname}.check.md` in the same directory. Checks fire on PreToolUse (before edits/commands) with an epoch-distance-aware scoring curve. See ADR-103 for the full design.
 
 ### When to suggest a check
 
@@ -218,8 +218,8 @@ scope: agent
 
 ```
 .claude/ways/{domain}/{wayname}/
-  way.md        # directive (fires on domain entry)
-  check.md      # sensor (fires before action, with decay)
+  {wayname}.md        # directive (fires on domain entry)
+  {wayname}.check.md  # sensor (fires before action, with decay)
 ```
 
 ## Principles

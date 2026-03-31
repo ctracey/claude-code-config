@@ -183,7 +183,7 @@ Flag these patterns:
 
 When the user gives a short name like "security" instead of a full path:
 1. Check `$CLAUDE_PROJECT_DIR/.claude/ways/` first (project-local)
-2. Then check `~/.claude/hooks/ways/` recursively for `*/security/way.md`
+2. Then check `~/.claude/hooks/ways/` recursively for `*/security/security.md`
 3. If multiple matches, list them and ask the user to pick
 
 ## Score Mode (BM25 Fallback)
@@ -199,7 +199,7 @@ bash ~/.claude/tools/way-match/generate-corpus.sh
 Use the `way-match` binary at `~/.claude/bin/way-match`:
 
 ```bash
-# Extract frontmatter fields from the way.md
+# Extract frontmatter fields from the way file
 description=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^description:/{gsub(/^description: */,"");print;exit}' "$wayfile")
 vocabulary=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^vocabulary:/{gsub(/^vocabulary: */,"");print;exit}' "$wayfile")
 threshold=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^threshold:/{gsub(/^threshold: */,"");print;exit}' "$wayfile")
@@ -253,7 +253,7 @@ Flag these patterns:
 
 **With embedding active**: run `way-embed match` once — it scores the query against all pre-computed corpus embeddings in a single batch call (~20ms). No per-way loop needed. Output is already ranked by cosine similarity.
 
-**With BM25 fallback**: for each way.md file found (project-local + global), extract description+vocabulary and run `way-match pair`. Display results as a ranked table:
+**With BM25 fallback**: for each way file found (project-local + global), extract description+vocabulary and run `way-match pair`. Display results as a ranked table:
 
 ```
 Score   Threshold  Match  Way
@@ -321,16 +321,16 @@ Validate way frontmatter against the official schema. Use the linter script for 
 
 ```bash
 # Lint all ways (global + project-local)
-bash ~/.claude/hooks/ways/lint-ways.sh
-
-# Lint with fix suggestions
-bash ~/.claude/hooks/ways/lint-ways.sh --fix
+ways lint
 
 # Print the frontmatter schema
-bash ~/.claude/hooks/ways/lint-ways.sh --schema
+ways lint --schema
 
 # Lint a specific directory
-bash ~/.claude/hooks/ways/lint-ways.sh hooks/ways/meta/
+ways lint hooks/ways/meta/
+
+# Exit non-zero on errors (for CI)
+ways lint --check
 ```
 
 The linter checks:
@@ -338,14 +338,14 @@ The linter checks:
 - Invalid values (non-numeric threshold, bad scope values, bad macro values)
 - Incomplete pairs (description without vocabulary, or vice versa)
 - `when:` block validation (unknown sub-fields, path existence)
-- check.md structure (`## anchor` and `## check` sections)
+- `*.check.md` structure (`## anchor` and `## check` sections)
 - Sibling vocabulary isolation (Jaccard > 0.15 warning, > 0.25 error)
 
 The linter does NOT flag absence of optional fields. A way without `when:`, `macro:`, or `provenance:` is correct — these fields are additive. Only flag what's wrong, not what's missing-but-optional.
 
 ### Frontmatter Schema Reference
 
-Run `bash ~/.claude/hooks/ways/lint-ways.sh --schema` for the full field reference. Key categories:
+Run `ways lint --schema` for the full field reference. Key categories:
 
 **Trigger fields**: `pattern`, `description`, `vocabulary`, `threshold`, `files`, `commands`, `trigger`
 **Scope/preconditions**: `scope`, `when:` (with sub-field `project:`)
@@ -358,7 +358,7 @@ Run `bash ~/.claude/hooks/ways/lint-ways.sh --schema` for the full field referen
 When linting all ways, also check tree structural health:
 - **Threshold progression**: Flag child ways with threshold <= parent threshold
 - **Vocabulary isolation**: Flag siblings with Jaccard > 0.15
-- **Orphan detection**: Flag way.md files in subdirectories with no ancestor way.md
+- **Orphan detection**: Flag way files in subdirectories with no ancestor way file
 - **Token budget**: Flag individual ways > 500 tokens (frontmatter-stripped)
 - **Tree depth**: Warn if any tree exceeds depth 4
 
@@ -376,7 +376,7 @@ Displays match score, distance factor, decay factor, effective score, and simula
 
 Analyze the progressive disclosure structure of a way tree. The path can be a short name (e.g., `supplychain`) or full path.
 
-Walk the tree recursively, finding all `way.md` and `check.md` files. For each file, extract frontmatter and compute structural metrics.
+Walk the tree recursively, finding all way files (`{name}.md`) and check files (`{name}.check.md`). For each file, extract frontmatter and compute structural metrics.
 
 ### What to Report
 
@@ -386,10 +386,10 @@ Walk the tree recursively, finding all `way.md` and `check.md` files. For each f
 Structure:
   Depth: 3 levels (root → depscan → python)
   Breadth: 5 at level 1, 4 at level 2
-  Total ways: 8 way.md + 1 check.md = 9 files
+  Total ways: 8 ways + 1 check = 9 files
 
 Threshold Progression:
-  Level 0  way.md          threshold=1.8  ✓
+  Level 0  supplychain.md  threshold=1.8  ✓
   Level 1  repoaudit       threshold=2.0  ✓
   Level 1  sourceaudit     threshold=2.0  ✓
   Level 1  depscan         threshold=1.8  ⚠ same as parent
@@ -409,7 +409,7 @@ Assessment: Thresholds increase with depth (1.8→2.0→2.5). Good.
 - **Flat threshold**: Parent and child share exact threshold → no progressive narrowing
 - **Vocabulary overlap**: Sibling ways with Jaccard similarity > 0.15 → competing triggers. Run `bash ~/.claude/tools/way-tree-analyze.sh jaccard <tree>` to compute pairwise scores and include results in the tree report. See **Jaccard Mode** for details on presentation and thresholds.
 
-- **Orphan ways**: A way.md in a subdirectory where no parent directory has a way.md → no progressive disclosure root
+- **Orphan ways**: A `{name}.md` in a subdirectory where no parent directory has a way file → no progressive disclosure root
 - **Deep trees**: Depth > 4 levels → likely over-decomposed
 - **Wide trees**: Breadth > 7 at any level → may need sub-grouping
 
@@ -423,17 +423,17 @@ Estimate token cost for a way tree. Uses `wc -c` on frontmatter-stripped content
 === Token Budget: softwaredev/code/supplychain ===
 
 Per-way:
-  way.md              ~300 tokens
-  check.md            ~150 tokens
-  repoaudit/way.md    ~450 tokens
-  sourceaudit/way.md  ~280 tokens
-  depscan/way.md      ~430 tokens
-  depscan/python      ~250 tokens
-  depscan/node        ~240 tokens
-  depscan/go          ~230 tokens
-  depscan/rust        ~210 tokens
-  automation/way.md   ~720 tokens
-  historysever/way.md ~580 tokens
+  supplychain.md           ~300 tokens
+  supplychain.check.md     ~150 tokens
+  repoaudit/repoaudit.md   ~450 tokens
+  sourceaudit/sourceaudit.md ~280 tokens
+  depscan/depscan.md        ~430 tokens
+  depscan/python            ~250 tokens
+  depscan/node              ~240 tokens
+  depscan/go                ~230 tokens
+  depscan/rust              ~210 tokens
+  automation/automation.md  ~720 tokens
+  historysever/historysever.md ~580 tokens
 
 Paths (root → leaf):
   → repoaudit                    ~900 tokens
@@ -584,7 +584,7 @@ Top 10 most contested terms (appear in 3+ way vocabularies):
 2. Sort results by score, identify clusters within 20% of each other
 3. For each pair of semantic ways, compute vocabulary Jaccard:
 ```bash
-# For each pair of way.md files with vocabulary fields
+# For each pair of way files with vocabulary fields
 # Split vocab into word sets, compute |A∩B| / |A∪B|
 ```
 4. Count term frequency across all vocabularies
@@ -606,7 +606,7 @@ Avg threshold       2.08            2.07
 Worst-case tokens   ~3840           ~1100
 Avg path tokens     ~940            ~680
 Max sibling Jaccard 0.08            0.05
-Has check.md        yes             no
+Has check file      yes             no
 Has macro.sh        yes (2)         no
 
 Assessment: supplychain is deeper and broader (8 domain-specific leaves).
@@ -617,7 +617,7 @@ Present the comparison as a table, then an assessment noting which tree is more 
 
 ## Metrics Mode
 
-Show tree disclosure metrics from the current session. The metrics file is written by `show-way.sh` at `/tmp/.claude-way-metrics-{session_id}.jsonl`.
+Show tree disclosure metrics from the current session. The metrics file is written by `ways show` at `/tmp/.claude-sessions/{session_id}/metrics.jsonl`.
 
 ### How to Read Metrics
 

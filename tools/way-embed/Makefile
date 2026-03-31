@@ -59,7 +59,7 @@ model-upstream:
 # Tries pre-built binary from GitHub Releases first, builds from source if unavailable.
 setup: setup-binary $(MODEL)
 	@echo "Regenerating corpus with embeddings..."
-	bash $(SRCDIR)../../tools/way-match/generate-corpus.sh
+	$(HOME)/.claude/bin/ways corpus --quiet
 	@echo ""
 	@echo "Setup complete. Running verification..."
 	bash $(SRCDIR)test-embedding.sh

@@ -49,7 +49,7 @@ The filtering logic in `detect-scope.sh` is a simple word match: does the way's 
 
 ## The Teams Way
 
-`meta/teams/way.md` fires on `session-start` with `scope: teammate`. When a teammate's first `UserPromptSubmit` hook runs, `check-state.sh` evaluates this trigger, confirms the scope matches, and injects the coordination norms:
+`meta/teams/teams.md` fires on `session-start` with `scope: teammate`. When a teammate's first `UserPromptSubmit` hook runs, `check-state.sh` evaluates this trigger, confirms the scope matches, and injects the coordination norms:
 
 - Check TaskList after completing each task
 - Use SendMessage to report progress and blockers

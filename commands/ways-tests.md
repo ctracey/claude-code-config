@@ -12,7 +12,7 @@ The user invokes `/ways-tests` with one of these patterns:
 
 ### Score mode: test a way against prompts
 ```
-/ways-tests score <path/to/way.md> "sample prompt here"
+/ways-tests score <path/to/{name}.md> "sample prompt here"
 /ways-tests score security "how do i hash passwords with bcrypt"
 ```
 
@@ -23,20 +23,20 @@ The user invokes `/ways-tests` with one of these patterns:
 
 ### Suggest mode: analyze vocabulary gaps
 ```
-/ways-tests suggest <path/to/way.md>
+/ways-tests suggest <path/to/{name}.md>
 /ways-tests suggest security
 /ways-tests suggest --all
 ```
 
 ### Suggest + apply: update vocabulary in-place
 ```
-/ways-tests suggest <path/to/way.md> --apply
+/ways-tests suggest <path/to/{name}.md> --apply
 /ways-tests suggest --all --apply
 ```
 
 ### Lint mode: validate way frontmatter
 ```
-/ways-tests lint <path/to/way.md>
+/ways-tests lint <path/to/{name}.md>
 /ways-tests lint --all
 ```
 
@@ -46,7 +46,7 @@ The user invokes `/ways-tests` with one of these patterns:
 
 When the user gives a short name like "security" instead of a full path:
 1. Check `$CLAUDE_PROJECT_DIR/.claude/ways/` first (project-local)
-2. Then check `~/.claude/hooks/ways/` recursively for `*/security/way.md`
+2. Then check `~/.claude/hooks/ways/` recursively for `*/security/security.md`
 3. If multiple matches, list them and ask the user to pick
 
 ### Score mode
@@ -54,7 +54,7 @@ When the user gives a short name like "security" instead of a full path:
 Use the `way-match` binary at `~/.claude/bin/way-match`:
 
 ```bash
-# Extract frontmatter fields from the way.md
+# Extract frontmatter fields from the way file
 description=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^description:/{gsub(/^description: */,"");print;exit}' "$wayfile")
 vocabulary=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^vocabulary:/{gsub(/^vocabulary: */,"");print;exit}' "$wayfile")
 threshold=$(awk 'NR==1 && /^---$/{p=1;next} p&&/^---$/{exit} p && /^threshold:/{gsub(/^threshold: */,"");print;exit}' "$wayfile")
@@ -73,7 +73,7 @@ Display the score, threshold, and match/no-match result. If the way has no vocab
 
 ### Score-all mode
 
-For each way.md file found (project-local + global), extract description+vocabulary and run `way-match pair`. Display results as a ranked table:
+For each way file found (project-local + global), extract description+vocabulary and run `way-match pair`. Display results as a ranked table:
 
 ```
 Score   Threshold  Match  Way
@@ -133,7 +133,7 @@ When `--apply` is specified:
 
 3. **If git-tracked** (or --force):
    - Parse the VOCABULARY line from suggest output
-   - Use `sed` to replace the `vocabulary:` line in the way.md frontmatter
+   - Use `sed` to replace the `vocabulary:` line in the way file frontmatter
    - Show the diff: `git diff "$wayfile"`
    - Report: "Updated vocabulary in <path> (+N terms)"
 
@@ -153,18 +153,18 @@ Validate way frontmatter for correctness:
 ### `--all` flag
 
 When `--all` is specified for suggest or lint:
-1. Find all way.md files in `~/.claude/hooks/ways/` recursively
+1. Find all way files in `~/.claude/hooks/ways/` recursively
 2. Also check `$CLAUDE_PROJECT_DIR/.claude/ways/` if project dir is set
 3. Process each file and aggregate results
 
 ### Check mode: test check scoring curve
 
 ```
-/ways-tests check <path/to/check.md> "tool context" --distance N --fires N
+/ways-tests check <path/to/{name}.check.md> "tool context" --distance N --fires N
 /ways-tests check design "editing architecture file" --distance 20 --fires 0
 ```
 
-Simulates the check scoring curve for a given check.md against tool context. Accepts optional `--distance` (epoch distance from parent way, default 10) and `--fires` (prior fire count this session, default 0).
+Simulates the check scoring curve for a given `{name}.check.md` against tool context. Accepts optional `--distance` (epoch distance from parent way, default 10) and `--fires` (prior fire count this session, default 0).
 
 Displays:
 ```
@@ -184,7 +184,7 @@ Simulate decay:
 ```
 
 Implementation:
-1. Extract frontmatter from check.md (description, vocabulary, threshold)
+1. Extract frontmatter from check file (description, vocabulary, threshold)
 2. Score the query with `way-match pair` to get match_score
 3. Apply the curve: `effective = match_score × (ln(distance+1)+1) × (1/(fires+1))`
 4. Show the breakdown and simulate successive firings until the check stops
@@ -195,16 +195,16 @@ Implementation:
 /ways-tests check-all "editing a database schema migration"
 ```
 
-Like `score-all` but for check.md files. Shows match score, effective score at various distances, and how many fires before decay silences each check.
+Like `score-all` but for `*.check.md` files. Shows match score, effective score at various distances, and how many fires before decay silences each check.
 
 ### Lint mode (updated for checks)
 
-Lint now also validates check.md files:
+Lint now also validates `*.check.md` files:
 
 - Check required fields: `description` must be present
 - Verify `## anchor` and `## check` sections exist in body
 - Verify threshold is a number
-- Check that parent way.md exists in same directory (orphan check detection)
+- Check that parent way file exists in same directory (orphan check detection)
 - Report issues per file
 
 Use `--all` to lint all ways AND checks.
