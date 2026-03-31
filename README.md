@@ -50,23 +50,23 @@ This repo ships with software development ways, but the mechanism is general-pur
 
 ## Prerequisites
 
-Runs on **Linux** and **macOS**. The hooks are all bash and lean on standard POSIX utilities plus a few extras:
+Runs on **Linux** and **macOS**. The core system is a Rust binary (`ways`) plus thin bash hook scripts:
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | The agent this configures | `npm install -g @anthropic-ai/claude-code` |
+| `ways` | Unified CLI — matching, scanning, linting, governance | Downloaded or built by `make setup` |
 | `git` | Version control, update checking | Usually pre-installed |
 | `jq` | JSON parsing (hook inputs, configs, API responses) | **Must install** |
-| `cargo` (Rust) | Build `ways` CLI from source | Pre-built binaries available via `make setup` |
 | `python3` | Governance traceability tooling, chart-tool | Stdlib only — no pip packages |
 | [`gh`](https://cli.github.com/) | GitHub API (update checks, repo macros) | Recommended, not required — degrades gracefully |
 
-Standard utilities (`bash`, `awk`, `sed`, `grep`, `find`, `timeout`, `tr`, `sort`, `wc`, `date`) are assumed present via coreutils.
+`make setup` acquires the `ways` binary automatically: pre-built download from GitHub Releases → build from source (requires `cargo`/Rust toolchain) → error with instructions. Standard utilities (`bash`, `awk`, `sed`, `grep`, `find`, `timeout`, `tr`, `sort`, `wc`, `date`) are assumed present via coreutils.
 
-**Semantic matching** uses a two-tier engine: **embedding** (all-MiniLM-L6-v2 via `ways embed`, 98% accuracy) → **BM25** (built into the `ways` binary, 91% accuracy). The embedding tier is preferred; BM25 is the fallback when the embedding model is unavailable. Both are managed through the unified `ways` CLI:
+**Semantic matching** uses a two-tier engine: **embedding** (all-MiniLM-L6-v2 via a separate `way-embed` binary, 98% accuracy) → **BM25** (built into `ways`, 91% accuracy). The embedding tier is preferred; BM25 is the automatic fallback when the embedding model is unavailable. Both are managed through the unified `ways` CLI:
 
 ```bash
-make setup   # download binary + model (21MB), generate corpus, verify
+make setup   # download ways binary + embedding model (~21MB), generate corpus
 ```
 
 See [Semantic Matching](docs/hooks-and-ways.md#semantic-matching) for the full setup and engine comparison.
@@ -111,6 +111,10 @@ The built-in ways cover software development, but the framework is domain-agnost
 
 Matching is tiered: regex patterns for known keywords/commands/files, then semantic scoring — either [sentence embeddings](docs/architecture/system/ADR-108-embedding-based-way-matching-with-all-minilm-l6-v2.md) (all-MiniLM-L6-v2) or [BM25](https://en.wikipedia.org/wiki/Okapi_BM25) term-frequency scoring. See [matching.md](docs/hooks-and-ways/matching.md) for the full strategy.
 
+`ways list` shows the live session state — which ways fired, when (epoch), how far back (distance), what triggered them, tree relationships, check decay curves, and a re-disclosure forecast showing when distant ways will re-fire as context fills:
+
+<img src="docs/images/ways-list-session.png" alt="ways list showing epoch tracking, distance, triggers, tree disclosure, and re-disclosure forecast" width="100%" />
+
 For the complete system guide — trigger flow, state machines, the pipeline from principle to implementation — see **[docs/hooks-and-ways/README.md](docs/hooks-and-ways/README.md)**.
 
 ## Configuration
@@ -137,15 +141,15 @@ Each way is a `{wayname}.md` file with YAML frontmatter in `~/.claude/hooks/ways
 
 ```yaml
 ---
-pattern: commit|push          # regex on user prompts
+description: semantic text    # embedding/BM25 matching (preferred)
+vocabulary: domain keywords   # space-separated terms for BM25 scoring
+threshold: 2.0                # BM25 score threshold
+embed_threshold: 0.35         # cosine similarity threshold (optional per-way tuning)
+pattern: commit|push          # regex on user prompts (supplementary)
 commands: git\ commit         # regex on bash commands
 files: \.env$                 # regex on file paths
-description: semantic text    # embedding/BM25 matching
-vocabulary: domain keywords   # BM25 vocabulary boost
-threshold: 2.0                # BM25 score threshold
-embed_threshold: 0.35         # cosine similarity threshold
 macro: prepend                # dynamic context via macro.sh
-scope: agent,subagent         # injection scope
+scope: agent, subagent        # injection scope
 ---
 ```
 
@@ -160,22 +164,33 @@ For the full authoring guide: [extending.md](docs/hooks-and-ways/extending.md) |
 After creating or tuning a way, verify it matches what you expect — and doesn't match what it shouldn't.
 
 ```bash
-# Quick check: score a prompt against all semantic ways
-/ways-tests "write some unit tests for this module"
+# Score a way against sample prompts (inside Claude Code)
+/ways-tests score security "how do i hash passwords with bcrypt"
 
-# Embedding engine tests (15 tests, validates ADR-108 claims)
-bash tools/way-embed/test-embedding.sh
+# Rank all ways against a prompt
+/ways-tests score-all "write some unit tests for this module"
 
-# Head-to-head: embedding vs BM25 on 64 fixtures
+# Validate frontmatter
+ways lint --global
+
+# Vocabulary gap analysis
+ways suggest --file ~/.claude/hooks/ways/softwaredev/code/security/security.md
+
+# Embedding similarity scores
+way-embed match --corpus ~/.cache/claude-ways/user/ways-corpus.jsonl \
+  --model ~/.cache/claude-ways/user/minilm-l6-v2.gguf \
+  --query "pin lockfile versions"
+
+# Sibling vocabulary overlap (Jaccard)
+ways siblings softwaredev/code/supplychain/depscan/node
+
+# Session simulation tests (Rust integration tests)
+make test-sim
+
+# Embedding engine comparison (embedding vs BM25 on 64 fixtures)
 bash tools/way-embed/compare-engines.sh
 
-# BM25 scorer against synthetic corpus (32 tests)
-bash tools/way-match/test-harness.sh --verbose
-
-# Score against real way files
-bash tools/way-match/test-integration.sh
-
-# Interactive: full hook pipeline with subagent injection (6 steps)
+# Interactive: full hook pipeline with subagent injection
 # Start a fresh session, then: read and run tests/way-activation-test.md
 ```
 
@@ -185,7 +200,16 @@ Other test tools: `scripts/doc-graph.sh --stats` checks documentation link integ
 
 ## What's Included
 
-This repo ships with **20+ ways** across three domains (softwaredev, itops, meta) — covering commits, security, testing, debugging, dependencies, documentation, and more. The live index is generated at session start. **Replace these entirely** if your domain isn't software dev.
+This repo ships with **85+ ways** across six domains — covering commits, security, testing, debugging, dependencies, architecture, documentation, and more. The live index is generated at session start. **Replace these entirely** if your domain isn't software dev.
+
+| Domain | Ways | Coverage |
+|--------|------|----------|
+| `softwaredev` | 50 | Commits, security, testing, debugging, deps, supply chain, architecture, delivery |
+| `meta` | 19 | Ways system itself — knowledge, authoring, optimization, introspection |
+| `ea` | 10 | Executive assistant — email, calendar, scheduling |
+| `itops` | 4 | Infrastructure operations |
+| `research` | 1 | Research workflows |
+| `writing` | 1 | Writing and documentation |
 
 Also included:
 - **[Agent teams](docs/hooks-and-ways/teams.md)** — three-scope model (agent/teammate/subagent) with scope-gated governance and team telemetry. When one agent becomes a team, every teammate gets the same handbook.
@@ -257,7 +281,7 @@ Policy-as-code for AI agents — lightweight, portable, deterministic.
 |---------|----------------|
 | **Tiered matching** | Regex for precision, embeddings for semantics, BM25 fallback — no cloud API needed |
 | **Shell macros** | Dynamic context from any source (APIs, files, system state) |
-| **Zero dependencies** | Bash + jq — runs anywhere |
+| **Minimal dependencies** | `ways` binary + bash + jq — no runtime services, no cloud APIs |
 | **Domain-agnostic** | Swap software dev ways for finance, ops, research, anything |
 | **Fully hackable** | Plain text files, fork and customize in minutes |
 
