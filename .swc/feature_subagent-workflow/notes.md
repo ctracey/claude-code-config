@@ -23,6 +23,7 @@ Skills use a `swc_` namespace prefix (underscore as namespace separator, hyphens
 | `swc_changelog` | Recent changelog entries, with invitation to ask for more |
 | `swc_update` | Update task status in the file |
 | `swc_begin` | Scaffold a new workload + plan + architecture set |
+| `swc_init` | Write the five stub docs into a resolved workload folder |
 | `swc_execute` | Spawn an implementation subagent for a task |
 
 ## Skill invocation
@@ -264,6 +265,7 @@ Decision not yet made — captured here as task 10.2. Explore before adding more
 | `swc_execute` | ✔ done | Spawn implementation subagent for a task |
 | `swc_update` | ✔ done | Update task status in file, with parent rollup |
 | `swc_begin` | ◐ draft | Scaffold new workload + plan + architecture |
+| `swc_init` | ✔ done | Write the five stub docs into a resolved workload folder |
 | `user-handoff` | □ not built | Structured handoff before commit |
 | `implementation-workflow` | □ not built | Governs the impl subagent step-by-step |
 | `review-subagent` | □ not built | Review findings format + skill |

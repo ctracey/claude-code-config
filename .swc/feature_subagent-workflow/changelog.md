@@ -147,6 +147,16 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - `.claude/.gitignore` deleted (redundant given root allowlist); root `.gitignore` updated with `.swc/` exemptions
 - Notes and plan docs updated to reflect new skill names, ways paths, and workload file locations
 
+## Session — Extract swc_init and add non-git-repo support to resolver `2026-03-31`
+
+- Extracted stub-file creation from `swc_plan-context` into a new `swc_init` skill — single responsibility: write the five stub docs, print nothing, return the folder path
+- `swc_plan-context` step 3 now delegates to `swc_init` rather than creating files inline
+- `swc_resolver` gained non-git-repo awareness: checks `git rev-parse --is-inside-work-tree` before any branch logic; if not a repo, offers to `git init` or fall back to directory name as the identifier
+- Branch recommendation prompt redesigned: open text entry (name → checkout, Enter → stay) replaces binary y/n; also fires after `git init`, not just on main/master
+- Silent fallback for missing `_meta.json` (removed the "not found" notice)
+- Folder-creation responsibility moved from `swc_resolver` to `swc_init` — resolver now stops after writing `_meta.json`
+- Closes task 13.1 (new-project setup now handled end-to-end by resolver + init pair)
+
 ## Task 10.1 — Workflow progress banner `2026-03-30`
 
 - Built `todo-workflow-progress` skill: emits a visual banner showing all stages with the active stage highlighted

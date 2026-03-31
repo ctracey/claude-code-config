@@ -6,7 +6,7 @@ allowed-tools: Read, Glob, Bash, Write
 
 # SWC Resolver
 
-Determine the `.swc/<folder>/` for the current (or specified) branch. In create mode, also creates the folder and updates `_meta.json`.
+Determine the `.swc/<folder>/` path for the current (or specified) branch. Handles git setup if needed. In create mode, also creates the folder and updates `_meta.json`.
 
 ## Arguments
 
@@ -16,25 +16,40 @@ Determine the `.swc/<folder>/` for the current (or specified) branch. In create 
 
 ## Steps
 
-### 1. Determine the branch
+### 1. Determine the working context
 
-Run `git branch --show-current` (or use the branch argument if supplied).
+Run `git rev-parse --is-inside-work-tree 2>/dev/null` to check for a git repo.
 
-**If the branch is `main` or `master`:**
+**If not a git repo:**
 
 ```
-⚠ You're on `main`. Working on a feature branch keeps your work isolated
-  and makes it easier to review before merging.
+This directory isn't a git repository.
 
-  Create a branch now? (y / n — continue on main):
+  Initialise one now? (y / n — use folder name instead):
 ```
 
-- **Yes:** ask for a branch name, run `git checkout -b <name>`, use the new branch.
-- **No:** continue on `main`. No further warning.
+- **No:** use the current directory name (basename of `pwd`) as the identifier. Skip to step 2.
+- **Yes:** ask for the primary branch name (default: `main`), then run `git init -b <name>`.
+  After init, go to the branch recommendation prompt below.
+
+**If a git repo exists**, run `git branch --show-current` (or use the branch argument if supplied).
+
+**Branch recommendation — triggers when on `main`/`master` OR just after `git init`:**
+
+```
+⚠ Working directly on `<branch>` makes it harder to review and roll back changes.
+  A feature branch is recommended.
+
+  What should the working branch be called?
+  (Enter a name, or press Enter to stay on `<branch>`):
+```
+
+- **Name provided:** run `git checkout -b <name>`, use the new branch.
+- **Empty / Enter:** continue on the current branch. No further warning.
 
 ### 2. Derive the folder name
 
-Replace every `/` in the branch name with `_`.
+Replace every `/` in the branch (or directory) name with `_`.
 
 > Example: `feature/swc-refactor` → `feature_swc-refactor`
 
@@ -43,10 +58,7 @@ Replace every `/` in the branch name with `_`.
 Read `.swc/_meta.json`.
 
 - **Found and branch has an entry:** folder confirmed → skip to step 5.
-- **Missing or branch not in map:** print a notice and continue to step 4:
-  ```
-  Note: .swc/_meta.json not found — falling back to folder scan.
-  ```
+- **Missing or branch not in map:** continue to step 4. Print nothing.
 
 ### 4. Scan folders
 
@@ -61,7 +73,7 @@ Stop.
 **No folders found — create mode:**
 Use the derived folder name from step 2. Proceed to step 5.
 
-**One folder found:** confirm with the user before proceeding, noting whether it matches the branch:
+**One folder found:** confirm with the user before proceeding, noting whether it matches:
 ```
 Found one workload: .swc/<branch-subfolder>/workload.md
 [MATCH] This folder matches your current branch.   ← or [NO MATCH] if it doesn't
@@ -95,11 +107,7 @@ Read the file first if it exists (to preserve other entries):
 
 Write the updated file. Print nothing — this is a silent side-effect.
 
-### 6. Create the folder (create mode only)
-
-If in create mode and `.swc/<folder>/` does not yet exist, create the directory by writing a `.swc/<folder>/.gitkeep` placeholder, then immediately delete it — or simply rely on the calling skill to write the first stub file into the folder. Print nothing.
-
-### 7. Return
+### 6. Return
 
 **Resolve mode:** print the resolved path:
 ```

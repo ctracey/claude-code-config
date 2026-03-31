@@ -6,27 +6,26 @@ allowed-tools: Read, Write, Edit, Glob, Bash
 
 # Plan Context
 
-Establish context before the planning conversation begins: confirm the branch, check for existing work, and create stub docs.
+Establish context before the planning conversation begins.
 
 ## Steps
 
-### 1. Resolve the branch and folder
+### 1. Resolve the folder
 
-Follow the `swc_resolver --create` skill. It handles:
-- Detecting the current branch
-- Warning if on `main` and offering to create a feature branch
-- Deriving the folder name (`/` → `_`)
-- Looking up or scanning for an existing workload
-- Creating the folder under `.swc/` and updating `_meta.json`
+Invoke `swc_resolver --create`. It handles:
+- Git repo detection and optional initialisation
+- Branch recommendation and confirmation
+- Folder name derivation and `_meta.json` update
 
-Once `swc_resolver` completes, you have:
-- The confirmed branch name
-- The folder path `.swc/<folder>/`
-- Whether an existing workload was found
+Returns: confirmed branch name + resolved folder path `.swc/<folder>/`.
 
-### 2. Handle existing workload (if found)
+### 2. Check for an existing workload
 
-If `swc_resolver` found an existing workload, read `.swc/<folder>/workload.md` and surface a brief summary — work item count, done count — then ask:
+Look for `.swc/<folder>/workload.md`.
+
+**Not found** — fresh start. Go to step 3.
+
+**Found** — read it and surface a brief summary (work item count, done count), then ask:
 
 > I found an existing workload for `<branch>` (M work items, X done). How does this new work relate?
 >
@@ -41,11 +40,12 @@ Wait for the user's choice before proceeding.
 
 **Replace**
 - Ask: "Archive the existing docs (rename folder with `_archived` suffix), or discard?"
-- Remove or rename the old entry in `_meta.json`. Proceed as if starting fresh.
+- Remove or rename the old entry in `_meta.json`. Treat as a fresh start.
 
 **Extend**
-- Ask how the new work relates to the existing scope (one sentence — goes into `notes.md`).
+- Ask how the new work relates to the existing scope (one sentence — append to `notes.md`).
 - New work items will be appended continuing from the highest existing number.
+- Skip step 3.
 
 **Sibling**
 - Ask: "What should the label be for the existing work as a group?" (e.g. "Phase 1", "Backend")
@@ -53,32 +53,28 @@ Wait for the user's choice before proceeding.
   - Old top-level item `1` with sub-items `1.1`, `1.2` → becomes `1.1` with sub-items `1.1.1`, `1.1.2`
   - Old top-level item `2` with sub-item `2.1` → becomes `1.2` with sub-item `1.2.1`
 - New work becomes item `2` with its own breakdown.
+- Skip step 3.
 
 **New sections**
 - Ask what the new section is about (one sentence).
 - Add a named section to `notes.md` and/or `architecture.md` as appropriate.
-- Skip to `swc-plan-delivery` (no new plan doc needed unless the user wants one).
+- Skip step 3 and skip to `swc-plan-delivery`.
 
-### 3. Create stub docs
+### 3. Scaffold stub docs
 
-Create `.swc/<folder>/` stub files (title + section headers only):
+Invoke `swc_init` with the resolved folder path. It creates the five stub files.
 
-- `workload.md`
-- `plan.md`
-- `architecture.md`
-- `notes.md`
-- `changelog.md`
+### 4. Confirm
 
-For **Extend**, **Sibling**, and **New sections** modes, edit existing files rather than creating new ones.
-
-Confirm: "Workload ready at `.swc/<folder>/`. Let's start with what's driving this work."
+Say: "Workload ready at `.swc/<folder>/`. Let's start with what's driving this work."
 
 ## Exit criteria
 
 **Done when:**
-- Branch confirmed with user (via `swc_resolver`)
+- Branch confirmed (via `swc_resolver`)
+- `_meta.json` updated (via `swc_resolver`)
 - Existing-work mode chosen (if applicable)
-- `_meta.json` written with branch→folder entry (via `swc_resolver`)
-- Stub docs created at `.swc/<folder>/`
+- Stub docs present at `.swc/<folder>/` (via `swc_init` or existing files)
+- User acknowledged
 
-**Return control to `swc-begin`.**
+**Return control to the calling skill.**
