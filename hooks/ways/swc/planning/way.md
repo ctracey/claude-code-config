@@ -1,7 +1,7 @@
 ---
 description: Collaborative planning conversation principles — how to conduct a good planning session with a user
-vocabulary: planning conversation intent delivery breakdown milestones swc-begin swc-plan workload work item
-pattern: plan.*(intent|solution|delivery|breakdown)|swc.*(begin|plan)|planning.*(session|conversation)
+vocabulary: planning conversation intent delivery breakdown milestones swc-workflow-plan swc-plan workload work item
+pattern: plan.*(intent|solution|delivery|breakdown)|swc.*(workflow.plan|plan)|planning.*(session|conversation)
 scope: agent
 ---
 

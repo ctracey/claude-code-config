@@ -6,7 +6,7 @@ allowed-tools: Write
 
 # SWC Init
 
-Create the stub planning docs for a new workload folder. Called by `swc_plan-context` after `swc_resolver` has confirmed the folder path.
+Create the stub planning docs for a new workload folder. Called by `swc_workflow_plan-context` after `swc_resolver` has confirmed the folder path.
 
 ## Arguments
 

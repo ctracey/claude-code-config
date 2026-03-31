@@ -1,6 +1,6 @@
 ---
-name: swc_plan-breakdown
-description: Propose and confirm the work item breakdown for a piece of work. Fifth phase of the planning conversation. Use when creating a task list, a workload breakdown, or when invoked via /swc-plan-breakdown.
+name: swc_workflow_plan-breakdown
+description: Propose and confirm the work item breakdown for a piece of work. Fifth phase of the planning conversation. Use when creating a task list, a workload breakdown, or when invoked via /swc-workflow-plan-breakdown.
 allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
@@ -68,7 +68,7 @@ Run `swc-list` to show the full workload. Then ask:
 
 > "That's the full breakdown. Anything to adjust before we wrap up?"
 
-Wait for any final adjustments, then proceed to `swc-plan-finalise`.
+Wait for any final adjustments, then proceed to `swc-workflow-plan-finalise`.
 
 ## Exit criteria
 
@@ -76,4 +76,4 @@ Wait for any final adjustments, then proceed to `swc-plan-finalise`.
 - Full workload written to `.swc/<folder>/workload.md`
 - User confirmed the breakdown
 
-**Return control to `swc-begin`.**
+**Return control to `swc-workflow-plan`.**

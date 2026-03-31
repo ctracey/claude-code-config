@@ -66,7 +66,7 @@ List all folders under `.swc/` (exclude `_meta.json`). Compare against the deriv
 
 **No folders found — resolve mode:**
 ```
-No workload found under .swc/. Run /swc-begin to start one.
+No workload found under .swc/. Run /swc-workflow-plan to start one.
 ```
 Stop.
 

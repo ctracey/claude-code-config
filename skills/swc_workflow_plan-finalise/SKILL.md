@@ -1,6 +1,6 @@
 ---
-name: swc_plan-finalise
-description: Finalise the planning docs — fill any remaining gaps, run swc-report, and confirm ready to start. Final phase of the planning conversation. Use at the end of a planning session or when invoked via /swc-plan-finalise.
+name: swc_workflow_plan-finalise
+description: Finalise the planning docs — fill any remaining gaps, run swc-report, and confirm ready to start. Final phase of the planning conversation. Use at the end of a planning session or when invoked via /swc-workflow-plan-finalise.
 allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
@@ -59,4 +59,4 @@ After the report output, say:
 - `swc-report` playback has been presented
 - User has explicitly confirmed the plan is correct
 
-**Return control to `swc-begin`. Planning is complete.**
+**Return control to `swc-workflow-plan`. Planning is complete.**

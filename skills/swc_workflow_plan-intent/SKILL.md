@@ -1,6 +1,6 @@
 ---
-name: swc_plan-intent
-description: Understand the intent behind a piece of work — why it exists, for whom, and what success looks like. Second phase of the planning conversation. Use when exploring motivation and goals, or when invoked via /swc-plan-intent.
+name: swc_workflow_plan-intent
+description: Understand the intent behind a piece of work — why it exists, for whom, and what success looks like. Second phase of the planning conversation. Use when exploring motivation and goals, or when invoked via /swc-workflow-plan-intent.
 allowed-tools: Read, Write, Edit, Glob
 ---
 
@@ -62,4 +62,4 @@ Transition: *"Good — now let's talk about how you're thinking of approaching i
 - `plan.md` has `## Goal / Why` written
 - User confirmed the playback is correct
 
-**Return control to `swc-begin`.**
+**Return control to `swc-workflow-plan`.**

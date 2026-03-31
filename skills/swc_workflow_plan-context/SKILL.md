@@ -1,6 +1,6 @@
 ---
-name: swc_plan-context
-description: Confirm the working branch, check for existing workloads, and create stub planning docs. First phase of the planning conversation. Use at the start of a planning session or when invoked via /swc-plan-context.
+name: swc_workflow_plan-context
+description: Confirm the working branch, check for existing workloads, and create stub planning docs. First phase of the planning conversation. Use at the start of a planning session or when invoked via /swc-workflow-plan-context.
 allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
@@ -58,7 +58,7 @@ Wait for the user's choice before proceeding.
 **New sections**
 - Ask what the new section is about (one sentence).
 - Add a named section to `notes.md` and/or `architecture.md` as appropriate.
-- Skip step 3 and skip to `swc-plan-delivery`.
+- Skip step 3 and skip to `swc-workflow-plan-delivery`.
 
 ### 3. Scaffold stub docs
 

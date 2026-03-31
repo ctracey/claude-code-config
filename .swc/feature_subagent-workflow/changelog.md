@@ -157,6 +157,16 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Folder-creation responsibility moved from `swc_resolver` to `swc_init` — resolver now stops after writing `_meta.json`
 - Closes task 13.1 (new-project setup now handled end-to-end by resolver + init pair)
 
+## Session — Rename swc_begin and swc_plan-* to swc_workflow_plan-* `2026-03-31`
+
+- `swc_begin` renamed to `swc_workflow_plan` — entry point name now reflects what it does (start the planning workflow)
+- All six planning phase skills renamed: `swc_plan-context/intent/solution/delivery/breakdown/finalise` → `swc_workflow_plan-*` — groups them clearly under the planning workflow
+- `swc_update` renamed to `swc_workload-update` — aligns with the `swc_workload` family naming
+- `planning/way.md` vocabulary and pattern updated to reference `swc-workflow-plan`
+- `workload-guard/way.md` updated: all references to `swc-update` → `swc-workload-update`
+- `swc_init/SKILL.md` and `swc_resolver/SKILL.md` references updated to new names
+- Old `swc_begin`, `swc_plan-*`, and `swc_update` skill directories removed
+
 ## Task 10.1 — Workflow progress banner `2026-03-30`
 
 - Built `todo-workflow-progress` skill: emits a visual banner showing all stages with the active stage highlighted

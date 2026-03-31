@@ -1,6 +1,6 @@
 ---
-name: swc_plan-delivery
-description: Understand the delivery shape — phases, milestones, and priorities. What lands first and why. Fourth phase of the planning conversation. Use when discussing rollout, sequencing, or priorities, or when invoked via /swc-plan-delivery.
+name: swc_workflow_plan-delivery
+description: Understand the delivery shape — phases, milestones, and priorities. What lands first and why. Fourth phase of the planning conversation. Use when discussing rollout, sequencing, or priorities, or when invoked via /swc-workflow-plan-delivery.
 allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
@@ -55,4 +55,4 @@ Transition: *"Good — let's figure out how to break it down."*
 - Skeleton workload written to `.swc/<folder>/workload.md`
 - User confirmed the ordering and grouping
 
-**Return control to `swc-begin`.**
+**Return control to `swc-workflow-plan`.**

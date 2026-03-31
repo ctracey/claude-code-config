@@ -1,6 +1,6 @@
 ---
-name: swc_plan-solution
-description: Understand the solution direction for a piece of work — tech approach, constraints, open questions, and deferred decisions. Third phase of the planning conversation. Use when exploring how to build something, or when invoked via /swc-plan-solution.
+name: swc_workflow_plan-solution
+description: Understand the solution direction for a piece of work — tech approach, constraints, open questions, and deferred decisions. Third phase of the planning conversation. Use when exploring how to build something, or when invoked via /swc-workflow-plan-solution.
 allowed-tools: Read, Write, Edit, Glob
 ---
 
@@ -73,4 +73,4 @@ Transition: *"Good — before we get into individual work items, let's talk abou
 - `plan.md` has Features and Out of scope
 - User confirmed the playback is correct
 
-**Return control to `swc-begin`.**
+**Return control to `swc-workflow-plan`.**
