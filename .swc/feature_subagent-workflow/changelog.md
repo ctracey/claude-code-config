@@ -120,6 +120,16 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Test scaffolding added: `todo-test-workflow` (two-stage greeting sequence), `todo-test-stage1` (greet), `todo-test-stage2` (goodbye) — validates the orchestrator pattern end-to-end
 - Workflow definition format: JSON with `title`, `stages` array (each with `name` and `skill`), and `active_stage` index
 
+## Session — Relocate .swc to repo root and add workload display skills `2026-03-31`
+
+- Moved workload tracking from `.claude/.swc/` to `.swc/` at repo root — avoids path confusion between the repo and the config dir since they are the same thing
+- Renamed `meta.json` → `_meta.json` to distinguish it from workload content files
+- Added `swc_workload-resolver` skill: canonical way to resolve the active workload path from branch name via `_meta.json`, with folder-scan fallback and user confirmation
+- Added `swc_workload` skill: displays work items with visual status symbols (✔/▣/□) and strikethrough for done items
+- Removed `swc_list` skill (superseded by `swc_workload`)
+- Updated `.gitignore` allowlist, all skill path references, and both swc ways to use new `.swc/` root location
+- Task 7.1 marked done
+
 ## Session — SWC namespace reorganisation `2026-03-31`
 
 - Skills renamed from `todo-*` to `swc_*` — underscore separates namespace from name, hyphens join words within (e.g. `swc_plan-context`, `swc_report-notes`)

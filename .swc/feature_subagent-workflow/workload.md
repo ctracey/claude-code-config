@@ -38,7 +38,7 @@
   - [ ] 6.2. Build the review subagent skill
 
 - [-] **7. Switch from todo-pr tracking to .swc workload tracking**
-  - [-] 7.1. Decide tracking strategy (branch-only vs always vs never)
+  - [x] 7.1. Decide tracking strategy (branch-only vs always vs never)
   - [ ] 7.2. Add cleanup step to ship flow if branch-only approach adopted
 
 - [ ] **8. Implementation agent reflection**

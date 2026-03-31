@@ -1,20 +1,20 @@
 ---
-description: SWC workload tracking — persistent workload files in .claude/.swc/ for multi-session continuity
+description: SWC workload tracking — persistent workload files in .swc/ for multi-session continuity
 vocabulary: swc workload work item tracking cross-session multi-session persistent task todo picking resume continuity progress
 threshold: 2.0
-pattern: swc|workload|work.?item|\.claude/\.swc
-files: \.claude/\.swc/.*\.md$
+pattern: swc|workload|work.?item|\.swc
+files: \.swc/.*\.md$
 scope: agent, subagent
 ---
 # SWC Workload Tracking Way
 
 ## Persistent Workload Files
 
-For complex, multi-session work, create a workload under `.claude/.swc/`:
+For complex, multi-session work, create a workload under `.swc/`:
 
 ```
-.claude/.swc/
-├── meta.json                     # branch→folder mapping
+.swc/
+├── _meta.json                     # branch→folder mapping
 └── feature_my-work/              # branch name with / → _
     ├── workload.md               # work item list
     ├── plan.md
@@ -34,9 +34,9 @@ For complex, multi-session work, create a workload under `.claude/.swc/`:
 
 **Workload folder resolution:**
 1. Run `git branch --show-current`
-2. Read `.claude/.swc/meta.json`
+2. Read `.swc/_meta.json`
 3. Look up branch in `workloads` map → folder name
-4. Fallback: most recently modified folder under `.claude/.swc/`
+4. Fallback: most recently modified folder under `.swc/`
 
 **Work item status markers:**
 

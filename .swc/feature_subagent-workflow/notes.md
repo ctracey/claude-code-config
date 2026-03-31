@@ -120,9 +120,9 @@ If it shaped the direction, it belongs in the docs. Write to them throughout the
 
 Workload files are first-class documentation — tracked in git alongside the branch they describe.
 
-- Location: `.claude/.swc/<folder>/` where folder = branch name with `/` replaced by `_`
-- Files tracked: `workload.md`, `plan.md`, `notes.md`, `changelog.md`, `architecture.md`, `meta.json`
-- `.gitignore` allowlist pattern: `!.claude/.swc/`, `!.claude/.swc/*/`, `!.claude/.swc/**/*.md`
+- Location: `.swc/<folder>/` where folder = branch name with `/` replaced by `_`
+- Files tracked: `workload.md`, `plan.md`, `notes.md`, `changelog.md`, `architecture.md`, `_meta.json`
+- `.gitignore` allowlist pattern: `!.swc/`, `!.swc/*/`, `!.swc/**/*.md`
 - Motivation: gives reviewers full context on intent, decisions, and task breakdown without ad-hoc tracking files cluttering `.claude/`
 
 ## todo-add skill — scenarios and requirements (2.7)

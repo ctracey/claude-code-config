@@ -53,7 +53,7 @@ All 19 `skills/todo-*` directories renamed to `skills/swc-*`:
 
 ```
 .claude/.swc/
-├── meta.json                        # branch→folder mapping + metadata
+├── _meta.json                        # branch→folder mapping + metadata
 └── feature_swc-refactor/            # branch name with / → _
     ├── workload.md                  # work item list (was: task list)
     ├── plan.md
@@ -62,7 +62,7 @@ All 19 `skills/todo-*` directories renamed to `skills/swc-*`:
     └── changelog.md
 ```
 
-**`meta.json` shape:**
+**`_meta.json` shape:**
 ```json
 {
   "version": 1,
@@ -76,7 +76,7 @@ All 19 `skills/todo-*` directories renamed to `skills/swc-*`:
 1. Run `git branch --show-current`
 2. Ask: "You're on `<branch>`. Start the workload here, or switch to a new branch first?"
 3. If switching: help create/checkout, re-detect, then continue
-4. Write entry to `meta.json`, create folder, create stub files
+4. Write entry to `_meta.json`, create folder, create stub files
 
 ## Cross-Reference Map
 

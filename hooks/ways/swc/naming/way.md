@@ -6,11 +6,11 @@ scope: agent, subagent
 ---
 # SWC Workload File Naming
 
-Workloads live in `.claude/.swc/` — one folder per branch.
+Workloads live in `.swc/` — one folder per branch.
 
 ```
-.claude/.swc/
-├── meta.json
+.swc/
+├── _meta.json
 └── feature_my-work/
     ├── workload.md
     ├── plan.md
@@ -29,7 +29,7 @@ Branch names with `/` are mapped to `_` for filesystem safety:
 | `fix/auth-bug` | `fix_auth-bug` |
 | `main` | `main` |
 
-The canonical mapping lives in `meta.json`:
+The canonical mapping lives in `_meta.json`:
 
 ```json
 {

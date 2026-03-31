@@ -154,11 +154,11 @@ Reference docs live in the `.swc/` workload folder for the branch. All scoped to
 
 | File | Contents |
 |---|---|
-| `.claude/.swc/<folder>/workload.md` | Numbered task breakdown with status markers |
-| `.claude/.swc/<folder>/plan.md` | Feature list, goals, product intent, out of scope |
-| `.claude/.swc/<folder>/architecture.md` | Tech stack decisions, folder structure, architectural constraints |
-| `.claude/.swc/<folder>/notes.md` | Conventions, agreements, decisions that apply across tasks |
-| `.claude/.swc/<folder>/changelog.md` | Append-only per-task record of what happened and why |
+| `.swc/<folder>/workload.md` | Numbered task breakdown with status markers |
+| `.swc/<folder>/plan.md` | Feature list, goals, product intent, out of scope |
+| `.swc/<folder>/architecture.md` | Tech stack decisions, folder structure, architectural constraints |
+| `.swc/<folder>/notes.md` | Conventions, agreements, decisions that apply across tasks |
+| `.swc/<folder>/changelog.md` | Append-only per-task record of what happened and why |
 
 ### `workload.md` task format
 

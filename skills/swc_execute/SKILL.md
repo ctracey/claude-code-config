@@ -18,21 +18,21 @@ Delegate a single work item to a fresh implementation subagent. The main session
 ### 1. Resolve the active workload
 
 1. Run `git branch --show-current`
-2. Read `.claude/.swc/meta.json`
+2. Read `.swc/_meta.json`
 3. Look up branch in `workloads` map → folder name
-4. Fallback: most recently modified folder under `.claude/.swc/`
+4. Fallback: most recently modified folder under `.swc/`
 
 ### 2. Resolve scope
 
-- If work item number not supplied, find the first unchecked `- [ ]` item in `.claude/.swc/<folder>/workload.md`
+- If work item number not supplied, find the first unchecked `- [ ]` item in `.swc/<folder>/workload.md`
 - Confirm scope with the user before proceeding: "I'll work on **work item M**: [name]. Proceed?"
 
 ### 3. Load reference docs
 
 Read in parallel:
-- `.claude/.swc/<folder>/workload.md` — extract the full work item entry
-- `.claude/.swc/<folder>/plan.md` — if it exists
-- `.claude/.swc/<folder>/architecture.md` — if it exists
+- `.swc/<folder>/workload.md` — extract the full work item entry
+- `.swc/<folder>/plan.md` — if it exists
+- `.swc/<folder>/architecture.md` — if it exists
 
 ### 4. Compose the work item brief
 

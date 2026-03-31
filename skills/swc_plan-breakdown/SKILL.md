@@ -45,7 +45,7 @@ Wait for explicit confirmation. Iterate if requested. Do not write until confirm
 
 ### 4. Capture
 
-Write the confirmed workload to `.claude/.swc/<folder>/workload.md`:
+Write the confirmed workload to `.swc/<folder>/workload.md`:
 
 ```markdown
 # [Branch] — [work title]
@@ -73,7 +73,7 @@ Wait for any final adjustments, then proceed to `swc-plan-finalise`.
 ## Exit criteria
 
 **Done when:**
-- Full workload written to `.claude/.swc/<folder>/workload.md`
+- Full workload written to `.swc/<folder>/workload.md`
 - User confirmed the breakdown
 
 **Return control to `swc-begin`.**

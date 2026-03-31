@@ -12,7 +12,7 @@ The docs have been built throughout the conversation. This step fills any remain
 
 ### 1. Review for completeness
 
-Check each doc in `.claude/.swc/<folder>/`:
+Check each doc in `.swc/<folder>/`:
 
 - `workload.md` — work item list present and confirmed?
 - `plan.md` — Goal/Why, Features, Out of scope, Delivery shape?
@@ -44,9 +44,9 @@ Run the `swc-report` skill now. This is the playback — present its full output
 After the report output, say:
 
 > "That's the plan. If anything looks off, open the docs directly and we can adjust:
-> - `.claude/.swc/<folder>/plan.md`
-> - `.claude/.swc/<folder>/architecture.md`
-> - `.claude/.swc/<folder>/notes.md`
+> - `.swc/<folder>/plan.md`
+> - `.swc/<folder>/architecture.md`
+> - `.swc/<folder>/notes.md`
 >
 > Planning is done — head back to the main session and run `/swc-execute` to start the first work item."
 

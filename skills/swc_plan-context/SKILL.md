@@ -29,11 +29,11 @@ Once confirmed, derive the folder name: replace every `/` in the branch name wit
 
 ### 2. Check for an existing workload
 
-Read `.claude/.swc/meta.json` if it exists. Check whether the confirmed branch already has an entry in `workloads`.
+Read `.swc/_meta.json` if it exists. Check whether the confirmed branch already has an entry in `workloads`.
 
 **If no entry found:** proceed to step 3.
 
-**If entry found:** read `.claude/.swc/<folder>/workload.md` and surface a brief summary — work item count, done count — then ask:
+**If entry found:** read `.swc/<folder>/workload.md` and surface a brief summary — work item count, done count — then ask:
 
 > I found an existing workload for `<branch>` (M work items, X done). How does this new work relate?
 >
@@ -48,7 +48,7 @@ Wait for the user's choice before proceeding.
 
 **Replace**
 - Ask: "Archive the existing docs (rename folder with `_archived` suffix), or discard?"
-- Remove or rename the old entry in `meta.json`. Proceed as if starting fresh.
+- Remove or rename the old entry in `_meta.json`. Proceed as if starting fresh.
 
 **Extend**
 - Ask how the new work relates to the existing scope (one sentence — goes into `notes.md`).
@@ -68,7 +68,7 @@ Wait for the user's choice before proceeding.
 
 ### 3. Create stub docs
 
-Write or update `.claude/.swc/meta.json`:
+Write or update `.swc/_meta.json`:
 
 ```json
 {
@@ -79,7 +79,7 @@ Write or update `.claude/.swc/meta.json`:
 }
 ```
 
-Create `.claude/.swc/<folder>/` with stub files (title + section headers only):
+Create `.swc/<folder>/` with stub files (title + section headers only):
 
 - `workload.md`
 - `plan.md`
@@ -89,14 +89,14 @@ Create `.claude/.swc/<folder>/` with stub files (title + section headers only):
 
 For **Extend**, **Sibling**, and **New sections** modes, edit existing files rather than creating new ones.
 
-Confirm: "Workload ready at `.claude/.swc/<folder>/`. Let's start with what's driving this work."
+Confirm: "Workload ready at `.swc/<folder>/`. Let's start with what's driving this work."
 
 ## Exit criteria
 
 **Done when:**
 - Branch confirmed with user
 - Existing-work mode chosen (if applicable)
-- `meta.json` written with branch→folder entry
-- Stub docs created at `.claude/.swc/<folder>/`
+- `_meta.json` written with branch→folder entry
+- Stub docs created at `.swc/<folder>/`
 
 **Return control to `swc-begin`.**

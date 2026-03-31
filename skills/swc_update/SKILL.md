@@ -20,11 +20,11 @@ Update a work item status in the active workload file, then roll up the parent s
 ### 1. Resolve the active workload
 
 1. Run `git branch --show-current`
-2. Read `.claude/.swc/meta.json`
+2. Read `.swc/_meta.json`
 3. Look up branch in `workloads` map → folder name
-4. Fallback: most recently modified folder under `.claude/.swc/`
+4. Fallback: most recently modified folder under `.swc/`
 
-Edit `.claude/.swc/<folder>/workload.md`.
+Edit `.swc/<folder>/workload.md`.
 
 ### 2. Resolve the target work item
 

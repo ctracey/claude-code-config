@@ -13,18 +13,18 @@ Read the active notes file and present a concise overview of key decisions and c
 ### 1. Resolve the active workload
 
 1. Run `git branch --show-current`
-2. Read `.claude/.swc/meta.json`
+2. Read `.swc/_meta.json`
 3. Look up branch in `workloads` map → folder name
-4. Fallback: most recently modified folder under `.claude/.swc/`
+4. Fallback: most recently modified folder under `.swc/`
 
-Read `.claude/.swc/<folder>/notes.md`.
+Read `.swc/<folder>/notes.md`.
 
 ### 2. Summarise
 
 Open with two lines:
 ```
 NOTES SUMMARY
-notes doc: .claude/.swc/<folder>/notes.md
+notes doc: .swc/<folder>/notes.md
 ```
 
 List topics as a flat bullet list — one line per topic, naming the key decision or convention only. No sub-bullets unless a topic has more than one distinct rule. Keep the whole output under 10 lines.

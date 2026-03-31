@@ -21,7 +21,7 @@
   - [ ] 4.1. `swc-begin` — update stage skill names in workflow JSON definition
   - [ ] 4.2. `swc-workflow-orchestrator` — update any skill name references
   - [ ] 4.3. `swc-execute` — update file paths to `.claude/.swc/<folder>/` convention
-  - [ ] 4.4. `swc-plan-context` — replace PR number resolution with branch detection + confirmation flow; add `meta.json` read/write; create folder structure
+  - [ ] 4.4. `swc-plan-context` — replace PR number resolution with branch detection + confirmation flow; add `_meta.json` read/write; create folder structure
   - [ ] 4.5. All remaining skills — grep for residual `todo-` path references and fix
 
 - [ ] **5. Terminology pass**

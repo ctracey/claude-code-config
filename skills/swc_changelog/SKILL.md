@@ -13,11 +13,11 @@ Read the active changelog file and present a concise overview of recent work ite
 ### 1. Resolve the active workload
 
 1. Run `git branch --show-current`
-2. Read `.claude/.swc/meta.json`
+2. Read `.swc/_meta.json`
 3. Look up branch in `workloads` map → folder name
-4. Fallback: most recently modified folder under `.claude/.swc/`
+4. Fallback: most recently modified folder under `.swc/`
 
-Read `.claude/.swc/<folder>/changelog.md`.
+Read `.swc/<folder>/changelog.md`.
 
 ### 2. Summarise
 

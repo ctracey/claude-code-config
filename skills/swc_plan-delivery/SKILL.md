@@ -36,7 +36,7 @@ Don't categorise it — just understand what the user considers high priority an
 
 Add `## Delivery shape` to `plan.md` with 2–4 bullets summarising phases and priorities.
 
-Write a skeleton workload to `.claude/.swc/<folder>/workload.md` — one top-level work item per phase or priority area identified, no sub-items yet. This gives a starting shape for the detailed breakdown.
+Write a skeleton workload to `.swc/<folder>/workload.md` — one top-level work item per phase or priority area identified, no sub-items yet. This gives a starting shape for the detailed breakdown.
 
 ### 5. Present and check
 
@@ -52,7 +52,7 @@ Transition: *"Good — let's figure out how to break it down."*
 
 **Done when:**
 - `plan.md` has `## Delivery shape`
-- Skeleton workload written to `.claude/.swc/<folder>/workload.md`
+- Skeleton workload written to `.swc/<folder>/workload.md`
 - User confirmed the ordering and grouping
 
 **Return control to `swc-begin`.**

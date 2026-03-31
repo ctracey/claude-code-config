@@ -2,11 +2,10 @@
 *
 
 # SWC workload tracking (persistent cross-session planning docs)
-!.claude/
-!.claude/.swc/
-!.claude/.swc/meta.json
-!.claude/.swc/*/
-!.claude/.swc/**/*.md
+!.swc/
+!.swc/_meta.json
+!.swc/*/
+!.swc/**/*.md
 
 # Track these directories
 !.gitignore

@@ -14,7 +14,7 @@ Existing `todo-pr-*.md` files on disk are accepted as orphaned. New workloads li
 - Use swc semantics in all skill output and user-facing text. Keep legacy terms (`task`, `todo`) only as trigger aliases in `vocabulary:` and `description:` fields so natural language still matches.
 
 **Keyed by branch, not PR**
-Workloads are identified by branch name. `swc-plan-context` detects the current branch via `git branch --show-current` and confirms with the user — offering the option to switch branches before starting. Branch names with `/` are mapped to `_` for filesystem safety. `meta.json` at the `.swc/` root holds the canonical branch→folder mapping.
+Workloads are identified by branch name. `swc-plan-context` detects the current branch via `git branch --show-current` and confirms with the user — offering the option to switch branches before starting. Branch names with `/` are mapped to `_` for filesystem safety. `_meta.json` at the `.swc/` root holds the canonical branch→folder mapping.
 
 **Tracking way split: two separate concerns**
 The tracking way at `hooks/ways/meta/tracking/` serves the general case (any cross-session file tracking). The new SWC-aware tracking way lives under `hooks/ways/meta/swc/tracking/` and knows about the richer task format and doctype convention.
