@@ -53,6 +53,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "${HOME}/.claude/hooks/ways/check-setup.sh"
+          },
+          {
+            "type": "command",
             "command": "${HOME}/.claude/hooks/ways/clear-markers.sh"
           },
           {

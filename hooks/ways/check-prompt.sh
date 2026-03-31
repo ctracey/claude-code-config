@@ -5,6 +5,8 @@
 # + semantic matching, scope/precondition gating, parent threshold
 # lowering, session markers, macro dispatch, and content output.
 
+source "$(dirname "$0")/require-ways.sh"
+
 INPUT=$(cat)
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' | tr '[:upper:]' '[:lower:]')
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
