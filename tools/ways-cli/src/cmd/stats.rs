@@ -4,7 +4,6 @@
 use anyhow::Result;
 use serde_json::json;
 use std::collections::HashMap;
-use std::path::PathBuf;
 
 pub fn run(days: Option<u32>, project_filter: Option<&str>, json_output: bool, global: bool) -> Result<()> {
     // Default to project scope: CLAUDE_PROJECT_DIR > detect from cwd > global
@@ -278,26 +277,4 @@ fn days_to_ymd(days: u64) -> (u64, u64, u64) {
     (y, m, d)
 }
 
-/// Detect project directory by walking up from cwd looking for .claude/ markers.
-fn detect_project_dir() -> Option<String> {
-    let cwd = std::env::current_dir().ok()?;
-    let mut dir = cwd.as_path();
-    loop {
-        // A tracked Claude Code project has .claude/ with settings or CLAUDE.md
-        let claude_dir = dir.join(".claude");
-        if claude_dir.is_dir()
-            && (claude_dir.join("settings.json").exists()
-                || dir.join("CLAUDE.md").exists()
-                || claude_dir.join("settings.local.json").exists())
-        {
-            return Some(dir.to_string_lossy().to_string());
-        }
-        dir = dir.parent()?;
-    }
-}
-
-fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+use crate::util::{detect_project_dir, home_dir};

@@ -66,8 +66,4 @@ fn dirs_next() -> PathBuf {
     home_dir().join(".claude")
 }
 
-fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+use crate::util::home_dir;

@@ -269,8 +269,4 @@ fn strip_frontmatter(content: &str) -> String {
     body.join("\n")
 }
 
-fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+use crate::util::home_dir;

@@ -355,11 +355,7 @@ fn content_hash(dir: &Path) -> String {
     format!("{:016x}", hasher.finish())
 }
 
-fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+use crate::util::home_dir;
 
 fn xdg_cache_dir() -> PathBuf {
     std::env::var("XDG_CACHE_HOME")

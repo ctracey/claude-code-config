@@ -63,7 +63,7 @@ sequenceDiagram
 
     rect rgba(198, 40, 40, 0.15)
         Note over U,S: Auto-compact triggers — all markers cleared, ways reset
-        W->>W: clear-markers.sh → rm /tmp/.claude-way-*
+        W->>W: clear-markers.sh → rm /tmp/.claude-sessions/{session_id}/*
         W-->>C: Core guidance reloads (fresh session state)
         Note right of C: All ways can fire again on next match
     end

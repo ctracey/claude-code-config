@@ -61,11 +61,12 @@ jobs:
           mkdir -p dist
           cp tools/ways-cli/target/${{ matrix.target }}/release/ways dist/ways-${{ matrix.platform }}
 
+      # Native builds can run directly; cross-compiled binaries can only be verified with `file`
       - name: Smoke test
         if: "!(matrix.target == 'aarch64-unknown-linux-gnu' && runner.os == 'Linux') && !(matrix.target == 'x86_64-apple-darwin' && runner.arch == 'ARM64')"
         run: dist/ways-${{ matrix.platform }} --version
 
-      - name: Verify binary (cross-compiled)
+      - name: Verify binary (cross-compiled — can't execute on this runner)
         if: "(matrix.target == 'aarch64-unknown-linux-gnu' && runner.os == 'Linux') || (matrix.target == 'x86_64-apple-darwin' && runner.arch == 'ARM64')"
         run: |
           file dist/ways-${{ matrix.platform }}

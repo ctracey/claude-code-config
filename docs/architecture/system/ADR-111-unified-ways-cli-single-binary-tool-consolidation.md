@@ -51,64 +51,71 @@ ways tree <path>           # tree analysis (way-tree-analyze.sh)
 ways provenance            # provenance scanning (provenance-scan.py)
 ```
 
-### 2. Rust for the CLI, existing C/C++ via `cc` crate
+### 2. Pure Rust implementation
 
-The CLI shell, file walking, YAML parsing, JSON emission, and all "script replacement" logic is written in Rust. The existing C (`way-match.c`) and C++ (`way-embed.cpp`) are compiled into the binary via the `cc` build crate and called through thin FFI wrappers.
+The entire CLI is pure Rust — no FFI, no C/C++ compilation. BM25 scoring was reimplemented natively (~176 lines in `bm25.rs`). Embedding matching delegates to the existing `way-embed` binary via subprocess (the embedding engine requires GGUF/ONNX runtime which remains a separate C++ binary).
 
-Rationale: the inference code (BM25 tokenization, ONNX runtime, GGUF model loading) is numerics-sensitive, already tested across 4 platforms, and rarely changes. The script logic being replaced is 90% string processing and file I/O — Rust's strengths.
+The original ADR planned FFI wrappers via the `cc` crate, but the BM25 C code was small enough to port directly. This eliminated cross-compilation complexity entirely — `cargo build` produces the binary with no native toolchain required beyond Rust.
 
 ### 3. Project structure
 
 ```
 tools/ways-cli/
 ├── Cargo.toml
-├── build.rs                 # cc::Build compiles csrc/
 ├── src/
-│   ├── main.rs              # clap dispatcher
+│   ├── main.rs              # clap dispatcher (19 subcommands)
 │   ├── cmd/
+│   │   ├── scan/            # prompt/command/file/state matching
+│   │   ├── show/            # session-aware way display
+│   │   ├── governance/      # 9 governance query modes (7 files)
 │   │   ├── lint.rs          # frontmatter validation
 │   │   ├── corpus.rs        # corpus generation
-│   │   ├── match_bm25.rs    # FFI wrapper → way-match.c
-│   │   ├── embed.rs         # FFI wrapper → way-embed.cpp
-│   │   ├── siblings.rs      # FFI wrapper → way-embed.cpp
-│   │   ├── graph.rs         # JSONL graph export
-│   │   ├── tree.rs          # tree analysis
-│   │   └── provenance.rs    # provenance scanning
+│   │   ├── match_bm25.rs    # BM25 scoring (pure Rust)
+│   │   ├── embed.rs         # embedding match (delegates to way-embed)
+│   │   ├── list.rs          # session way list with forecast
+│   │   ├── context.rs       # token usage from transcript
+│   │   ├── reset.rs         # session state recovery
+│   │   └── ...              # graph, tree, provenance, stats, etc.
+│   ├── bm25.rs              # BM25 engine (Porter2 stemming, IDF)
 │   ├── scanner.rs           # shared: file discovery by frontmatter
 │   ├── frontmatter.rs       # shared: YAML frontmatter parsing
-│   └── ffi.rs               # extern "C" declarations for C/C++
-├── csrc/
-│   ├── way-match.c          # existing BM25 (from tools/way-match/)
-│   ├── way-embed.cpp        # existing embedding (from tools/way-embed/)
-│   ├── stem_UTF_8_english.c # Snowball stemmer
-│   └── *.h                  # headers
-└── tests/
+│   ├── session.rs           # session state (directory-per-session)
+│   ├── table.rs             # ANSI-aware table formatting
+│   └── util.rs              # shared utilities (home_dir, project detection)
+├── tests/
+│   └── session_sim.rs       # 8 integration scenarios
+└── download-ways.sh         # pre-built binary installer
 ```
 
 ### 4. Incremental delivery
 
 Subcommands ship independently. The order follows dependency:
 
-| Phase | Subcommands | Replaces | C/C++ needed |
-|-------|-------------|----------|--------------|
-| 1 | `lint`, `corpus`, `graph` | lint-ways.sh, generate-corpus.sh, new | No |
-| 2 | `match`, `embed`, `siblings` | way-match, way-embed, new | Yes (FFI) |
-| 3 | `tree`, `provenance` | way-tree-analyze.sh, provenance-scan.py | No |
+| Phase | Subcommands | Replaces | Status |
+|-------|-------------|----------|--------|
+| 1 | `lint`, `corpus`, `graph` | lint-ways.sh, generate-corpus.sh, new | Shipped |
+| 2 | `match`, `embed`, `siblings` | way-match (ported to Rust), way-embed (subprocess) | Shipped |
+| 3 | `tree`, `provenance`, `scan`, `show`, `governance`, `context`, `list`, `stats`, `reset`, `init`, `status`, `suggest` | All remaining scripts | Shipped |
 
-Phase 1 is pure Rust — no FFI, no ONNX dependency. It validates the build pipeline and CLI ergonomics. Phase 2 introduces the FFI boundary. Phase 3 ports the remaining utilities.
+All three phases delivered as pure Rust. BM25 was ported rather than wrapped via FFI. Embedding delegates to the existing `way-embed` binary. The `scan` and `show` subcommands absorbed the hook orchestration that was previously spread across show-core.sh, show-way.sh, match-way.sh, and check-prompt.sh.
 
-### 5. Installation and path
+### 5. Installation and distribution
 
-The binary installs to `~/.claude/bin/ways`. The hook scripts (`show-way.sh`, `check-prompt.sh`, etc.) call `ways` subcommands instead of individual tools. During the transition, both old and new tools coexist — hooks detect which is available and prefer `ways` when present.
+The binary installs to `~/.claude/bin/ways` with a symlink to `~/.local/bin/ways`. Three install paths:
 
-### 6. Path to pure Rust (optional, not required)
+1. **Download** — `download-ways.sh` pulls pre-built binary from GitHub Releases (no toolchain needed)
+2. **Build from source** — `cargo build --release` (requires Rust toolchain)
+3. **`make install`** — tries download first, falls back to build
 
-The FFI boundary is thin and the C/C++ is stable. However, the architecture does not prevent porting:
+CI builds 4 platforms (linux-x86_64, linux-aarch64, darwin-x86_64, darwin-arm64) via `cargo-zigbuild` for ARM cross-compilation. Tagged releases (`ways-v*`) create GitHub Releases with checksums.
 
-- `way-match.c` → pure Rust BM25 (mechanical port, ~500 lines)
-- `way-embed.cpp` → `ort` crate for ONNX + Rust GGUF loader (larger effort, evaluate when `ort` static linking matures)
+The 10 remaining hook scripts are thin dispatchers — they parse hook JSON input and call `ways scan` or read session state. The orchestration, matching, and display logic lives entirely in the binary.
 
-This is a future choice, not a commitment. The FFI approach is the long-term default unless there's a reason to change.
+### 6. Remaining C/C++ (embedding engine)
+
+BM25 was ported to pure Rust (176 lines in `bm25.rs`). The embedding engine (`way-embed`) remains a separate C++ binary because it depends on llama.cpp for GGUF model inference. The `ways embed` subcommand delegates to `way-embed` via subprocess.
+
+Future option: the `ort` crate could replace the C++ embedding binary with a pure Rust ONNX path, eliminating the last subprocess dependency. This is not planned — the current approach works and the embedding binary is stable.
 
 ## Consequences
 
@@ -124,17 +131,17 @@ This is a future choice, not a commitment. The FFI approach is the long-term def
 
 ### Negative
 
-- Rust toolchain required for development (not for end users — binary is distributed)
-- FFI boundary between Rust and C/C++ is a maintenance surface (mitigated: it's thin and the C/C++ is stable)
-- CI must cross-compile Rust + C/C++ for 4 platforms (mitigated: `cargo-zigbuild` handles this)
-- Porting bash logic to Rust takes more lines for the same functionality (mitigated: the logic is straightforward and the type system catches bugs the bash scripts silently swallow)
+- Rust toolchain required for development (not for end users — pre-built binaries available)
+- CI cross-compiles for 4 platforms via `cargo-zigbuild` (working, but adds build complexity)
+- Porting bash to Rust took more lines for the same functionality (mitigated: type system caught bugs the bash scripts silently swallowed)
 
 ### Neutral
 
-- The existing bash scripts remain in the repo during transition but are progressively replaced. Once all hooks prefer `ways`, the scripts can be removed
-- `governance.sh` becomes a thin orchestrator calling `ways provenance` + `ways lint` instead of calling scripts directly — or itself becomes `ways governance`
-- The `Makefile` gains a `make ways` target; `make install` includes the `ways` binary
-- CI builds change from "compile C, compile C++, run bash" to "cargo build, run tests"
+- `governance.sh` (543 lines), `provenance-verify.sh`, and `context-usage.sh` were deleted — fully replaced by `ways governance`, `ways governance lint`, and `ways context`
+- 10 bash hook scripts remain as thin dispatchers (15-30 lines each) — they parse hook JSON and call `ways scan`
+- `Makefile` has `make ways`, `make ways-rebuild`, `make install`, `make release` targets
+- CI builds changed from "compile C, compile C++, run bash" to "cargo build, run tests"
+- Session state moved from flat `/tmp/.claude-*-{uuid}` markers to per-user `/tmp/.claude-sessions-{uid}/{session_id}/` directories
 
 ## Alternatives Considered
 

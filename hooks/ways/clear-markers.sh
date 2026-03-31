@@ -5,15 +5,17 @@
 # Reads session_id from stdin JSON input (Claude Code hook format)
 # Clears this session's state directory only — other sessions stay intact
 
+source "$(dirname "$0")/sessions-root.sh"
+
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
 
 # Clear session state
 if [[ -n "$SESSION_ID" ]]; then
-  rm -rf "/tmp/.claude-sessions/${SESSION_ID}" 2>/dev/null
+  rm -rf "${SESSIONS_ROOT}/${SESSION_ID}" 2>/dev/null
 else
   # No session ID — legacy fallback, clear everything
-  rm -rf /tmp/.claude-sessions 2>/dev/null
+  rm -rf "${SESSIONS_ROOT}" 2>/dev/null
 fi
 
 # Log session event

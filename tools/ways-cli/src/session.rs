@@ -1,21 +1,43 @@
 //! Session state management — markers, epochs, token positions, scope detection.
 //!
-//! All session state lives in /tmp/.claude-sessions/{session_id}/ as a
+//! All session state lives in /tmp/.claude-sessions-{uid}/{session_id}/ as a
 //! directory tree. Way IDs map directly to paths (no dash-encoding).
 //! This module owns all reads and writes to session state.
 
 use std::path::{Path, PathBuf};
-
-const SESSIONS_ROOT: &str = "/tmp/.claude-sessions";
 
 /// Re-disclosure fires when a way has drifted this % of the context window.
 const REDISCLOSE_PCT: u64 = 25;
 
 // ── Session directory ──────────────────────────────────────────
 
+/// Per-user sessions root: /tmp/.claude-sessions-{uid}
+///
+/// Uses XDG_RUNTIME_DIR (per-user on systemd) if available, otherwise
+/// falls back to /tmp/.claude-sessions-{uid} using $EUID or `id -u`.
+pub fn sessions_root() -> String {
+    // Prefer XDG_RUNTIME_DIR (already per-user, no UID needed)
+    if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
+        return format!("{xdg}/claude-sessions");
+    }
+    // Fall back to /tmp with UID namespace
+    let uid = std::env::var("EUID")
+        .or_else(|_| std::env::var("UID"))
+        .unwrap_or_else(|_| {
+            std::process::Command::new("id")
+                .arg("-u")
+                .output()
+                .ok()
+                .and_then(|o| String::from_utf8(o.stdout).ok())
+                .map(|s| s.trim().to_string())
+                .unwrap_or_else(|| "0".to_string())
+        });
+    format!("/tmp/.claude-sessions-{uid}")
+}
+
 /// Root directory for a session's state.
 fn session_dir(session_id: &str) -> PathBuf {
-    PathBuf::from(format!("{SESSIONS_ROOT}/{session_id}"))
+    PathBuf::from(format!("{}/{session_id}", sessions_root()))
 }
 
 /// Ensure a path's parent directories exist.
@@ -433,7 +455,7 @@ fn find_check_in_dir(dir: &Path) -> Option<PathBuf> {
 
 /// List all session IDs that have state directories.
 pub fn list_sessions() -> Vec<String> {
-    let root = PathBuf::from(SESSIONS_ROOT);
+    let root = PathBuf::from(sessions_root());
     if !root.is_dir() {
         return Vec::new();
     }
@@ -531,8 +553,4 @@ fn find_newest_jsonl(dir: &Path) -> Option<PathBuf> {
     newest.map(|(_, p)| p)
 }
 
-fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+use crate::util::home_dir;

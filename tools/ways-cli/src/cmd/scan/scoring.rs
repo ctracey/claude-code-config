@@ -113,8 +113,4 @@ pub(crate) fn default_corpus() -> PathBuf {
     xdg.join("claude-ways/user/ways-corpus.jsonl")
 }
 
-pub(crate) fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+pub(crate) use crate::util::home_dir;

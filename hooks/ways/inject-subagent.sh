@@ -14,13 +14,15 @@
 # Way content is emitted WITHOUT marker checks - subagents get fresh
 # context regardless of what the parent already triggered.
 
+source "$(dirname "$0")/sessions-root.sh"
+
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(echo "$INPUT" | jq -r '.cwd // empty')}"
 
 [[ -z "$SESSION_ID" ]] && exit 0
 
-STASH_DIR="/tmp/.claude-sessions/${SESSION_ID}/subagent-stash"
+STASH_DIR="${SESSIONS_ROOT}/${SESSION_ID}/subagent-stash"
 [[ ! -d "$STASH_DIR" ]] && exit 0
 
 # Claim the oldest stash file (FIFO for parallel Task invocations)
@@ -47,8 +49,8 @@ done <<< "$CHANNELS"
 # If this is a teammate spawn, write a marker the teammate's own hooks can detect
 # The marker persists for the teammate's session lifetime
 if [[ "$IS_TEAMMATE" == "true" ]]; then
-  mkdir -p "/tmp/.claude-sessions/${SESSION_ID}"
-  echo "${TEAM_NAME}" > "/tmp/.claude-sessions/${SESSION_ID}/teammate"
+  mkdir -p "${SESSIONS_ROOT}/${SESSION_ID}"
+  echo "${TEAM_NAME}" > "${SESSIONS_ROOT}/${SESSION_ID}/teammate"
 fi
 
 [[ -z "$WAYS" ]] && exit 0

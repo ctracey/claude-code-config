@@ -8,6 +8,19 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+// ── Session root (must match session::sessions_root()) ────────
+
+fn sessions_root() -> String {
+    if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
+        return format!("{xdg}/claude-sessions");
+    }
+    let uid = Command::new("id").arg("-u").output().ok()
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .map(|s| s.trim().to_string())
+        .unwrap_or_else(|| "0".to_string());
+    format!("/tmp/.claude-sessions-{uid}")
+}
+
 // ── Test infrastructure ────────────────────────────────────────
 
 fn ways_bin() -> PathBuf {
@@ -148,14 +161,14 @@ fn fixture_home() -> PathBuf {
 }
 
 fn clean_markers(session_id: &str) {
-    let session_dir = format!("/tmp/.claude-sessions/{session_id}");
+    let session_dir = format!("{}/{session_id}", sessions_root());
     let _ = std::fs::remove_dir_all(&session_dir);
 }
 
 // ── Assertion helpers ──────────────────────────────────────────
 
 fn assert_marker_exists(way_id: &str, session_id: &str) {
-    let path = format!("/tmp/.claude-sessions/{session_id}/ways/{way_id}/.marker");
+    let path = format!("{}/{session_id}/ways/{way_id}/.marker", sessions_root());
     assert!(
         Path::new(&path).exists(),
         "Expected marker for '{way_id}' but it doesn't exist at {path}"
@@ -163,7 +176,7 @@ fn assert_marker_exists(way_id: &str, session_id: &str) {
 }
 
 fn assert_marker_absent(way_id: &str, session_id: &str) {
-    let path = format!("/tmp/.claude-sessions/{session_id}/ways/{way_id}/.marker");
+    let path = format!("{}/{session_id}/ways/{way_id}/.marker", sessions_root());
     assert!(
         !Path::new(&path).exists(),
         "Expected NO marker for '{way_id}' but found one at {path}"
@@ -171,7 +184,7 @@ fn assert_marker_absent(way_id: &str, session_id: &str) {
 }
 
 fn assert_epoch(session_id: &str, expected: u64) {
-    let path = format!("/tmp/.claude-sessions/{session_id}/epoch");
+    let path = format!("{}/{session_id}/epoch", sessions_root());
     let actual: u64 = std::fs::read_to_string(&path)
         .unwrap_or_else(|_| panic!("No epoch file at {path}"))
         .trim()
@@ -181,7 +194,7 @@ fn assert_epoch(session_id: &str, expected: u64) {
 }
 
 fn assert_check_fires(way_id: &str, session_id: &str, expected: u64) {
-    let path = format!("/tmp/.claude-sessions/{session_id}/check-fires/{way_id}/.value");
+    let path = format!("{}/{session_id}/check-fires/{way_id}/.value", sessions_root());
     let actual: u64 = std::fs::read_to_string(&path)
         .unwrap_or("0".to_string())
         .trim()
@@ -316,7 +329,7 @@ fn scenario_6_scope_filtering() {
     assert_marker_absent("testdomain/scoped-way", &s.id);
 
     // Turn 2: create teammate marker, try again
-    let teammate_dir = format!("/tmp/.claude-sessions/{}", s.id);
+    let teammate_dir = format!("{}/{}", sessions_root(), s.id);
     std::fs::create_dir_all(&teammate_dir).unwrap();
     let teammate_marker = format!("{teammate_dir}/teammate");
     std::fs::write(&teammate_marker, "test-team").unwrap();

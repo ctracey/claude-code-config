@@ -6,7 +6,6 @@ use anyhow::Result;
 
 use crate::session;
 
-const SESSIONS_ROOT: &str = "/tmp/.claude-sessions";
 
 pub fn run(session: Option<&str>, all: bool, confirm: bool) -> Result<()> {
     let dry_run = !confirm;
@@ -43,7 +42,7 @@ pub fn run(session: Option<&str>, all: bool, confirm: bool) -> Result<()> {
     let mut total = 0;
 
     for sid in &sessions {
-        let dir = format!("{SESSIONS_ROOT}/{sid}");
+        let dir = format!("{}/{sid}", session::sessions_root());
         let path = std::path::Path::new(&dir);
         if !path.is_dir() {
             continue;
@@ -99,7 +98,7 @@ fn find_newest_session(sessions: &[String]) -> String {
     let mut newest = (std::time::UNIX_EPOCH, sessions[0].clone());
 
     for sid in sessions {
-        let dir = format!("{SESSIONS_ROOT}/{sid}");
+        let dir = format!("{}/{sid}", session::sessions_root());
         let path = std::path::Path::new(&dir);
         if let Ok(meta) = std::fs::metadata(path) {
             if let Ok(mtime) = meta.modified() {

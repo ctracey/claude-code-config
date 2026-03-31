@@ -44,11 +44,7 @@ fn default_model() -> PathBuf {
     xdg_cache_dir().join("claude-ways/user/minilm-l6-v2.gguf")
 }
 
-fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+use crate::util::home_dir;
 
 fn xdg_cache_dir() -> PathBuf {
     std::env::var("XDG_CACHE_HOME")

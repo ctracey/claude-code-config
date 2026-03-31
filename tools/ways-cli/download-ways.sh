@@ -100,7 +100,7 @@ gh release download "$RELEASE_TAG" \
   --dir "$OUTPUT_DIR" \
   --clobber
 
-# Verify checksum (if checksums.txt exists in release)
+# Verify checksum
 CHECKSUMS_FILE="${OUTPUT_DIR}/checksums.txt"
 if gh release download "$RELEASE_TAG" \
     --repo "$GH_REPO" \
@@ -121,6 +121,8 @@ if gh release download "$RELEASE_TAG" \
     echo "Checksum verified: ${actual_hash:0:12}..." >&2
   fi
   rm -f "$CHECKSUMS_FILE"
+else
+  echo "WARNING: checksums.txt not found in release — skipping verification" >&2
 fi
 
 # Make executable and install

@@ -495,7 +495,7 @@ struct MetricEntry {
 }
 
 fn load_metrics(session_id: &str) -> HashMap<String, MetricEntry> {
-    let path = format!("/tmp/.claude-sessions/{session_id}/metrics.jsonl");
+    let path = format!("{}/{session_id}/metrics.jsonl", crate::session::sessions_root());
     let content = match std::fs::read_to_string(&path) {
         Ok(c) => c,
         Err(_) => return HashMap::new(),
@@ -528,7 +528,7 @@ fn detect_session() -> Option<String> {
     if let Some(ref proj) = project {
         if let Some(sid) = latest_session_for_project(proj) {
             // Verify the session directory exists
-            let dir = format!("/tmp/.claude-sessions/{sid}");
+            let dir = format!("{}/{sid}", crate::session::sessions_root());
             if std::path::Path::new(&dir).is_dir() {
                 return Some(sid);
             }
@@ -546,7 +546,7 @@ fn detect_session() -> Option<String> {
 
     let mut newest: Option<(std::time::SystemTime, String)> = None;
     for sid in sessions {
-        let dir = format!("/tmp/.claude-sessions/{sid}");
+        let dir = format!("{}/{sid}", crate::session::sessions_root());
         if let Ok(meta) = std::fs::metadata(&dir) {
             let mtime = meta.modified().unwrap_or(std::time::UNIX_EPOCH);
             if newest.as_ref().map_or(true, |(t, _)| mtime > *t) {
@@ -583,21 +583,7 @@ fn latest_session_for_project(project: &str) -> Option<String> {
     latest
 }
 
-fn detect_project_dir() -> Option<String> {
-    let cwd = std::env::current_dir().ok()?;
-    let mut dir = cwd.as_path();
-    loop {
-        let claude_dir = dir.join(".claude");
-        if claude_dir.is_dir()
-            && (claude_dir.join("settings.json").exists()
-                || dir.join("CLAUDE.md").exists()
-                || claude_dir.join("settings.local.json").exists())
-        {
-            return Some(dir.to_string_lossy().to_string());
-        }
-        dir = dir.parent()?;
-    }
-}
+use crate::util::detect_project_dir;
 
 fn fmt_epoch(n: u64) -> String {
     if n >= 1_000_000 {

@@ -400,7 +400,7 @@ pub fn state(
 
         // Handle repeating context-threshold ways
         if trigger_type == "context-threshold" && way.repeat {
-            let tasks_marker = format!("/tmp/.claude-sessions/{session_id}/tasks-active");
+            let tasks_marker = format!("{}/{session_id}/tasks-active", crate::session::sessions_root());
             if std::path::Path::new(&tasks_marker).exists() {
                 continue; // tasks active, suppress repeat
             }

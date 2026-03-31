@@ -1,6 +1,6 @@
 //! Content rendering utilities — pure functions for file processing.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 
 /// Extract a YAML frontmatter field value by name.
@@ -104,9 +104,4 @@ pub(crate) fn is_project_trusted(project_dir: &str) -> bool {
     }
 }
 
-/// Resolve the user's home directory from $HOME.
-pub(crate) fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+pub(crate) use crate::util::home_dir;

@@ -234,11 +234,7 @@ fn count_ways(dir: &Path) -> (usize, usize) {
     (total, semantic)
 }
 
-fn home_dir() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/tmp"))
-}
+use crate::util::home_dir;
 
 fn xdg_cache_dir() -> PathBuf {
     std::env::var("XDG_CACHE_HOME")
