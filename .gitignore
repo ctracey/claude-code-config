@@ -131,10 +131,9 @@ tools/ways-cli/target/
 !models/
 !models/*
 
-# Built binaries (way-match checked in, way-embed via GitHub Releases)
+# Built binaries (acquired via `make ways` / GitHub Releases, not committed)
 !bin/
-!bin/way-match
-!bin/ways
+bin/ways
 bin/way-embed-*
 
 # Tests
