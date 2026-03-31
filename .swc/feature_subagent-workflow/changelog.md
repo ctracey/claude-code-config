@@ -120,6 +120,14 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Test scaffolding added: `todo-test-workflow` (two-stage greeting sequence), `todo-test-stage1` (greet), `todo-test-stage2` (goodbye) — validates the orchestrator pattern end-to-end
 - Workflow definition format: JSON with `title`, `stages` array (each with `name` and `skill`), and `active_stage` index
 
+## Session — Rename resolver and consolidate branch/folder logic `2026-03-31`
+
+- Renamed `swc_workload-resolver` → `swc_resolver` — shorter name reflects its broader role as the single source of truth for branch→folder naming
+- Added main/master branch warning to `swc_resolver`: prompts user to create a feature branch, but allows continuing on main if they choose
+- Added `--create` mode to `swc_resolver`: handles branch detection, folder naming, meta.json update, and folder creation — used by `swc_plan-context`
+- Refactored `swc_plan-context` to delegate branch/folder setup to `swc_resolver --create`; removes duplicated naming logic
+- Updated `swc_workload` reference and `settings.local.json` permission entry
+
 ## Session — Relocate .swc to repo root and add workload display skills `2026-03-31`
 
 - Moved workload tracking from `.claude/.swc/` to `.swc/` at repo root — avoids path confusion between the repo and the config dir since they are the same thing
