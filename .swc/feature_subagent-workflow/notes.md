@@ -292,3 +292,18 @@ Decision not yet made — captured here as task 10.2. Explore before adding more
 | Hook | Purpose |
 |---|---|
 | Pre-commit / pre-push | Confirm user is ready before git operations |
+
+## Improvement Observations
+
+### rushed intent conversation
+I notice that the Skill(todo-plan-intent)
+I like that it checks how much detail the user wants to go into and isnt dragging them through a workflow for the sake of it.
+balance this and facilitate the user efficiently & considerately through this workflow
+"How detailed do you want the plan — quick breakdown to get moving, or a thorough exploration first?"
+This should also be an option for enough exploration lets talk about solution instead of straight skip
+
+### intent vs solution boundary
+I notice that Skill(swc_plan-intent)
+started exploring tech decisions, happened on a few occaisions.
+Lets keep that for the swc_plan-solution stage and stay focused on intent and motivation, we want to understand enough here so we know what success looks like and can evaluate aignment of outcomes and deliverables
+
