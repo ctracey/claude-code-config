@@ -58,7 +58,19 @@ Make only changes that reflect what actually happened. Don't pad.
 
 ### 5. PR comment
 
-Check whether an open PR exists for this branch:
+First check whether the branch has a remote:
+
+```bash
+git remote get-url origin 2>/dev/null
+```
+
+If no remote is configured, ask:
+> "No remote configured — would you like to create one (e.g. a GitHub repo with a PR), or keep this local for now?"
+
+- If they want a remote: help them create one (e.g. `gh repo create`) and continue to the PR check below.
+- If they want to stay local: acknowledge briefly ("Keeping it local — no problem.") and skip the rest of this step.
+
+If a remote exists, check for an open PR:
 
 ```bash
 gh pr view --json number,title 2>/dev/null
