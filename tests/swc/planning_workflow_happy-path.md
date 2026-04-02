@@ -41,10 +41,9 @@ should check if user has direction for solution
 
 ```card column layout. needs to be a dark theme, something that fits with douglas adams books```
 
-should check if user would like to use relevant template (dependant on local skill for this template)
-
 ```single file distribution build using react```
 
+should check if user would like to use relevant template (dependant on local skill for this template)
 
 ### Planning Workflow Stage: delivery
 should ask user if they have direction on delivery strategy at high level

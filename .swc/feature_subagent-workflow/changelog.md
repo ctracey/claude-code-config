@@ -182,6 +182,14 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Skill stops before git ops — commit/push is user's next step
 - Distinction from `/ship`: push = content hygiene mid-PR; ship = git delivery at merge moment
 
+## Session — planning workflow UX improvements `2026-04-02`
+
+- `swc_workflow_plan`: added step 0 — offers a workflow summary and confirms the user wants to proceed before starting; guards against false-positive skill triggers
+- Stage summary is derived dynamically from the JSON config stages array, not hardcoded
+- `swc_workflow_plan-intent`: removed the separate depth-check step ("quick vs thorough"); depth is now read from the user's answers throughout the conversation
+- Playback in intent stage now doubles as the depth offer: "does that capture it, or is there anything you'd like to clarify or go deeper on?"
+- `hooks/ways/swc/planning/way.md`: "be mindful of their time" rewritten — depth is a dial, not a switch; every stage still runs and must satisfy exit criteria; only check in explicitly if user intent is unclear
+
 ## Task 10.1 — Workflow progress banner `2026-03-30`
 
 - Built `todo-workflow-progress` skill: emits a visual banner showing all stages with the active stage highlighted

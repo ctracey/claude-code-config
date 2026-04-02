@@ -8,7 +8,7 @@
   - [ ] 1.3. Build the user-handoff skill
   - [x] 1.4. Explore Aaron's ADR method and assess fit with this workflow
 
-- [-] **2. Todo list management skills**
+- [x] **2. Todo list management skills**
   - [x] 2.1. Build the todo-list skill
   - [x] 2.2. Build the todo-plan skill
   - [x] 2.3. Build the todo-notes skill
@@ -18,7 +18,7 @@
   - [ ] 2.7. Build the todo-add skill
   - [x] 2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
   - [x] 2.9. Rename this skillset
-  - [ ] 2.10. Move .swc to root of repo instead of inside .claude and consider tracking decoupling — the `todo-*` prefix ties skills to a specific file format; evaluate whether the skills should be renamed to reflect the workflow concept rather than the storage mechanism, and whether tracking (the todo files) should be decoupled from the workflow skills themselves
+  - [x] 2.10. Move .swc to root of repo instead of inside .claude and consider tracking decoupling — the `todo-*` prefix ties skills to a specific file format; evaluate whether the skills should be renamed to reflect the workflow concept rather than the storage mechanism, and whether tracking (the todo files) should be decoupled from the workflow skills themselves
 
 - [x] **3. Todo list creation skills**
   - [x] 3.1. Build the todo-begin skill (scaffold todo + plan + architecture from a documented plan)
@@ -48,11 +48,11 @@
 - [ ] **9. Story mapping**
   - [ ] 9.1. Consider story mapping as a complement to task breakdown — logical user journey vs delivery roadmap with outcome/learning milestones
 
-- [-] **10. Workflow visualisation**
+- [x] **10. Workflow visualisation**
   - [x] 10.1. Visualise workflow progress and active step — show which phase the current session is in (planning, executing, reviewing, shipping) and progress within it
   - [x] 10.2. Explore a workflow config skill or script — single source of truth for step names used by `todo-begin` and the progress banner, avoiding drift between the `steps=` string and the numbered step list
   - [x] 10.3. Build an abstracted workflow skill — generic workflow engine that any multi-stage process (planning, executing, reviewing, shipping) can use, rather than hardcoding stage logic in individual skills
-  - [ ] 10.4. Improve swc_plan-intent skill
+  - [x] 10.4. Improve swc_plan-intent skill
 
 - [ ] **11. Agent identity**
   - [ ] 11.1. Explore surfacing a clear agent name visible to the user — e.g. "Planner" or "Implementer" — so the user always knows which agent they are talking to and what its role boundary is

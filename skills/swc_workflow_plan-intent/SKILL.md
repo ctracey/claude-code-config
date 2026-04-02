@@ -34,19 +34,13 @@ Calibrate depth to the complexity of the work. For small work items, one or two 
 - Are there specific scenarios or user journeys we need to support?
 - Are there non-negotiable outcomes — things that must hold true regardless of approach?
 
-### 3. Check depth
+### 3. Play back
 
-> "How detailed do you want the plan — quick breakdown to get moving, or a thorough exploration of requirements first?"
+> "So if I've got this right: [goal], for [who], because [why]. The key outcome is [what changes]. Does that capture it, or is there anything you'd like to clarify or go deeper on?"
 
-Match the depth of the rest of the conversation to this answer.
+Correct and re-confirm if needed. If their answers have been short and direct, move on. If they're elaborating, follow deeper before transitioning.
 
-### 4. Play back
-
-> "So if I've got this right: [goal], for [who], because [why]. The key outcome is [what changes]. Does that capture it?"
-
-Correct and re-confirm if needed.
-
-### 5. Capture
+### 4. Capture
 
 Write to `plan.md`:
 - `## Goal / Why` — one paragraph: what this accomplishes and the motivation
@@ -55,7 +49,7 @@ If users, personas, or scenarios were discussed, add `## Users and scenarios`.
 
 If constraints were raised, add `## Constraints` to `notes.md`.
 
-### 6. Present and check
+### 5. Present and check
 
 Run `swc-report-plan` to show the current state of the plan doc. Then ask:
 
