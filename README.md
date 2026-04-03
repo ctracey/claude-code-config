@@ -6,7 +6,9 @@
 ![License](https://img.shields.io/github/license/aaronsb/claude-code-config)
 ![Last commit](https://img.shields.io/github/last-commit/aaronsb/claude-code-config)
 
-<img src="docs/images/ways-cli.png" alt="Agent Ways CLI" width="100%" />
+<p align="center">
+  <img src="docs/images/agent-ways-logo.svg" alt="Agent Ways" width="600" />
+</p>
 
 Event-driven cognitive steering for AI coding agents. Ways encode *how we do things* — prescriptive guidance triggered by context, not requested by intent — and inject them just-in-time before tools execute.
 
