@@ -18,6 +18,8 @@ source "$(dirname "$0")/sessions-root.sh"
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
+AGENT_ID=$(echo "$INPUT" | jq -r '.agent_id // empty')
+[[ -n "$AGENT_ID" ]] && export CLAUDE_AGENT_ID="$AGENT_ID"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(echo "$INPUT" | jq -r '.cwd // empty')}"
 
 [[ -z "$SESSION_ID" ]] && exit 0
@@ -128,7 +130,7 @@ while IFS= read -r waypath; do
     [[ -n "$TEAM_NAME" ]] && log_args+=(team="$TEAM_NAME")
     # Inline event logging
     mkdir -p "${HOME}/.claude/stats" 2>/dev/null
-    local _args=(--arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)") _obj="ts:\$ts"
+    _args=(--arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)") _obj="ts:\$ts"
     for _kv in "${log_args[@]}"; do _args+=(--arg "${_kv%%=*}" "${_kv#*=}"); _obj+=",${_kv%%=*}:\$${_kv%%=*}"; done
     jq -nc "${_args[@]}" "{${_obj}}" >> "${HOME}/.claude/stats/events.jsonl" 2>/dev/null
   fi

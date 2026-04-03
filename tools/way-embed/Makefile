@@ -44,20 +44,25 @@ verify: cmake-build
 
 # Model download (XDG cache location)
 MODEL_DIR  = $(shell echo $${XDG_CACHE_HOME:-$$HOME/.cache})/claude-ways/user
-MODEL      = $(MODEL_DIR)/minilm-l6-v2.gguf
+MODEL_EN   = $(MODEL_DIR)/minilm-l6-v2.gguf
+MODEL_MULTI = $(MODEL_DIR)/multilingual-minilm-l12-v2-q8.gguf
 SRCDIR     = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-model: $(MODEL)
-$(MODEL):
+model: $(MODEL_EN)
+$(MODEL_EN):
 	bash $(SRCDIR)download-model.sh
+
+model-multilingual: $(MODEL_MULTI)
+$(MODEL_MULTI):
+	bash $(SRCDIR)download-model.sh --multilingual
 
 # Download directly from HuggingFace (for provenance verification)
 model-upstream:
 	bash $(SRCDIR)download-model.sh --upstream
 
-# Full setup: download (or build) binary + model, regenerate corpus
+# Full setup: download (or build) binary + both models, regenerate corpus
 # Tries pre-built binary from GitHub Releases first, builds from source if unavailable.
-setup: setup-binary $(MODEL)
+setup: setup-binary $(MODEL_EN) $(MODEL_MULTI)
 	@echo "Regenerating corpus with embeddings..."
 	$(HOME)/.claude/bin/ways corpus --quiet
 	@echo ""
@@ -65,6 +70,7 @@ setup: setup-binary $(MODEL)
 	bash $(SRCDIR)test-embedding.sh
 	@echo ""
 	@echo "To compare against BM25: bash $(SRCDIR)compare-engines.sh"
+	@echo "To test multilingual: bash $(SRCDIR)test-multilingual.sh"
 
 # Try download, fall back to build
 setup-binary:
@@ -113,4 +119,4 @@ release:
 clean:
 	rm -rf $(BUILDDIR)
 
-.PHONY: cmake-build verify test model model-upstream setup release-build release clean
+.PHONY: cmake-build verify test model model-multilingual model-upstream setup release-build release clean

@@ -103,6 +103,11 @@ pub fn way(id: &str, session_id: &str, trigger: &str) -> Result<String> {
     let (sibling_total, sibling_fired) = count_siblings(id, &project_dir, session_id);
 
     // Metrics JSONL
+    let agent_id = std::env::var("CLAUDE_AGENT_ID")
+        .ok()
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "main".to_string());
+
     session::append_metric(
         session_id,
         &json!({
@@ -115,6 +120,7 @@ pub fn way(id: &str, session_id: &str, trigger: &str) -> Result<String> {
             "sibling_total": sibling_total,
             "sibling_fired": sibling_fired,
             "trigger": trigger,
+            "agent_id": agent_id,
         }),
     );
 
@@ -253,11 +259,22 @@ pub fn core(session_id: &str) -> Result<String> {
         }
     }
 
-    // Output core.md body
+    // Output core.md body with language substitution
     let core_file = ways_dir.join("core.md");
     if core_file.is_file() {
         let content = std::fs::read_to_string(&core_file)?;
-        output.push_str(&body_text(&content));
+        let mut body = body_text(&content);
+
+        // Replace hardcoded English directive with configured language
+        let lang = crate::agents::resolve_language();
+        if lang != "en" {
+            body = body.replace(
+                "All file output (commit messages, comments, documentation, PR descriptions) must be in English regardless of interface language setting.",
+                &format!("All file output (commit messages, comments, documentation, PR descriptions) must be in {lang}. Code identifiers (variable names, function names) should remain in English."),
+            );
+        }
+
+        output.push_str(&body);
     }
 
     // Version info

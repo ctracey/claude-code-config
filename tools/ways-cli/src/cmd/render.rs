@@ -15,6 +15,7 @@ pub trait WayRow {
     fn trigger(&self) -> &str;
     fn check_fires(&self) -> u64;
     fn depth(&self) -> u64 { 0 }
+    fn agent_id(&self) -> &str { "main" }
 }
 
 // ── Constants ─────────────────────────────────────────────────
@@ -34,7 +35,31 @@ pub const PIN_COLORS: [&str; 10] = [
     "\x1b[38;2;85;239;196m",  // mint
 ];
 
-const BAR_WIDTH: usize = 60;
+// ── Layout ───────────────────────────────────────────────────
+
+/// Computed layout dimensions derived from terminal width.
+pub struct Layout {
+    /// Width of the Way ID column
+    pub way_col: usize,
+    /// Width of the progress/forecast bar
+    pub bar_width: usize,
+    /// Total separator width
+    pub separator: usize,
+}
+
+impl Layout {
+    pub fn detect() -> Self {
+        let term_w = crate::table::terminal_width();
+        // Fixed columns: epoch(6) + dist(6) + trigger(12) + pin(2) + redisclosure(14) + agent(14) + spaces(6) = 60
+        let fixed_cols = 60;
+        let indent = 2;
+        // Way column gets everything left after fixed columns
+        let way_col = term_w.saturating_sub(indent + fixed_cols).max(20);
+        let bar_width = term_w.saturating_sub(indent + 4).clamp(30, 200);
+        let separator = term_w.saturating_sub(indent + 2);
+        Layout { way_col, bar_width, separator }
+    }
+}
 
 // ── Table rendering ───────────────────────────────────────────
 
@@ -44,6 +69,7 @@ pub fn compute_bar_positions<W: WayRow>(
     context_window_k: u64,
     redisclose_threshold_k: u64,
 ) -> Vec<Option<usize>> {
+    let bw = Layout::detect().bar_width;
     ways.iter()
         .map(|w| {
             if context_window_k == 0 {
@@ -51,8 +77,8 @@ pub fn compute_bar_positions<W: WayRow>(
             }
             let fire_pos_k = w.token_pos() / 1000;
             let redisclose_at_k = fire_pos_k + redisclose_threshold_k;
-            let bar_pos = ((redisclose_at_k * BAR_WIDTH as u64) / context_window_k) as usize;
-            Some(bar_pos.min(BAR_WIDTH - 1))
+            let bar_pos = ((redisclose_at_k * bw as u64) / context_window_k) as usize;
+            Some(bar_pos.min(bw - 1))
         })
         .collect()
 }
@@ -85,12 +111,19 @@ pub fn pin_str(cluster_idx: usize) -> String {
 
 /// Render table header.
 pub fn write_table_header(out: &mut String) {
+    let layout = Layout::detect();
+    write_table_header_with(out, &layout);
+}
+
+/// Render table header with explicit layout.
+pub fn write_table_header_with(out: &mut String, layout: &Layout) {
     let _ = writeln!(
         out,
-        "  \x1b[1m{:<34} {:>5} {:>5} {:<11} {} {}\x1b[0m",
-        "Way", "Epoch", "Dist", "Trigger", "⌖", "Re-disclosure"
+        "  \x1b[1m{:<w$} {:>5} {:>5} {:<11} {} {:<13} {}\x1b[0m",
+        "Way", "Epoch", "Dist", "Trigger", "⌖", "Re-disclosure", "Agent",
+        w = layout.way_col
     );
-    let _ = writeln!(out, "  \x1b[2m{}\x1b[0m", "─".repeat(85));
+    let _ = writeln!(out, "  \x1b[2m{}\x1b[0m", "─".repeat(layout.separator));
 }
 
 /// Render a single way row.
@@ -105,6 +138,25 @@ pub fn write_way_row<W: WayRow>(
     index: usize,
     row_prefix: &str,
     row_suffix: &str,
+) {
+    let layout = Layout::detect();
+    write_way_row_with(out, w, current_epoch, current_tokens_k, redisclose_threshold_k,
+        bar_positions, unique_pos, index, row_prefix, row_suffix, &layout);
+}
+
+/// Render a single way row with explicit layout.
+pub fn write_way_row_with<W: WayRow>(
+    out: &mut String,
+    w: &W,
+    current_epoch: u64,
+    current_tokens_k: u64,
+    redisclose_threshold_k: u64,
+    bar_positions: &[Option<usize>],
+    unique_pos: &[usize],
+    index: usize,
+    row_prefix: &str,
+    row_suffix: &str,
+    layout: &Layout,
 ) {
     let distance = current_epoch.saturating_sub(w.epoch_fired());
     let next = predict_next(w, current_epoch, current_tokens_k, redisclose_threshold_k);
@@ -131,16 +183,28 @@ pub fn write_way_row<W: WayRow>(
         " ".to_string()
     };
 
+    let agent_display = if w.agent_id() == "main" {
+        "\x1b[2mmain\x1b[0m".to_string()
+    } else {
+        let aid = w.agent_id();
+        if aid.len() > 12 { format!("{}…", &aid[..11]) } else { aid.to_string() }
+    };
+
+    // Pad re-disclosure to fixed visible width (ANSI-aware)
+    let next_padded = ansi_pad(&next, 13);
+
     let _ = writeln!(
         out,
-        "  {row_prefix}{:<34} {:>5} {}{:>5}\x1b[0m {:<11} {} {}{row_suffix}",
-        truncate(&display_id, 34),
+        "  {row_prefix}{:<w$} {:>5} {}{:>5}\x1b[0m {:<11} {} {} {}{row_suffix}",
+        truncate(&display_id, layout.way_col),
         w.epoch_fired(),
         dist_color,
         distance,
         trigger_display,
         pin,
-        next,
+        next_padded,
+        agent_display,
+        w = layout.way_col
     );
 
     if w.check_fires() > 0 {
@@ -165,12 +229,15 @@ pub fn write_token_timeline<W: WayRow>(
     context_window_k: u64,
     redisclose_threshold_k: u64,
 ) {
+    let layout = Layout::detect();
+    let bar_width = layout.bar_width;
+
     let pct = if context_window_k > 0 {
         (current_tokens_k * 100 / context_window_k).min(100)
     } else {
         0
     };
-    let filled = (pct as usize * BAR_WIDTH / 100).min(BAR_WIDTH);
+    let filled = (pct as usize * bar_width / 100).min(bar_width);
 
     struct RdPoint {
         at_k: u64,
@@ -188,11 +255,11 @@ pub fn write_token_timeline<W: WayRow>(
         let past = current_tokens_k >= redisclose_at_k;
 
         let full_bar_pos = if context_window_k > 0 {
-            ((redisclose_at_k * BAR_WIDTH as u64) / context_window_k) as usize
+            ((redisclose_at_k * bar_width as u64) / context_window_k) as usize
         } else {
             0
         }
-        .min(BAR_WIDTH - 1);
+        .min(bar_width - 1);
 
         let ci = cluster_of(full_bar_pos, unique_pos);
 
@@ -236,19 +303,19 @@ pub fn write_token_timeline<W: WayRow>(
     };
 
     let zoom_bar_start = if context_window_k > 0 && zoom_span > 0 {
-        ((zoom_start * BAR_WIDTH as u64) / context_window_k) as usize
+        ((zoom_start * bar_width as u64) / context_window_k) as usize
     } else {
         0
     };
     let zoom_bar_end = if context_window_k > 0 && zoom_span > 0 {
-        ((zoom_end * BAR_WIDTH as u64) / context_window_k) as usize
+        ((zoom_end * bar_width as u64) / context_window_k) as usize
     } else {
         0
     }
-    .min(BAR_WIDTH.saturating_sub(1));
+    .min(bar_width.saturating_sub(1));
 
     let mut bar = String::new();
-    for i in 0..BAR_WIDTH {
+    for i in 0..bar_width {
         if i < filled {
             bar.push('█');
         } else {
@@ -263,7 +330,7 @@ pub fn write_token_timeline<W: WayRow>(
     // Zoom boundary arrows
     if zoom_span > 0 {
         let mut arrow_line = String::from("  ");
-        for i in 0..BAR_WIDTH {
+        for i in 0..bar_width {
             if i == zoom_bar_start || i == zoom_bar_end {
                 arrow_line.push('^');
             } else {
@@ -275,11 +342,11 @@ pub fn write_token_timeline<W: WayRow>(
 
     // Forecast
     if !future_points.is_empty() {
-        let mut zoom_markers: Vec<Option<usize>> = vec![None; BAR_WIDTH];
+        let mut zoom_markers: Vec<Option<usize>> = vec![None; bar_width];
         for p in &future_points {
             let offset = p.at_k.saturating_sub(zoom_start);
-            let pos = ((offset * BAR_WIDTH as u64) / zoom_span) as usize;
-            let pos = pos.min(BAR_WIDTH - 1);
+            let pos = ((offset * bar_width as u64) / zoom_span) as usize;
+            let pos = pos.min(bar_width - 1);
             if zoom_markers[pos].is_none() {
                 zoom_markers[pos] = Some(p.cluster);
             }
@@ -292,7 +359,7 @@ pub fn write_token_timeline<W: WayRow>(
         );
 
         let mut marker_str = String::from("  ");
-        for i in 0..BAR_WIDTH {
+        for i in 0..bar_width {
             match zoom_markers[i] {
                 Some(ci) => marker_str.push_str(&pin_str(ci)),
                 None => marker_str.push('·'),
@@ -302,9 +369,9 @@ pub fn write_token_timeline<W: WayRow>(
 
         // Scale labels
         let mid_k = zoom_start + zoom_span / 2;
-        let mid_pos = BAR_WIDTH / 2;
+        let mid_pos = bar_width / 2;
         let end_label = format!("{zoom_end}K");
-        let end_pos = BAR_WIDTH - end_label.len();
+        let end_pos = bar_width - end_label.len();
         let mut label_line = String::from("  ");
         let start_label = format!("{zoom_start}K");
         label_line.push_str(&format!("\x1b[2m{start_label}"));
@@ -336,6 +403,10 @@ pub fn write_token_timeline<W: WayRow>(
             out,
             "  {}  \x1b[2m│ {redisclose_threshold_k}K interval\x1b[0m",
             zones.join("  ")
+        );
+        let _ = writeln!(
+            out,
+            "  \x1b[2mnow = past threshold, will re-inject on next match  │  approaching = near threshold  │  distant = far from re-injection\x1b[0m"
         );
     }
 }
@@ -414,4 +485,30 @@ pub fn truncate(s: &str, max: usize) -> String {
     } else {
         format!("{}…", &s[..max - 1])
     }
+}
+
+/// Pad a string containing ANSI codes to a fixed visible width.
+fn ansi_pad(s: &str, width: usize) -> String {
+    let visible = ansi_visible_len(s);
+    if visible >= width {
+        s.to_string()
+    } else {
+        format!("{s}{}", " ".repeat(width - visible))
+    }
+}
+
+/// Measure visible length of a string, ignoring ANSI escape sequences.
+fn ansi_visible_len(s: &str) -> usize {
+    let mut len = 0;
+    let mut in_escape = false;
+    for c in s.chars() {
+        if in_escape {
+            if c == 'm' { in_escape = false; }
+        } else if c == '\x1b' {
+            in_escape = true;
+        } else {
+            len += 1;
+        }
+    }
+    len
 }

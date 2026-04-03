@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+pub mod agents;
 mod bm25;
 mod cmd;
 mod frontmatter;
@@ -130,6 +131,15 @@ enum Commands {
         /// Project directory (default: CLAUDE_PROJECT_DIR or cwd)
         #[arg(long)]
         project: Option<String>,
+    },
+    /// Language coverage report — models, stubs, and per-way embed routing
+    Language {
+        /// Filter to ways supporting this language (code or name)
+        #[arg(long)]
+        filter: Option<String>,
+        /// Machine-readable JSON output
+        #[arg(long)]
+        json: bool,
     },
     /// Usage statistics from event log
     Stats {
@@ -389,6 +399,7 @@ fn main() -> Result<()> {
         Commands::Tree { path, jaccard } => cmd::tree::run(path, jaccard),
         Commands::Provenance { ways_dir } => cmd::provenance::run(ways_dir),
         Commands::Init { project } => cmd::init::run(project.as_deref()),
+        Commands::Language { filter, json } => cmd::language::run(filter.as_deref(), json),
         Commands::Stats { days, project, json, global } => {
             cmd::stats::run(days, project.as_deref(), json, global)
         }
