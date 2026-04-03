@@ -80,15 +80,27 @@ Ways without a `when:` block fire everywhere (the default). Use `when:` sparingl
 
 ## Creating a New Way
 
-1. Create directory in:
-   - Global: `~/.claude/hooks/ways/{domain}/{wayname}/`
-   - Project: `$PROJECT/.claude/ways/{domain}/{wayname}/`
+Use `ways template` to scaffold the way file and locale stubs in one step:
 
-2. Add `{wayname}.md` with frontmatter + guidance
+```bash
+# Project-local (default)
+ways template softwaredev/code/newway \
+  --description "what this way covers" \
+  --vocabulary "domain keywords users would say"
 
-3. Optionally add `macro.sh` for dynamic context
+# Global
+ways template meta/newway \
+  --description "what this way covers" \
+  --global
+```
 
-**That's it.** No config files to update. Project ways override global ways with the same path. Ways can nest arbitrarily: `{domain}/{parent}/{child}/{child}.md`.
+This creates:
+- `{wayname}/{wayname}.md` — frontmatter + body template with guidance placeholders
+- `{wayname}/{wayname}.locales.jsonl` — locale entries for all covered languages (needs translation)
+
+Then: translate locale descriptions, run `ways corpus && ways tune --apply`, and `ways lint`.
+
+**Manual creation** also works: create `{domain}/{wayname}/{wayname}.md` with frontmatter + guidance. No config files to update. Project ways override global ways with the same path. Ways can nest arbitrarily: `{domain}/{parent}/{child}/{child}.md`.
 
 ## Writing Ways Well
 

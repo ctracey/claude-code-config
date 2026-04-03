@@ -132,6 +132,26 @@ enum Commands {
         #[arg(long)]
         project: Option<String>,
     },
+    /// Scaffold a new way with frontmatter, body template, and locale stubs
+    Template {
+        /// Way path relative to ways root (e.g., "softwaredev/code/newway")
+        path: String,
+        /// Description — what this way covers, in natural language
+        #[arg(long, short)]
+        description: String,
+        /// Vocabulary — space-separated domain keywords users would say
+        #[arg(long, short = 'V')]
+        vocabulary: Option<String>,
+        /// Matching threshold — higher = stricter (default: 2.0, semantic threshold auto-tuned by `ways tune`)
+        #[arg(long, default_value = "2.0")]
+        threshold: f64,
+        /// Scope: agent, subagent, teammate (comma-separated)
+        #[arg(long, default_value = "agent")]
+        scope: String,
+        /// Create in global ways (~/.claude/hooks/ways/) instead of project-local
+        #[arg(long)]
+        global: bool,
+    },
     /// Language coverage report — models, stubs, and per-way embed routing
     Language {
         /// Filter to ways supporting this language (code or name)
@@ -426,6 +446,9 @@ fn main() -> Result<()> {
         Commands::Tree { path, jaccard } => cmd::tree::run(path, jaccard),
         Commands::Provenance { ways_dir } => cmd::provenance::run(ways_dir),
         Commands::Init { project } => cmd::init::run(project.as_deref()),
+        Commands::Template { path, description, vocabulary, threshold, scope, global } => {
+            cmd::template::run(path, description, vocabulary, threshold, scope, global)
+        }
         Commands::Language { filter, audit, json } => cmd::language::run(filter.as_deref(), audit, json),
         Commands::Stats { days, project, json, global } => {
             cmd::stats::run(days, project.as_deref(), json, global)

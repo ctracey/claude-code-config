@@ -19,5 +19,6 @@ pub mod show;
 pub mod stats;
 pub mod status;
 pub mod suggest;
+pub mod template;
 pub mod tree;
 pub mod tune;
