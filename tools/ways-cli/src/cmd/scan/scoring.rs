@@ -54,20 +54,33 @@ pub(crate) fn batch_embed_score(query: &str) -> Option<Vec<(String, f64)>> {
     // EN corpus + EN model
     let en_corpus = xdg.join("ways-corpus-en.jsonl");
     let en_model = xdg.join("minilm-l6-v2.gguf");
-    if en_corpus.is_file() && en_model.is_file() {
-        if let Some(matches) = run_embed_match(&embed_bin, &en_corpus, &en_model, query) {
-            results.extend(matches);
-            any_ran = true;
+    if en_corpus.is_file() && has_entries(&en_corpus) {
+        if en_model.is_file() {
+            if let Some(matches) = run_embed_match(&embed_bin, &en_corpus, &en_model, query) {
+                results.extend(matches);
+                any_ran = true;
+            }
+        } else {
+            eprintln!("WARNING: {} ways in EN corpus but model missing ({})",
+                line_count(&en_corpus), en_model.display());
+            eprintln!("  Run: make setup");
         }
     }
 
     // Multilingual corpus + multilingual model
     let multi_corpus = xdg.join("ways-corpus-multi.jsonl");
     let multi_model = xdg.join("multilingual-minilm-l12-v2-q8.gguf");
-    if multi_corpus.is_file() && multi_model.is_file() {
-        if let Some(matches) = run_embed_match(&embed_bin, &multi_corpus, &multi_model, query) {
-            results.extend(matches);
-            any_ran = true;
+    if multi_corpus.is_file() && has_entries(&multi_corpus) {
+        if multi_model.is_file() {
+            if let Some(matches) = run_embed_match(&embed_bin, &multi_corpus, &multi_model, query) {
+                results.extend(matches);
+                any_ran = true;
+            }
+        } else {
+            eprintln!("WARNING: {} multilingual ways in corpus but model missing ({})",
+                line_count(&multi_corpus), multi_model.display());
+            eprintln!("  These ways will not match non-English prompts.");
+            eprintln!("  Run: make setup");
         }
     }
 
@@ -117,6 +130,18 @@ fn run_embed_match(
             })
             .collect(),
     )
+}
+
+fn has_entries(path: &std::path::Path) -> bool {
+    std::fs::read_to_string(path)
+        .map(|c| c.lines().any(|l| !l.is_empty()))
+        .unwrap_or(false)
+}
+
+fn line_count(path: &std::path::Path) -> usize {
+    std::fs::read_to_string(path)
+        .map(|c| c.lines().filter(|l| !l.is_empty()).count())
+        .unwrap_or(0)
 }
 
 fn find_way_embed() -> Option<std::path::PathBuf> {

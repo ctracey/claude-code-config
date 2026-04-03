@@ -152,6 +152,20 @@ pub fn run(json_output: bool) -> Result<()> {
         } else {
             println!("Corpus:    MISSING — run `ways corpus` to generate");
         }
+
+        // Dual corpus status
+        let en_corpus = xdg_cache.join("ways-corpus-en.jsonl");
+        let multi_corpus = xdg_cache.join("ways-corpus-multi.jsonl");
+        let multi_model_path = xdg_cache.join("multilingual-minilm-l12-v2-q8.gguf");
+        let en_count = en_corpus.is_file().then(|| count_lines(&en_corpus)).unwrap_or(0);
+        let multi_count = multi_corpus.is_file().then(|| count_lines(&multi_corpus)).unwrap_or(0);
+        if en_count > 0 || multi_count > 0 {
+            println!("  EN corpus:    {} ways", en_count);
+            println!("  Multi corpus: {} ways", multi_count);
+            if multi_count > 0 && !multi_model_path.is_file() {
+                println!("  ⚠ {} multilingual ways but model missing — run: make setup", multi_count);
+            }
+        }
         println!();
 
         // Ways
@@ -237,6 +251,12 @@ fn count_ways(dir: &Path) -> (usize, usize) {
     }
 
     (total, semantic)
+}
+
+fn count_lines(path: &Path) -> usize {
+    std::fs::read_to_string(path)
+        .map(|c| c.lines().filter(|l| !l.is_empty()).count())
+        .unwrap_or(0)
 }
 
 use crate::util::home_dir;
