@@ -295,6 +295,21 @@ static float cosine_similarity(const float *a, const float *b, int n) {
  * Commands
  * ======================================================================== */
 
+/* similarity: embed two texts, print cosine similarity */
+static int cmd_similarity(const char *model_path, const char *text1, const char *text2) {
+    embed_engine *engine = engine_init(model_path);
+    if (!engine) return 1;
+
+    auto vec1 = engine_embed(engine, text1);
+    auto vec2 = engine_embed(engine, text2);
+
+    float sim = cosine_similarity(vec1.data(), vec2.data(), engine->n_embd);
+    printf("%.4f\n", sim);
+
+    engine_free(engine);
+    return 0;
+}
+
 /* generate: embed corpus descriptions, write augmented JSONL */
 static int cmd_generate(const char *corpus_path, const char *model_path, const char *output_path) {
     std::vector<corpus_entry> corpus;
@@ -422,14 +437,18 @@ static void usage(const char *prog) {
         "  %s match --corpus FILE --model FILE --query TEXT [--threshold N]\n"
         "    Score query against pre-computed corpus embeddings.\n"
         "    Output: id<TAB>score for each match above threshold.\n\n"
+        "  %s similarity --model FILE --text1 TEXT --text2 TEXT\n"
+        "    Embed two texts and print their cosine similarity.\n\n"
         "Options:\n"
         "  --corpus FILE     Path to ways-corpus.jsonl\n"
         "  --model FILE      Path to GGUF model file\n"
         "  --query TEXT      User prompt to match\n"
         "  --threshold N     Override per-way embed_threshold (default: use per-way)\n"
         "  --output FILE     Output path for generate (default: overwrite corpus)\n"
+        "  --text1 TEXT      First text for similarity comparison\n"
+        "  --text2 TEXT      Second text for similarity comparison\n"
         "  --version         Print version\n",
-        VERSION, prog, prog);
+        VERSION, prog, prog, prog);
 }
 
 int main(int argc, char **argv) {
@@ -448,6 +467,8 @@ int main(int argc, char **argv) {
     const char *model_path = nullptr;
     const char *query = nullptr;
     const char *output_path = nullptr;
+    const char *text1 = nullptr;
+    const char *text2 = nullptr;
     double threshold = -1.0; /* negative = use per-way */
 
     for (int i = 2; i < argc; i++) {
@@ -461,6 +482,10 @@ int main(int argc, char **argv) {
             threshold = atof(argv[++i]);
         } else if (strcmp(argv[i], "--output") == 0 && i + 1 < argc) {
             output_path = argv[++i];
+        } else if (strcmp(argv[i], "--text1") == 0 && i + 1 < argc) {
+            text1 = argv[++i];
+        } else if (strcmp(argv[i], "--text2") == 0 && i + 1 < argc) {
+            text2 = argv[++i];
         } else if (strcmp(argv[i], "--version") == 0) {
             printf("way-embed %s\n", VERSION);
             return 0;
@@ -488,8 +513,15 @@ int main(int argc, char **argv) {
         }
         return cmd_match(corpus_path, model_path, query, threshold);
 
+    } else if (strcmp(command, "similarity") == 0) {
+        if (!model_path || !text1 || !text2) {
+            fprintf(stderr, "error: similarity requires --model, --text1, and --text2\n");
+            return 1;
+        }
+        return cmd_similarity(model_path, text1, text2);
+
     } else {
-        fprintf(stderr, "error: unknown command: %s (expected 'generate' or 'match')\n", command);
+        fprintf(stderr, "error: unknown command: %s (expected 'generate', 'match', or 'similarity')\n", command);
         return 1;
     }
 }
