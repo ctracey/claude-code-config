@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/agent-ways-logo.svg" alt="Agent Ways" width="600" />
+  <img src="docs/images/agent-ways-logo.svg" alt="Agent Ways" width="600" title="The W converges on the current task — green at the attention cursor, red at the fading edges. Each node is a way firing inside a larger network of possibilities." />
 </p>
 
 # Agent Ways
