@@ -37,7 +37,6 @@ pub fn run() -> Result<()> {
         .ok_or_else(|| anyhow::anyhow!("failed to render banner text"))?;
 
     let rendered = figure.to_string();
-    let lines: Vec<&str> = rendered.lines().collect();
 
     // Print spaced title with underline, aligned to block text
     println!();
@@ -45,7 +44,7 @@ pub fn run() -> Result<()> {
     println!();
 
     // Print block text with gradient color per line
-    for (i, line) in lines.iter().enumerate() {
+    for (i, line) in rendered.lines().enumerate() {
         let color = GRADIENT[i % GRADIENT.len()];
         println!("{color}{line}{RESET}");
     }
