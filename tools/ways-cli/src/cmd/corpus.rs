@@ -218,14 +218,14 @@ fn scan_ways_dir(dir: &Path, id_prefix: &str, excluded: &[String], w: &mut impl 
             relpath.parent().unwrap_or(Path::new("")).display()
         );
 
-        let embed_model = fm.embed_model.as_deref().unwrap_or("en");
+        // .md ways always use EN model (locale stubs use multilingual)
         let entry = json!({
             "id": id,
             "description": fm.description,
             "vocabulary": fm.vocabulary.unwrap_or_default(),
             "threshold": fm.threshold.unwrap_or(2.0),
             "embed_threshold": fm.embed_threshold.unwrap_or(0.35),
-            "embed_model": embed_model,
+            "embed_model": "en",
         });
 
         serde_json::to_writer(&mut *w, &entry)?;
@@ -524,13 +524,7 @@ fn content_hash(dir: &Path) -> String {
     format!("{:016x}", hasher.finish())
 }
 
-use crate::util::home_dir;
-
-fn xdg_cache_dir() -> PathBuf {
-    std::env::var("XDG_CACHE_HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| home_dir().join(".cache"))
-}
+use crate::util::{home_dir, xdg_cache_dir};
 
 /// Check if any way file is newer than the manifest.
 fn is_stale(manifest: &Path, global_dir: &Path, project_dir: &str) -> bool {

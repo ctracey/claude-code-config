@@ -5,6 +5,7 @@
 
 mod candidates;
 mod scoring;
+pub(crate) use scoring::batch_embed_score;
 
 use anyhow::Result;
 use regex::Regex;
@@ -14,7 +15,7 @@ use crate::session;
 
 use candidates::{check_when, collect_candidates, collect_checks};
 use scoring::{
-    batch_bm25_score, batch_embed_score, capture_show_check, capture_show_way, default_project,
+    batch_bm25_score, capture_show_check, capture_show_way, default_project,
 };
 
 pub(crate) struct WayCandidate {
@@ -47,13 +48,8 @@ pub fn prompt(query: &str, session_id: &str, project: Option<&str>) -> Result<()
     let scope = session::detect_scope(session_id);
     let candidates = collect_candidates(&project_dir);
 
-    // Batch semantic scoring — embed is authoritative when available
     let embed_matches = batch_embed_score(query);
-    let bm25_matches = if embed_matches.is_some() {
-        Vec::new() // embedding engine is healthy — skip BM25 entirely
-    } else {
-        batch_bm25_score(query)
-    };
+    let bm25_matches = bm25_fallback(query, embed_matches.is_some());
 
     for way in &candidates {
         if !session::scope_matches(&way.scope, &scope) {
@@ -99,13 +95,8 @@ pub fn task(
     let is_teammate = team.is_some();
     let candidates = collect_candidates(&project_dir);
 
-    // Batch semantic scoring — embed exclusive when available
     let embed_matches = batch_embed_score(query);
-    let bm25_matches = if embed_matches.is_some() {
-        Vec::new()
-    } else {
-        batch_bm25_score(query)
-    };
+    let bm25_matches = bm25_fallback(query, embed_matches.is_some());
 
     let mut matched: Vec<(String, String)> = Vec::new(); // (way_id, channel)
 
@@ -235,13 +226,8 @@ pub fn command(
         description.unwrap_or("")
     );
 
-    // Semantic scoring for checks — embed exclusive when available
     let embed_check_matches = batch_embed_score(&query_for_checks);
-    let bm25_check_matches = if embed_check_matches.is_some() {
-        Vec::new()
-    } else {
-        batch_bm25_score(&query_for_checks)
-    };
+    let bm25_check_matches = bm25_fallback(&query_for_checks, embed_check_matches.is_some());
     let semantic_matches = embed_check_matches.as_deref().unwrap_or(&bm25_check_matches);
 
     for check in &checks {
@@ -321,14 +307,9 @@ pub fn file(filepath: &str, session_id: &str, project: Option<&str>) -> Result<(
         }
     }
 
-    // Check matching for files — embed exclusive when available
     let checks = collect_checks(&project_dir);
     let embed_matches = batch_embed_score(filepath);
-    let bm25_matches = if embed_matches.is_some() {
-        Vec::new()
-    } else {
-        batch_bm25_score(filepath)
-    };
+    let bm25_matches = bm25_fallback(filepath, embed_matches.is_some());
     let semantic_matches = embed_matches.as_deref().unwrap_or(&bm25_matches);
 
     for check in &checks {
@@ -631,4 +612,13 @@ fn strip_frontmatter(content: &str) -> String {
 
 fn capture_show_core(session_id: &str) -> String {
     crate::cmd::show::core(session_id).unwrap_or_default()
+}
+
+/// BM25 fallback: returns scores when embedding is unavailable and language supports BM25.
+fn bm25_fallback(query: &str, embed_available: bool) -> Vec<(String, f64)> {
+    if embed_available || !crate::agents::is_bm25_available() {
+        Vec::new()
+    } else {
+        batch_bm25_score(query)
+    }
 }
