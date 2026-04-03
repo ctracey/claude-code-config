@@ -194,12 +194,14 @@ fn scan_ways_dir(dir: &Path, id_prefix: &str, excluded: &[String], w: &mut impl 
             relpath.parent().unwrap_or(Path::new("")).display()
         );
 
+        let embed_model = fm.embed_model.as_deref().unwrap_or("en");
         let entry = json!({
             "id": id,
             "description": fm.description,
             "vocabulary": fm.vocabulary.unwrap_or_default(),
             "threshold": fm.threshold.unwrap_or(2.0),
             "embed_threshold": fm.embed_threshold.unwrap_or(0.35),
+            "embed_model": embed_model,
         });
 
         serde_json::to_writer(&mut *w, &entry)?;
@@ -211,6 +213,7 @@ fn scan_ways_dir(dir: &Path, id_prefix: &str, excluded: &[String], w: &mut impl 
 }
 
 /// Shell out to way-embed generate for embedding vectors.
+/// Generates two corpus files: one with EN model embeddings, one with multilingual.
 fn auto_embed(xdg_way: &Path, corpus: &Path, log: &dyn Fn(&str)) -> Result<()> {
     let embed_bin = [
         xdg_way.join("way-embed"),
@@ -219,27 +222,99 @@ fn auto_embed(xdg_way: &Path, corpus: &Path, log: &dyn Fn(&str)) -> Result<()> {
     .into_iter()
     .find(|p| p.is_file());
 
-    let model = xdg_way.join("minilm-l6-v2.gguf");
+    let bin = match embed_bin {
+        Some(b) => b,
+        None => {
+            log("Tip: install the embedding engine for 98% matching accuracy (vs 91% BM25):");
+            log("  cd ~/.claude && make setup");
+            return Ok(());
+        }
+    };
 
-    if let Some(bin) = embed_bin {
-        if model.is_file() {
-            log("Embedding model found — generating embedding vectors...");
-            let status = std::process::Command::new(&bin)
-                .args(["generate", "--corpus"])
-                .arg(corpus)
-                .args(["--model"])
-                .arg(&model)
-                .stderr(std::process::Stdio::null())
-                .status();
+    let en_model = xdg_way.join("minilm-l6-v2.gguf");
+    let multi_model = xdg_way.join("multilingual-minilm-l12-v2-q8.gguf");
 
-            match status {
-                Ok(s) if s.success() => log(&format!("Embeddings added to {}", corpus.display())),
-                _ => eprintln!("WARNING: embedding generation failed, corpus has BM25 fields only"),
+    // Split corpus into EN and multilingual entries
+    let corpus_content = std::fs::read_to_string(corpus)?;
+    let corpus_en = xdg_way.join("ways-corpus-en.jsonl");
+    let corpus_multi = xdg_way.join("ways-corpus-multi.jsonl");
+    let mut en_count = 0usize;
+    let mut multi_count = 0usize;
+
+    {
+        let mut w_en = std::io::BufWriter::new(std::fs::File::create(&corpus_en)?);
+        let mut w_multi = std::io::BufWriter::new(std::fs::File::create(&corpus_multi)?);
+
+        for line in corpus_content.lines() {
+            if line.is_empty() { continue; }
+            let model_field = serde_json::from_str::<serde_json::Value>(line)
+                .ok()
+                .and_then(|v| v.get("embed_model").and_then(|m| m.as_str()).map(|s| s.to_string()))
+                .unwrap_or_else(|| "en".to_string());
+
+            if model_field == "multilingual" {
+                writeln!(w_multi, "{line}")?;
+                multi_count += 1;
+            } else {
+                writeln!(w_en, "{line}")?;
+                en_count += 1;
             }
         }
-    } else {
-        log("Tip: install the embedding engine for 98% matching accuracy (vs 91% BM25):");
-        log("  cd ~/.claude && make setup");
+    }
+
+    // Embed EN corpus
+    if en_model.is_file() && en_count > 0 {
+        log(&format!("Embedding {en_count} ways with English model..."));
+        let status = std::process::Command::new(&bin)
+            .args(["generate", "--corpus"])
+            .arg(&corpus_en)
+            .args(["--model"])
+            .arg(&en_model)
+            .stderr(std::process::Stdio::null())
+            .status();
+
+        match status {
+            Ok(s) if s.success() => log(&format!("  EN embeddings: {}", corpus_en.display())),
+            _ => eprintln!("WARNING: EN embedding generation failed"),
+        }
+    }
+
+    // Embed multilingual corpus
+    if multi_model.is_file() && multi_count > 0 {
+        log(&format!("Embedding {multi_count} ways with multilingual model..."));
+        let status = std::process::Command::new(&bin)
+            .args(["generate", "--corpus"])
+            .arg(&corpus_multi)
+            .args(["--model"])
+            .arg(&multi_model)
+            .stderr(std::process::Stdio::null())
+            .status();
+
+        match status {
+            Ok(s) if s.success() => log(&format!("  Multi embeddings: {}", corpus_multi.display())),
+            _ => eprintln!("WARNING: multilingual embedding generation failed"),
+        }
+    } else if multi_count > 0 && !multi_model.is_file() {
+        log(&format!("  {multi_count} multilingual ways found but model not installed"));
+        log("  Run: make setup  (downloads multilingual model, 127MB)");
+    }
+
+    // Also generate combined corpus for backward compatibility
+    // (the main ways-corpus.jsonl keeps EN embeddings as before)
+    if en_model.is_file() {
+        log(&format!("Generating combined corpus with English embeddings..."));
+        let status = std::process::Command::new(&bin)
+            .args(["generate", "--corpus"])
+            .arg(corpus)
+            .args(["--model"])
+            .arg(&en_model)
+            .stderr(std::process::Stdio::null())
+            .status();
+
+        match status {
+            Ok(s) if s.success() => log(&format!("Combined corpus: {}", corpus.display())),
+            _ => eprintln!("WARNING: combined embedding generation failed"),
+        }
     }
 
     Ok(())
