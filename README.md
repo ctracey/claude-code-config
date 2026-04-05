@@ -1,14 +1,6 @@
-<p align="center">
-  <img src="docs/images/agent-ways-logo.svg" alt="Agent Ways logo — a W made of nodes and edges with a red-to-green gradient representing attention falloff, emerging from a dim background knowledge graph" width="600" />
-</p>
+# Agent Ways - Previously Claude-Code-Config. 
 
-# Agent Ways
-
-![GitHub stars](https://img.shields.io/github/stars/aaronsb/agent-ways?style=social)
-![GitHub forks](https://img.shields.io/github/forks/aaronsb/agent-ways?style=social)
-![GitHub issues](https://img.shields.io/github/issues/aaronsb/agent-ways)
-![License](https://img.shields.io/github/license/aaronsb/agent-ways)
-![Last commit](https://img.shields.io/github/last-commit/aaronsb/agent-ways)
+This repository will no longer get updates and I recommend rebasing on [Agent Ways](https://github.com/aaronsb/agent-ways) as that will be my focus for the tooling moving forward. Sorry for the inconvenience.
 
 Event-driven cognitive steering for AI coding agents. Ways encode *how we do things* — prescriptive guidance triggered by context, not requested by intent — and inject them just-in-time before tools execute.
 
