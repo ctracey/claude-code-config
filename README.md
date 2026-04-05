@@ -4,11 +4,11 @@
 
 # Agent Ways
 
-![GitHub stars](https://img.shields.io/github/stars/aaronsb/claude-code-config?style=social)
-![GitHub forks](https://img.shields.io/github/forks/aaronsb/claude-code-config?style=social)
-![GitHub issues](https://img.shields.io/github/issues/aaronsb/claude-code-config)
-![License](https://img.shields.io/github/license/aaronsb/claude-code-config)
-![Last commit](https://img.shields.io/github/last-commit/aaronsb/claude-code-config)
+![GitHub stars](https://img.shields.io/github/stars/aaronsb/agent-ways?style=social)
+![GitHub forks](https://img.shields.io/github/forks/aaronsb/agent-ways?style=social)
+![GitHub issues](https://img.shields.io/github/issues/aaronsb/agent-ways)
+![License](https://img.shields.io/github/license/aaronsb/agent-ways)
+![Last commit](https://img.shields.io/github/last-commit/aaronsb/agent-ways)
 
 Event-driven cognitive steering for AI coding agents. Ways encode *how we do things* — prescriptive guidance triggered by context, not requested by intent — and inject them just-in-time before tools execute.
 
@@ -90,7 +90,7 @@ See [Semantic Matching](docs/hooks-and-ways.md#semantic-matching) for the full s
 
 ```bash
 # Clone (fork first if you plan to customize)
-git clone https://github.com/aaronsb/claude-code-config ~/.claude
+git clone https://github.com/aaronsb/agent-ways ~/.claude
 
 # Set up semantic matching engine (downloads ~21MB model)
 cd ~/.claude && make setup
@@ -101,7 +101,7 @@ cd ~/.claude && make setup
 Or as a one-liner (clones to temp, verifies, then installs):
 
 ```bash
-curl -sL https://raw.githubusercontent.com/aaronsb/claude-code-config/main/scripts/install.sh | bash -s -- --bootstrap
+curl -sL https://raw.githubusercontent.com/aaronsb/agent-ways/main/scripts/install.sh | bash -s -- --bootstrap
 ```
 
 The built-in ways cover software development, but the framework is domain-agnostic. Fork it, replace the ways, add your own domains.
@@ -293,12 +293,12 @@ For the attention mechanics: [context-decay.md](docs/hooks-and-ways/context-deca
 
 ## Updating
 
-At session start, `check-config-updates.sh` compares your local copy against upstream (`aaronsb/claude-code-config`). It runs silently unless you're behind — then it prints a notice with the exact commands to sync. Network calls are rate-limited to once per hour. After pulling, run `make setup` to update the semantic matching corpus.
+At session start, `check-config-updates.sh` compares your local copy against upstream (`aaronsb/agent-ways`). It runs silently unless you're behind — then it prints a notice with the exact commands to sync. Network calls are rate-limited to once per hour. After pulling, run `make setup` to update the semantic matching corpus.
 
 | Scenario | How detected | Sync command |
 |----------|-------------|--------------|
-| **Direct clone** | `origin` points to `aaronsb/claude-code-config` | `cd ~/.claude && git pull` |
-| **Fork** | GitHub API reports `parent` is `aaronsb/claude-code-config` | `cd ~/.claude && git fetch upstream && git merge upstream/main` |
+| **Direct clone** | `origin` points to `aaronsb/agent-ways` | `cd ~/.claude && git pull` |
+| **Fork** | GitHub API reports `parent` is `aaronsb/agent-ways` | `cd ~/.claude && git fetch upstream && git merge upstream/main` |
 | **Renamed clone** | `.claude-upstream` marker file exists | `cd ~/.claude && git fetch upstream && git merge upstream/main` |
 | **Plugin** | `CLAUDE_PLUGIN_ROOT` set with `plugin.json` | `/plugin update disciplined-methodology` |
 
