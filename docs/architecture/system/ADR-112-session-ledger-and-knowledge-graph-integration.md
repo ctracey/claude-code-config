@@ -30,6 +30,21 @@ When compaction fires, Claude loses the detailed understanding built over the se
 
 An agent operating under a shrinking resource (context window) must externalize knowledge at a rate that tracks resource consumption, not wall-clock time. This is the same principle as write-ahead logging in databases (log before the transaction commits), incremental checkpointing in HPC (save every N iterations, not N minutes), and medical shift handoffs (outgoing nurse writes a narrative per patient: what happened, what's pending, what to watch for).
 
+### Knowledge tier geometry
+
+Each knowledge tier offers a fixed "surface area" (depth × breadth) that reshapes along an attention dimension — echoing the capacity-precision tradeoff described in Oberauer's concentric model of working memory (2002) and formalized by rate-distortion theory (Shannon/Berger), where a fixed information budget is allocated between fidelity and coverage:
+
+| Tier | Shape | Persistence | Bounded By |
+|---|---|---|---|
+| **Live context** | Tall, narrow (deep on current task, blind to rest) | Session (collapses at compaction) | Context window |
+| **Transcripts** | Shorter, wider (raw history, low signal-to-noise) | Uncertain (possible TTL) | Disk, retention policy |
+| **Ledger** | Flatter, wider (curated summaries, high signal) | Permanent (user-controlled) | Disk |
+| **Knowledge graph** | Flattest, widest (concepts + edges across all time) | Regenerable from ledger | KG infrastructure |
+
+Each project has its own stack of these tiers with different surface areas based on maturity. The **overlap projection** across all tiers and all projects is the total knowledge coverage. Gaps in the projection are things unknown at any tier. Overlap between tiers is redundancy — and how the tiers validate each other. This projection model has precedent in Formal Concept Analysis (Wille, 1982), where coverage gaps are computed from overlapping concept extents.
+
+Retrieval triggers (domain entry, post-compaction, etc.) are **attention-routing operations** — they select the operating point on the rate-distortion curve, reshaping which slice of the lower tiers gets projected into the live-context tier. Without them, the lower tiers exist but never influence the first-class attention space where work actually happens.
+
 ### The economic bet
 
 The reflection entries cost tokens — Claude spends part of its response on summation rather than forward progress. The KG ingestion costs tokens against a separate inference framework (the KG's LLM extraction pipeline). The bet is that this combined cost returns a **greater than 1:1 ratio of value** through connected concept reasoning.
@@ -120,10 +135,6 @@ The frontmatter is written by the hook script (which has access to session state
 
 The `transcript` field links back to the source session transcript. This means the ledger entry can serve as a pointer into the full session history — the prose is a curated summary, and the transcript is the raw record. If deeper context is needed, the transcript is always reachable.
 
-#### Relationship to the KG
-
-The KG does not care about ledger ordering. Epistemic status measures honesty and convergence, not recency — ingesting entry 47 before entry 3 produces the same concept graph. This means replay (for KG regeneration) is simply "ingest everything not yet ingested" without ordering constraints. The temporal ordering in the ledger serves human readability and in-session continuity, not the KG.
-
 #### Capture mechanism — keyphrase extraction
 
 Claude doesn't write to the ledger directly. Instead, the reflection way injects a prompt like:
@@ -143,9 +154,22 @@ The keyphrase serves as a machine-parseable delimiter that's natural enough to a
 
 **Total Claude-side cost: zero tool calls.** Claude just talks. The framework handles filing.
 
+#### Additional capture channel: memory writes
+
+Claude's auto-memory system (MEMORY.md + topic files) produces the same class of knowledge artifact as ledger entries — curated prose about what was learned, written to disk with structured frontmatter. Memory writes are triggered by explicit user requests ("remember this") or by the memory way at context thresholds (surprise test).
+
+When KG is enabled, a PostToolUse hook on Write can detect writes to the memory directory and copy the file to the KG FUSE ingest — the same pattern as ledger entry ingestion. Memory files already have frontmatter with name, description, and type, making them well-structured KG input. This means the KG receives knowledge from two channels:
+
+1. **Ledger entries** — periodic epoch reflections (what happened)
+2. **Memory writes** — explicit or surprise-gated observations (what was surprising or important)
+
+Both channels are fire-and-forget copies to the FUSE mount. The KG deduplicates across channels naturally.
+
 #### Session narrative (ephemeral working copy)
 
-During a session, entries are also appended to `${SESSIONS_ROOT}/${session}/narrative.md` — a concatenated view of all entries this session. This is what Claude reads for in-session continuity (e.g., at resume after compaction). It's ephemeral (lives in XDG_RUNTIME_DIR) and regenerable from the ledger.
+During a session, entries are also appended to `${SESSIONS_ROOT}/${session}/narrative.md` — a concatenated view of entries this session. This is what Claude reads for in-session continuity (e.g., at resume after compaction). It's ephemeral (lives in XDG_RUNTIME_DIR) and regenerable from the ledger.
+
+The resume way does not inject the entire narrative — only the last 2-3 entries plus the handoff entry. In long sessions with many compaction cycles, the narrative could grow large; injecting it all would immediately consume the fresh context window. The KG (if active) handles deeper cross-session structural context; the narrative provides only the immediate thread of continuity.
 
 #### Epoch numbering
 
@@ -189,7 +213,7 @@ One KG ontology per Claude project (named after the project slug). All retrieval
 
 #### Replay
 
-The ledger enables KG regeneration. If the KG is lost or reset, ingest all ledger entries. Order doesn't matter — the KG's epistemic model is order-independent and deduplication makes replay idempotent at the concept level.
+The ledger enables KG regeneration. If the KG is lost or reset, ingest all ledger entries across all projects (`~/.claude/ledger/*/`). Order doesn't matter — the KG's epistemic model measures honesty and convergence, not recency, so ingesting entry 47 before entry 3 produces the same concept graph. Deduplication makes replay idempotent. The temporal ordering in the ledger serves human readability and in-session continuity, not the KG.
 
 #### Graph maturity phases
 
@@ -204,6 +228,23 @@ The KG isn't static storage — it progresses through distinct phases as ledger 
 **Reasoning** — Node relationships, edge vector directions, and grounding scores with substantiating evidence form reasoning networks. The graph topology itself encodes arguments. High-grounding paths represent well-established reasoning chains; contested edges represent open questions. Retrieval at this phase provides not just context but structured reasoning — "here's why X, supported by evidence from sessions 3, 7, and 12, with a counterpoint from session 9."
 
 Each phase increases the value-to-cost ratio of the reflection investment. The linear phase costs the same as the reasoning phase in tokens spent, but the reasoning phase returns qualitatively richer context.
+
+#### Why KG over editorial curation (the ephemera problem)
+
+Memory curation approaches fall into two categories from the formal literature: **editorial** (the AGM framework — Alchourrón, Gärdenfors, Makinson, 1985) which performs minimal consistent revision, and **evidential** (Dempster-Shafer theory, 1976) which preserves contradictions and scores the balance of evidence. Claude Code's built-in memory curation ("dream mode") is editorial. The KG is evidential.
+
+When editorial curation encounters "X is true" from session 3 and "X is false" from session 12, it must pick one. The *fact that understanding shifted* is itself knowledge, and it's destroyed. The KG keeps both assertions with their evidence and scores the balance through epistemic status classifications that editorial curation cannot represent:
+
+- **AFFIRMATIVE** — consistent evidence across sessions (editorial curation's only output)
+- **CONTESTED** — evidence in both directions (more informative than either assertion alone)
+- **CONTRADICTORY** — later evidence actively contradicts earlier (tells you understanding shifted)
+- **INSUFFICIENT_DATA** — not enough evidence to classify (tells you this is unexplored)
+
+The deeper problem is ephemera. Editorial curation keeps big signals and discards small ones. But minor observations compound — a low-signal concept from session 5 might become the key insight in session 40, but only if it survived 35 curation cycles. The KG preserves it as a low-ranked node with live edges, costing nothing in attention budget until a future session produces a structurally adjacent concept. The minor signal surfaces not because anyone remembered to preserve it, but because the graph topology kept it connected.
+
+The KG's composed scoring reinforces this. A concept that's individually weak but connected to three strong concepts along a coherent semantic axis is more informative than its individual score suggests. Polarity analysis projects concepts onto axes — a minor concept near the midpoint of a contested axis is the most interesting concept in the graph, not the least.
+
+The scaling curves go in opposite directions. As data grows over months, editorial curation becomes increasingly destructive — each pass loses more ephemera. The KG becomes increasingly valuable — each new concept has more neighbors to connect to, more axes to project onto, more composed scores to participate in. The ledger preserves raw signal; the KG preserves the *relationships between signals* — including the minor ones that editorial curation discards.
 
 ### Hook Changes
 
@@ -333,6 +374,21 @@ Each phase increases the value-to-cost ratio of the reflection investment. The l
 
 - **Cross-project KG queries** — Considered allowing retrieval to search across all ontologies. Rejected because it violates project scoping — sessions from project A shouldn't bleed into project B's context. Cross-ontology edges exist at the concept level (a concept can point to concepts in other ontologies), but retrieval is always scoped to the current project's ontology.
 
+## Related Projects
+
+- [aaronsb/agent-ways](https://github.com/aaronsb/agent-ways) — The ways framework this ADR extends
+- [aaronsb/knowledge-graph-system](https://github.com/aaronsb/knowledge-graph-system) — The KG system used for Tier 2
+
+## Theoretical References
+
+- Oberauer (2002) — Concentric model of working memory: capacity-precision tradeoffs across nested tiers
+- Shannon/Berger — Rate-distortion theory: fixed information budget allocated between fidelity and coverage
+- Wille (1982) — Formal Concept Analysis: coverage gap detection from overlapping concept extents
+- Dempster-Shafer (1976) — Evidential reasoning: preserve contradictions, score balance of evidence
+- AGM framework (1985) — Belief revision via minimal consistent editing (the editorial model we contrast against)
+- Tishby et al. (1999) — Information Bottleneck: attention as selection of operating point on R(D) curve
+- Behrouz et al. (2025) — Google Titans: multi-tier memory (short-term/long-term/persistent) with surprise-gated writes. Rhymes with this design's tier structure, though Titans operates within model architecture while this design operates via external infrastructure.
+
 ## Implementation Plan
 
 ### Phase 1: Hook improvements (no binary changes)
@@ -355,5 +411,5 @@ Each phase increases the value-to-cost ratio of the reflection investment. The l
 13. **Observe** — Measure KG injection information density and epistemic trust growth
 
 ### Phase 4: Additional hook diversification
-13. **PostToolUseFailure** — Error-context way injection via `check-error-post.sh`
-14. **CwdChanged / FileChanged** — Project-local way activation, corpus rebuild on way edits
+14. **PostToolUseFailure** — Error-context way injection via `check-error-post.sh`
+15. **CwdChanged / FileChanged** — Project-local way activation, corpus rebuild on way edits
