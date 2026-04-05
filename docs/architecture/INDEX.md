@@ -27,9 +27,12 @@ _Ways architecture, matching, macros, hooks, session lifecycle_
 | [ADR-104](./system/ADR-104-token-gated-way-re-disclosure-for-long-context-windows.md) | Token-Gated Way Re-Disclosure for Long Context Windows | Accepted |
 | [ADR-105](./system/ADR-105-progressive-disclosure-for-way-trees.md) | Progressive Disclosure for Way Trees | Accepted |
 | [ADR-106](./system/ADR-106-project-pulse-epoch-mapped-project-awareness.md) | Project Pulse — Epoch-Mapped Project Awareness | Accepted |
-| [ADR-107](./system/ADR-107-way-match-corpus-batch-mode-and-locale-support.md) | Way-Match Corpus, Batch Mode, and Locale Support | Draft |
+| [ADR-107](./system/ADR-107-way-match-corpus-batch-mode-and-locale-support.md) | Corpus, Matching Pipeline, and Locale Support | Accepted |
 | [ADR-108](./system/ADR-108-embedding-based-way-matching-with-all-minilm-l6-v2.md) | Embedding-Based Way Matching with all-MiniLM-L6-v2 | Accepted |
 | [ADR-109](./system/ADR-109-project-scope-way-embedding-with-manifest-based-staleness-detection.md) | Project-Scope Way Embedding with Manifest-Based Staleness Detection | Draft |
+| [ADR-110](./system/ADR-110-way-file-separation-and-graph-compatible-structure.md) | Way File Separation and Graph-Compatible Structure | Draft |
+| [ADR-111](./system/ADR-111-unified-ways-cli-single-binary-tool-consolidation.md) | Unified `ways` CLI — Single Binary Tool Consolidation | Accepted |
+| [ADR-112](./system/ADR-112-session-ledger-and-knowledge-graph-integration.md) | Session Ledger and Knowledge Graph Integration | Draft |
 
 ## Documentation
 _Documentation structure, tooling, coherence_

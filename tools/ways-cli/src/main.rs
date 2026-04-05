@@ -57,7 +57,7 @@ enum Commands {
         #[arg(long)]
         if_stale: bool,
     },
-    /// Score a query against ways using BM25
+    /// Score a query against ways (semantic cosine similarity, BM25 fallback)
     Match {
         /// The query string to match
         query: String,
