@@ -4,6 +4,15 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Workload restructure `2026-04-06`
+
+- Reorganised workload from 15 flat top-level tasks into a 2-level hierarchy: **1. MAIN WORKFLOW** (sub-areas 1.1–1.4) and **2. Advanced improvements**
+- Items regrouped thematically — planning visualisation now under 1.3, story mapping / ways hygiene / MCP service demoted to section 2
+- Task number references updated in notes.md (task 10.2 → 1.3.3.2) and architecture.md (tasks 3.1, 12.1, 13.1, 9.1 → new numbers)
+- Task 12.1 (naming convention alignment) marked as resolved — decision absorbed into completed items under 1.1.x
+
+---
+
 ## Task 1.1 — Define reference doc conventions `2026-03-27`
 
 - Established four doctype suffixes: *(none)*, `_plan`, `_architecture`, `_notes`

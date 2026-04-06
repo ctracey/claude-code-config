@@ -249,7 +249,7 @@ A workflow config — a skill or script that owns the canonical step list — wo
 - Does it generalise beyond planning? `todo-execute` could have its own step list (e.g. `brief,implement,test,handoff`).
 - If it's a script, can `todo-begin` call it to get the `steps=` value at runtime rather than hardcoding it?
 
-Decision not yet made — captured here as task 10.2. Explore before adding more workflows that need progress banners.
+Decision not yet made — captured here as task 1.3.3.2. Explore before adding more workflows that need progress banners.
 
 ## Workflow components inventory
 

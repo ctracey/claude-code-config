@@ -4,7 +4,7 @@
 
 This sub-initiative refactors `todo-begin` from a monolithic 8-step skill into a layered architecture: a thin orchestrator that runs focused per-phase skills directly in the main session.
 
-Parent: PR-5 task 3.1 (`todo-begin` skill)
+Parent: PR-5 task 1.1.2 (`todo-begin` skill)
 
 ---
 
@@ -337,14 +337,14 @@ Implementation acceptance:
 ## Open questions
 
 - Should `todo-plan-context` handle all four existing-work modes (replace/extend/sibling/new sections) inline, or delegate mode-specific logic to a helper?
-- Naming convention alignment (task 12.1): should `todo-pr-N` track the PR number, the branch name, or both? How does `todo-plan-context` handle renaming when a placeholder becomes a real PR?
-- New project setup (task 13.1): what's the right level of guidance for creating a repo/branch from scratch — full scaffold, or just a prompt to do it and confirm?
+- Naming convention alignment (resolved — now implicit in 1.1.x): should `todo-pr-N` track the PR number, the branch name, or both? How does `todo-plan-context` handle renaming when a placeholder becomes a real PR?
+- New project setup (task 1.3.2): what's the right level of guidance for creating a repo/branch from scratch — full scaffold, or just a prompt to do it and confirm?
 
 ---
 
 ## Deferred decisions
 
-- Story mapping integration (task 9.1) — how `todo-plan-delivery` and `todo-plan-breakdown` could support outcome/learning milestones as an alternative to pure task lists. Deferred until the core architecture is stable.
+- Story mapping integration (task 2.3.1) — how `todo-plan-delivery` and `todo-plan-breakdown` could support outcome/learning milestones as an alternative to pure task lists. Deferred until the core architecture is stable.
 - Changelog creation — confirmed: `_changelog.md` is created as part of the execution workflow (`todo-execute`), not planning. No action needed here.
 
 ---
