@@ -9,9 +9,8 @@
      - [x] 1.1.3. Explicitly check and confirm git repo state with user as the first step of planning — branch, remote, open PRs — in a streamlined single exchange before proceeding
      - [x] 1.1.4. Split _notes and _changelog into separate docs
      - [-] 1.1.5. Define when and how notes/docs are updated in the workflow (post-task, post-review, or on handoff)
-     - [-] 1.1.6. Switch from todo-pr tracking to .swc workload tracking
-         - [x] 1.1.6.1. Decide tracking strategy (branch-only vs always vs never)
-         - [ ] 1.1.6.2. Add cleanup step to ship flow if branch-only approach adopted
+     - [x] 1.1.6. Switch from todo-pr tracking to .swc workload tracking, Decide tracking strategy (branch-only vs always vs never)
+     - [ ] 1.1.7. Add cleanup step to ship flow if branch-only approach adopted
 
 
   - [-] 1.2. **Workload management**
