@@ -194,6 +194,35 @@ The subagent is expected to make decisions autonomously. The tipping point for s
 
 Scope questions never stop work. Flag them as recommendations in the summary artifact for Gate 4. The user decides there whether to extend scope as a new work item.
 
+## Implementation workflow brief format
+
+The implementation agent receives a structured brief assembled by `swc_deliver` / `swc_implement`. Format inherited from `swc_execute` and extended for multi-pass delivery:
+
+```
+## Work item brief
+
+**Work item:** [number and name]
+[description]
+
+**Done when:** [prose criteria from work item entry — human-readable intent]
+
+**Approved spec:** [path to spec file, or inline checklist for non-code work items]
+
+## Plan
+[contents of plan.md, or "not provided"]
+
+## Architecture
+[contents of architecture.md, or "not provided"]
+
+## Prior context
+[contents of .swc/<folder>/workitems/<N>/context.md — omitted on first pass]
+
+## Review findings (pass N)
+[structured findings from code-reviewer — omitted on first pass]
+```
+
+**"Done when" vs the spec:** "Done when" is the human-readable intent from the work item. The approved spec is the machine-checkable expression of it. The implementation workflow exits when the spec passes — not when it judges the prose criteria satisfied. The spec supersedes "Done when" as the operative exit condition.
+
 ## Spec-driven TDD convention
 
 The implementation workflow is spec-first:

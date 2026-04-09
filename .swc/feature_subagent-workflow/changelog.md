@@ -4,6 +4,23 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — swc_workflow_deliver skill scaffold `2026-04-09`
+
+- Created `swc_workflow_deliver` orchestrator skill — resolves work item, confirms with user, delegates to `swc-workflow-orchestrator` with 2-stage deliver definition
+- Created `swc_workflow_deliver-requirements` stub — stage 1, scope/constraints/edge-case clarification
+- Created `swc_workflow_deliver-specs` stub — stage 2, test strategy and acceptance criteria
+- Added workload item 1.4.2.0 to track skill wiring; marked done
+- Added 1.2.12 to track `_meta.json` key rename (`workloads` → `workloadContexts`)
+
+---
+
+## Session — implementation workflow brief format `2026-04-09`
+
+- Added brief format to notes.md — structure the implementation agent receives, extended from swc_execute to include prior context.md and review findings for multi-pass delivery
+- Captured "Done when" vs spec relationship — spec supersedes prose criteria as the operative exit condition; implementation workflow exits when spec passes
+
+---
+
 ## Task 1.4.1 — Resolve execution workflow risks `2026-04-09`
 
 - R1 resolved: `swc_deliver` reads codebase context before Gate 1 so approach agreement is grounded in reality

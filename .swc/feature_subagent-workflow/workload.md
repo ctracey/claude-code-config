@@ -25,6 +25,7 @@
      - [x] 1.2.9. Rename this skillset
      - [x] 1.2.10. Move .swc to root of repo instead of inside .claude and consider tracking decoupling — the `todo-*` prefix ties skills to a specific file format; evaluate whether the skills should be renamed to reflect the workflow concept rather than the storage mechanism, and whether tracking (the todo files) should be decoupled from the workflow skills themselves
      - [ ] 1.2.11. Resolve workload guard / skill conflict — the guard hook fires on any direct edit to workload.md, including edits made by swc_workload-update itself; the guard and skill need a shared mechanism (e.g. a CLI tool or detectable marker) so sanctioned edits are not flagged
+     - [ ] 1.2.12. Rename `workloads` key to `workloadContexts` in `_meta.json` schema — update all skills and docs that read/write this key
 
       
   - [x] 1.3. **Planning workflow for new project**
@@ -45,7 +46,8 @@
          - [x] 1.4.1.4. Define how swc_deliver grounds Gate 1 in codebase reality (R1)
          - [x] 1.4.1.5. Define quality loop visibility in Gate 3 handoff (R5)
 
-     - [ ] 1.4.2. **Delivery workflow — swc_deliver**
+     - [-] 1.4.2. **Delivery workflow — swc_deliver**
+         - [x] 1.4.2.0. Build `swc_workflow_deliver` skill — entry-point skill that resolves the target work item, confirms with the user, and delegates to `swc-workflow-orchestrator` with the deliver stage definitions (stub created; needs full stage wiring)
          - [ ] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
          - [ ] 1.4.2.2. Gate 2 — write test spec, human approves
          - [ ] 1.4.2.3. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
