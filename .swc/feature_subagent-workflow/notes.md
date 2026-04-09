@@ -290,24 +290,39 @@ Decision not yet made — worth revisiting when the workflow is stable enough to
 
 ## Open risks — execution workflow design
 
-### R1: Brief quality assumption is fragile
+### R1: Brief quality assumption is fragile ✔ resolved
 Gates 1 and 2 happen before the agent reads the codebase. The agreed approach may become unworkable once the agent encounters existing patterns or integration constraints — leading to silent deviation or a stuck agent.
-**Mitigation to explore:** `swc_deliver` reads relevant codebase context before Gate 1 so approach agreement is grounded in reality.
 
-### R2: Quality loop has no exit condition
+**Resolution:** `swc_deliver` reads relevant codebase context before Gate 1 so approach agreement is grounded in reality.
+
+### R2: Quality loop has no exit condition ✔ resolved
 "Loop until quality bar is met" is undefined — no max iterations, no severity threshold, no escalation path. Risk of indefinite looping or compute waste.
-**Mitigation to explore:** Max pass count (e.g. 3) + severity threshold (minor findings don't trigger another pass) + escalate to user if unresolved.
 
-### R3: context.md quality is unenforced
+**Resolution:** After findings on a second pass, escalate to the user. They can choose to accept the outstanding findings as documented tech debt and move on, or require another pass. The user holds the exit condition — the loop never runs more than twice without human judgement.
+
+### R3: context.md quality is unenforced ✔ resolved
 Iterative refinement depends on thorough context.md. Nothing enforces this. A sparse context.md means the next agent starts near-blind.
-**Mitigation to explore:** Implementation workflow treats context.md sections as a required checklist before the agent can return.
 
-### R4: TDD doesn't map cleanly to this project ⚠ priority
-This workflow assumes traditional code + tests. Skills and ways are markdown instruction files — it's not clear what "tests passing" means for them or how to write a test harness. This needs resolving before building the execution workflow.
+**Resolution:** The implementation workflow treats context.md sections as a required checklist before the agent can return. The agent cannot mark a pass complete without filling: agreed approach, decisions made (with reasoning), scope flags, and open questions.
 
-### R5: Quality loop is invisible to the user
+### R4: TDD doesn't map cleanly to this project ✔ resolved
+Gate 2 is a **spec approval gate**, not a test file gate. What constitutes a "spec" depends on the work item type, agreed with the user during the architecture discussion as part of planning.
+
+| Work item type | Spec format |
+|---|---|
+| Code (CLI, scripts, MCP server) | Traditional test file — unit/integration, agreed framework |
+| Skills (markdown instruction files) | Acceptance checklist — scenarios the skill must handle, verified by walkthrough |
+| Ways (guidance files) | Way-matching test via `ways-tests` skill — score against target prompts, validate frontmatter |
+| Agents | Behavioural spec — input/output scenarios, verified by spot-running the agent |
+
+If a work item has no testable output (e.g. a pure docs update), the user and agent agree at Gate 1 that Gate 2 is a review checklist rather than a test file. Gate 2 still exists; it materialises as the agreed form.
+
+`swc_deliver` and the implementation workflow describe spec types rather than assuming a test file. The architecture discussion answers: (1) what type is this work item, and (2) what does a passing spec look like for that type.
+
+### R5: Quality loop is invisible to the user ✔ resolved
 If the loop runs multiple times and still produces a poor result, the user finds out at Gate 3 with no visibility. Hard to debug or give useful feedback.
-**Mitigation to explore:** Surface iteration count and outcome in the Gate 3 handoff summary.
+
+**Resolution:** Gate 3 always includes the reviewer findings from the final pass — the user sees the actual feedback, not just a pass/fail outcome. If the loop ran more than once, the handoff also shows what was flagged vs what was resolved across passes. The user sees the reasoning behind the result.
 
 ### Optimisation: "Approach needs revisiting" signal
 If the agent discovers the agreed approach is wrong mid-implementation, it currently deviates silently or stops. A cleaner path: an explicit flag in the summary artifact that triggers Gate 1 again rather than surfacing as a vague Gate 3 failure.

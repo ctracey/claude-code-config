@@ -4,6 +4,17 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Task 1.4.1 — Resolve execution workflow risks `2026-04-09`
+
+- R1 resolved: `swc_deliver` reads codebase context before Gate 1 so approach agreement is grounded in reality
+- R2 resolved: quality loop escalates to user after second pass — user holds the exit condition, can accept as tech debt
+- R3 resolved: implementation workflow treats context.md sections as a required checklist before agent can return
+- R4 resolved: Gate 2 is a spec approval gate, not a test file gate — spec format agreed in architecture discussion; table of spec types by work item type added to notes
+- R5 resolved: Gate 3 always includes reviewer findings from final pass; multi-pass handoff shows what was flagged vs resolved
+- Added 1.2.11: resolve workload guard / skill conflict (hook fires on all Edit calls to workload.md including skill-mediated ones; deferred — aligns with planned CLI work)
+
+---
+
 ## Workload restructure `2026-04-06`
 
 - Reorganised workload from 15 flat top-level tasks into a 2-level hierarchy: **1. MAIN WORKFLOW** (sub-areas 1.1–1.4) and **2. Advanced improvements**

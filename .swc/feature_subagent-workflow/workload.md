@@ -24,6 +24,7 @@
      - [x] 1.2.8. Reconsider gitignore of todo files — decide if todo-pr-N files should be tracked in git
      - [x] 1.2.9. Rename this skillset
      - [x] 1.2.10. Move .swc to root of repo instead of inside .claude and consider tracking decoupling — the `todo-*` prefix ties skills to a specific file format; evaluate whether the skills should be renamed to reflect the workflow concept rather than the storage mechanism, and whether tracking (the todo files) should be decoupled from the workflow skills themselves
+     - [ ] 1.2.11. Resolve workload guard / skill conflict — the guard hook fires on any direct edit to workload.md, including edits made by swc_workload-update itself; the guard and skill need a shared mechanism (e.g. a CLI tool or detectable marker) so sanctioned edits are not flagged
 
       
   - [x] 1.3. **Planning workflow for new project**
@@ -37,12 +38,12 @@
 
 
   - [-] 1.4. **Task execution workflow**
-     - [ ] 1.4.1. **Address documented risks before building**
-         - [ ] 1.4.1.1. Resolve R4 — define testability approach for skills and ways
-         - [ ] 1.4.1.2. Define quality loop exit conditions and escalation path (R2)
-         - [ ] 1.4.1.3. Define context.md enforcement — required sections before agent can return (R3)
-         - [ ] 1.4.1.4. Define how swc_deliver grounds Gate 1 in codebase reality (R1)
-         - [ ] 1.4.1.5. Define quality loop visibility in Gate 3 handoff (R5)
+     - [x] 1.4.1. **Address documented risks before building**
+         - [x] 1.4.1.1. Resolve R4 — define testability approach for skills and ways
+         - [x] 1.4.1.2. Define quality loop exit conditions and escalation path (R2)
+         - [x] 1.4.1.3. Define context.md enforcement — required sections before agent can return (R3)
+         - [x] 1.4.1.4. Define how swc_deliver grounds Gate 1 in codebase reality (R1)
+         - [x] 1.4.1.5. Define quality loop visibility in Gate 3 handoff (R5)
 
      - [ ] 1.4.2. **Delivery workflow — swc_deliver**
          - [ ] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
