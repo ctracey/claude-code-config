@@ -24,7 +24,9 @@ Skills use a `swc_` namespace prefix (underscore as namespace separator, hyphens
 | `swc_update` | Update task status in the file |
 | `swc_begin` | Scaffold a new workload + plan + architecture set |
 | `swc_init` | Write the five stub docs into a resolved workload folder |
-| `swc_execute` | Spawn an implementation subagent for a task |
+| `swc_deliver` | Delivery workflow — interactive, runs gates 1–4, feedback loop, commit/push |
+| `swc_implement` | Implementation workflow — subagent brief, autonomous, spec→code→tests→summary |
+| `swc_execute` | ~~Spawn an implementation subagent for a task~~ — superseded by `swc_deliver` |
 
 ## Skill invocation
 
@@ -117,6 +119,92 @@ Every decision that influenced the work must be captured: what was decided, and 
 
 If it shaped the direction, it belongs in the docs. Write to them throughout the conversation as agreements are reached. The final review is just confirming nothing was missed.
 
+## Work item context artifacts
+
+Each work item executed by the implementation subagent gets its own context document:
+
+```
+.swc/<folder>/workitems/
+└── <item-number>/
+    └── context.md      ← agreed approach, decisions, open questions for this item
+```
+
+- Folder name matches the work item number exactly (e.g. `1.4.2`)
+- `context.md` is written by the implementation subagent during execution, not after
+- The test file lives in the codebase alongside the code it describes — not here
+- This folder is the reasoning record; the test file is the spec artifact
+
+### context.md format
+
+```markdown
+# Work item <N> — <title>
+
+## Agreed approach
+[What was agreed with the user before implementation began]
+
+## Pass <n> — <date>
+
+### Decisions made
+[Choices made during this pass and why — include assumptions behind each decision]
+
+### Scope flags
+[Anything noticed that is out of scope — recommendation for Gate 3]
+
+### Open questions
+[Anything unresolved — surface in summary artifact]
+```
+
+`context.md` is append-only across passes — each implementation agent adds a new `## Pass N` section. It is never overwritten. This gives the next agent a full picture of what was tried, what was decided, and what assumptions were made.
+
+**Written throughout execution, not at the end.** If the session ends unexpectedly, context.md should reflect everything up to that point.
+
+**context.md is the memory that travels between fresh agent sessions.** When `swc_deliver` assembles the brief for a new implementation agent, it includes context.md from all prior passes alongside the review findings. The agent reads what was tried before acting.
+
+**Flawed assumptions surface through context.md.** When a reviewer asks "why did you do X?", the answer is in context.md. If the assumption behind the decision was wrong, that explains the finding — and may justify revisiting the approach at Gate 1 rather than patching the implementation.
+
+## Execution workflow layers
+
+Three layers, each with a distinct responsibility:
+
+| Layer | Skill | Where | Responsibility |
+|---|---|---|---|
+| Delivery | `swc_deliver` | Main session | Gates 1–3 (3 human gates), quality loop, calls `swc_implement`, commit/push |
+| Spawning | `swc_implement` | Main session | Receives approved brief, spawns the implementation agent |
+| Execution | implementation workflow | Agent session | Implements against spec, documents decisions, returns summary |
+
+**Key rules:**
+- `swc_deliver` does not know or care how the agent is spawned — it calls `swc_implement`
+- `swc_implement` does not run gates — it only spawns the agent with the brief it receives
+- The implementation agent does not interact with the user — it follows the implementation workflow autonomously
+- All three layers read/write from `.swc/<folder>/workitems/<N>/` for the active work item
+- `swc_execute` is retained as a legacy skill pending retirement once this is working
+
+## Implementation decision guide
+
+The subagent is expected to make decisions autonomously. The tipping point for stopping is narrow.
+
+**Proceed and document in `context.md`:**
+- Data structure choices — expected, make the call
+- Implementation details, internal design, naming, algorithms
+- Scope observations — note the concern, continue on original scope, raise at Gate 4
+
+**Stop only when:**
+- No reasonable forward path exists within the agreed brief and original scope
+- i.e. genuinely blocked, not just uncertain
+
+Scope questions never stop work. Flag them as recommendations in the summary artifact for Gate 4. The user decides there whether to extend scope as a new work item.
+
+## Spec-driven TDD convention
+
+The implementation workflow is spec-first:
+
+1. Agent proposes approach → **user approves (blocking gate)**
+2. Agent writes test file → **user approves spec (blocking gate)**
+3. Agent implements until tests pass
+4. Done = tests passing
+
+The test harness (framework, file location, naming) is language/framework-appropriate, agreed with the user, and documented in `architecture.md`. This agreement happens once per codebase, not per task.
+
 ## Workload tracking in git
 
 Workload files are first-class documentation — tracked in git alongside the branch they describe.
@@ -200,6 +288,30 @@ The plugin approach is cleanest for distribution (single install, versioned), bu
 
 Decision not yet made — worth revisiting when the workflow is stable enough to package.
 
+## Open risks — execution workflow design
+
+### R1: Brief quality assumption is fragile
+Gates 1 and 2 happen before the agent reads the codebase. The agreed approach may become unworkable once the agent encounters existing patterns or integration constraints — leading to silent deviation or a stuck agent.
+**Mitigation to explore:** `swc_deliver` reads relevant codebase context before Gate 1 so approach agreement is grounded in reality.
+
+### R2: Quality loop has no exit condition
+"Loop until quality bar is met" is undefined — no max iterations, no severity threshold, no escalation path. Risk of indefinite looping or compute waste.
+**Mitigation to explore:** Max pass count (e.g. 3) + severity threshold (minor findings don't trigger another pass) + escalate to user if unresolved.
+
+### R3: context.md quality is unenforced
+Iterative refinement depends on thorough context.md. Nothing enforces this. A sparse context.md means the next agent starts near-blind.
+**Mitigation to explore:** Implementation workflow treats context.md sections as a required checklist before the agent can return.
+
+### R4: TDD doesn't map cleanly to this project ⚠ priority
+This workflow assumes traditional code + tests. Skills and ways are markdown instruction files — it's not clear what "tests passing" means for them or how to write a test harness. This needs resolving before building the execution workflow.
+
+### R5: Quality loop is invisible to the user
+If the loop runs multiple times and still produces a poor result, the user finds out at Gate 3 with no visibility. Hard to debug or give useful feedback.
+**Mitigation to explore:** Surface iteration count and outcome in the Gate 3 handoff summary.
+
+### Optimisation: "Approach needs revisiting" signal
+If the agent discovers the agreed approach is wrong mid-implementation, it currently deviates silently or stops. A cleaner path: an explicit flag in the summary artifact that triggers Gate 1 again rather than surfacing as a vague Gate 3 failure.
+
 ## Ways and fresh agent sessions
 
 Each subagent gets its own session, which means ways fire fresh for every subagent spawn. This is a feature, not a coincidence — it ensures that project preferences, code style, and workflow guidance are always present regardless of how far into a long main session we are.
@@ -262,12 +374,12 @@ Decision not yet made — captured here as task 1.3.3.2. Explore before adding m
 | `swc_report-notes` | ✔ done | Summarise the `notes.md` doc |
 | `swc_changelog` | ✔ done | Show recent changelog entries |
 | `swc_report` | ✔ done | Full status report (plan + list + notes) |
-| `swc_execute` | ✔ done | Spawn implementation subagent for a task |
+| `swc_execute` | ✔ done → superseded | Spawn implementation subagent — replaced by `swc_deliver` |
+| `swc_deliver` | □ not built | Delivery workflow — interactive gates, feedback loop, commit/push. Calls `swc_implement`; has no knowledge of agent mechanics. |
+| `swc_implement` | □ not built | Agent spawning — receives approved brief from `swc_deliver`, spawns the implementation agent. Agent follows the implementation workflow. |
 | `swc_update` | ✔ done | Update task status in file, with parent rollup |
 | `swc_begin` | ◐ draft | Scaffold new workload + plan + architecture |
 | `swc_init` | ✔ done | Write the five stub docs into a resolved workload folder |
-| `user-handoff` | □ not built | Structured handoff before commit |
-| `implementation-workflow` | □ not built | Governs the impl subagent step-by-step |
 | `review-subagent` | □ not built | Review findings format + skill |
 
 **Ways** (relevant to this workflow)

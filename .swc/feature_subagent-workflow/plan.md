@@ -37,12 +37,18 @@ The main session never implements code. It delegates, coordinates, and decides.
 
 The implementation subagent is spawned by the main session for each task or fix cycle. It operates within its own session context, meaning the WAY fires fresh, preferences are clean, and there is no accumulated context baggage from prior tasks.
 
+**Scope: one work item per run.** The subagent receives a single work item, executes it fully, and stops. It does not proceed to the next item.
+
 **Responsibilities:**
-- Receive the task brief from the main session (task description from `todo.md`, plus `plan.md` and `architecture.md` for context)
-- Follow the implementation skill workflow
-- Surface decision points to the user rather than making assumptions
-- Verify tests pass and the build is clean before completing
+- Receive the task brief from the main session (task description from `workload.md`, plus `plan.md` and `architecture.md` for context)
+- Follow the implementation skill workflow — the two bookend moments are mandatory:
+  1. **Upfront approach agreement (blocking gate)** — propose the implementation approach and wait for explicit user approval before writing any code
+  2. **Final satisfaction check** — present what was done and confirm the user is satisfied before closing
+- Write tests first (spec-driven TDD) — the test file is the spec. The test harness is language/framework-appropriate, agreed with the user, and documented in `architecture.md`
+- **Spec approval is a blocking gate** — the agent does not touch implementation code until the user has approved the test spec
+- Implement until tests pass — done signal is a passing test suite
 - Produce a rich summary artifact covering: what was done, decisions made, approach taken, tests added, build status
+- Write a `workitems/<item-number>/context.md` capturing the agreed approach, decisions made, and any open questions for this item
 - **Proactively make the case for quality** — don't wait for the reviewer to ask. Lead with why the solution is sound: approach rationale, edge cases considered, test coverage, known trade-offs. The reviewer's job is verification, not extraction.
 - Return the summary artifact to the main session
 
@@ -50,50 +56,49 @@ The implementation subagent does not directly invoke the review subagent. That r
 
 
 
-### Review subagent
+### Review subagent (code-reviewer)
 
-The review subagent is spawned by the main session after the implementation subagent returns its summary. It operates in its own fresh session, so the WAY fires independently with clean preferences.
+The review subagent is spawned autonomously by `swc_deliver` after the implementation agent returns its summary. It is a **quality pre-filter** — its job is to ensure the code is clean and well-structured before the human sees it. It does not assess correctness or intent — that is the human's role at Gate 3.
 
 **Responsibilities:**
-- Receive the rich summary artifact and relevant code context from the main session
-- Conduct a code review against the project's standards and preferences (injected via WAY)
-- Return structured findings to the main session
+- Receive the summary artifact and relevant code context
+- Check code quality, SOLID principles, and refactoring opportunities
+- Return structured findings
 
-The review subagent does not apply fixes. It reports findings and returns control to the main session.
+Findings trigger another implementation pass (via `swc_implement`) to address quality issues. This loop runs autonomously until the quality bar is met. The human is not involved in this loop — they see the result only once quality has been cleared.
 
 ---
 ## Workflow sequence
 
 ```
-Main session
-  └── Trigger task execution skill
-        └── Spawn implementation subagent
-              ├── WAY fires: inject project preferences
-              ├── Clarify requirements (surface decisions to user if needed)
-              ├── Implement
-              ├── Test + build check
-              └── Return rich summary artifact to main
-
-Main session
-  └── Spawn review subagent (with summary artifact)
-        ├── WAY fires: inject project preferences
-        ├── Code review
-        └── Return findings to main
-
-Main session
-  ├── Fixes needed?
-  │     └── Spawn fresh implementation subagent with findings
-  │           └── Apply fixes → return updated summary
+/swc-deliver [N]  (main session — interactive)
   │
-  └── Structured user handoff
-        ├── What was done
-        ├── Decisions made and approach taken
-        ├── Tests added + all tests passing
-        ├── Build status
-        ├── Code review completed, findings addressed
-        └── Artifact presented for user approval
-
-User approves → commit + push to PR → next task
+  ├── [GATE 1] Propose approach → human agrees
+  ├── Write test spec (scenario-based, agreed harness)
+  ├── [GATE 2] Present spec → human approves
+  │
+  ├── /swc-implement (main session — spawns agent)
+  │     Brief: work item + agreed approach + approved spec + plan.md + architecture.md
+  │     + context.md from prior passes (if any) + review findings (if any)
+  │     └── Implementation agent (autonomous — follows implementation workflow)
+  │           ├── Reads prior context.md passes to understand what was tried and why
+  │           ├── Implements against approved spec until tests pass
+  │           ├── Documents decisions and assumptions in context.md (appends new pass)
+  │           ├── Flags scope concerns in summary, continues on original scope
+  │           └── Returns rich summary artifact
+  │
+  ├── code-reviewer agent (autonomous — quality pre-filter)
+  │     ├── Code quality, SOLID, refactoring suggestions
+  │     └── Findings → /swc-implement again to address quality issues
+  │           └── Loop until quality bar met
+  │
+  └── [GATE 3] Human review — correctness and satisfaction (blocking gate)
+        Human sees: tests passing, code quality cleared, summary artifact
+        Human question: "Did we build the right thing?"
+        │
+        ├── Not satisfied → back to GATE 1 with context (full pass, not a patch)
+        │
+        └── Satisfied → commit + push to PR branch
 ```
 
 ---
@@ -122,9 +127,9 @@ Skills define reusable, repeatable processes that can be triggered explicitly (v
 
 | Skill | Purpose |
 |---|---|
-| Task execution skill | Triggered from main session; spawns the implementation subagent and passes reference docs |
-| Implementation workflow skill | Governs the step-by-step process: clarify → implement → test → build check → summarise |
-| User handoff skill | Defines the structured handoff format: summary first, then decisions, tests, review status, artifact |
+| `swc_deliver` | Delivery workflow — runs Gates 1–3 in main session, orchestrates quality loop, commit/push |
+| `swc_implement` | Agent spawning — assembles brief, spawns fresh implementation agent |
+| Implementation workflow | The workflow the implementation agent follows — autonomous, spec→code→tests→summary |
 
 
 
@@ -141,10 +146,12 @@ Skills define reusable, repeatable processes that can be triggered explicitly (v
 
 | Subagent | Spawned by | Scope |
 |---|---|---|
-| Implementation subagent | Main session (via task execution skill) | Implements a single task following the implementation workflow skill |
-| Review subagent | Main session (after implementation returns) | Reviews code and summary artifact; returns findings only |
+| Implementation agent | `swc_implement` (called by `swc_deliver`) | Single work item — implements against approved spec, documents in context.md, returns summary |
+| Review agent (`code-reviewer`) | `swc_deliver` (after implementation returns) | Quality pre-filter — code quality, SOLID, refactoring; findings fed back to `swc_implement` |
 
-Each subagent gets its own session, its own WAY injection, and operates independently. Fresh subagents are always preferred over reuse.
+Each subagent gets its own session, its own WAY injection, and operates independently. Fresh subagents on every pass — never reuse a prior session.
+
+**Why fresh agents:** users cannot converse directly with a spawned agent. The agent receives its brief, executes autonomously, and returns a result. This constraint shapes the whole design — interactive work (gates) stays in the main session; autonomous work (implementation, review) is delegated to fresh agents with complete briefs.
 
 
 ---
@@ -156,9 +163,10 @@ Reference docs live in the `.swc/` workload folder for the branch. All scoped to
 |---|---|
 | `.swc/<folder>/workload.md` | Numbered task breakdown with status markers |
 | `.swc/<folder>/plan.md` | Feature list, goals, product intent, out of scope |
-| `.swc/<folder>/architecture.md` | Tech stack decisions, folder structure, architectural constraints |
+| `.swc/<folder>/architecture.md` | Tech stack decisions, folder structure, architectural constraints. Also records agreed test harness approach per language/framework. |
 | `.swc/<folder>/notes.md` | Conventions, agreements, decisions that apply across tasks |
 | `.swc/<folder>/changelog.md` | Append-only per-task record of what happened and why |
+| `.swc/<folder>/workitems/<N>/context.md` | Per-item: agreed approach, decisions made, open questions. Written by the implementation subagent during execution. |
 
 ### `workload.md` task format
 
@@ -196,12 +204,26 @@ Reference docs live in the `.swc/` workload folder for the branch. All scoped to
 ---
 ## Decision points and user control
 
-The implementation skill explicitly requires decision points to be surfaced to the user rather than resolved autonomously. The subagent presents options and a recommendation — the user makes the final call.
+The implementation agent is expected to make decisions autonomously — data structures, implementation details, internal design. It does not stop to ask. Scope concerns are flagged in the summary artifact and raised at Gate 3; work continues on the original scope.
+
+The agent stops only when no reasonable forward path exists within the agreed brief. This is a narrow exception, not the default.
+
+User control is exercised at the three gates — not mid-implementation. See the implementation decision guide in `notes.md`.
 
 ---
 ## Key design principles
 
 **Sequential over parallel** — one task at a time, user approves before the next begins.
+
+**Single item scope** — one work item per agent run. The agent executes it fully and stops. It does not proceed to the next item autonomously.
+
+**Spec-driven TDD** — tests are written before implementation. The test file is the spec. The agent does not write implementation code until the user has approved the test spec. Done means tests pass — not "looks right".
+
+**Three human gates** — approach agreement, spec approval, and satisfaction/correctness review. Every gate is blocking. The human satisfaction gate (Gate 3) can trigger a full feedback pass — back to Gate 1 with context, not a patch.
+
+**Review agent is a quality pre-filter, not a correctness judge** — the `code-reviewer` agent runs autonomously before the human sees the result. It ensures code quality and SOLID compliance. Correctness — did we build the right thing? — is the human's judgement at Gate 3 only.
+
+**Proceed unless genuinely stuck** — the implementation subagent is expected to make decisions: data structures, implementation details, internal design choices. These do not require stopping. Scope concerns are noted and raised in the summary at Gate 3 — work continues on the original scope. The only reason to stop mid-implementation is when no reasonable forward path exists within the agreed brief.
 
 **Small tasks as discipline** — smaller tasks are clearer, less abstract, and more specific. Tight feedback loops catch drift early and prevent waste on work that isn't needed.
 

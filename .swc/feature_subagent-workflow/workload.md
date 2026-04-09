@@ -37,16 +37,38 @@
 
 
   - [-] 1.4. **Task execution workflow**
-     - [-] 1.4.1. Build the implementation-workflow skill
-     - [ ] 1.4.2 Build the user-handoff skill, Update execute and handoff skills to include a docs/notes update step
-     - [ ] 1.4.3. Define the rich summary artifact format
-     - [ ] 1.4.4 Implementation agent reflection
-         - [ ] 1.4.4.1. Define what the implementation agent should reflect on after completing a task
-         - [ ] 1.4.4.2. Capture reflection output as part of the rich summary artifact
-     - [ ] 1.4.5 Agent identity. Explore surfacing a clear agent name visible to the user — e.g. "Planner" or "Implementer" — so the user always knows which agent they are talking to and what its role boundary is
-     - [ ] 1.4.6. **Review and fine tune**
-         - [ ] 1.4.6.1. Define the structured findings format
-         - [ ] 1.4.6.2 Build the review subagent skill
+     - [ ] 1.4.1. **Address documented risks before building**
+         - [ ] 1.4.1.1. Resolve R4 — define testability approach for skills and ways
+         - [ ] 1.4.1.2. Define quality loop exit conditions and escalation path (R2)
+         - [ ] 1.4.1.3. Define context.md enforcement — required sections before agent can return (R3)
+         - [ ] 1.4.1.4. Define how swc_deliver grounds Gate 1 in codebase reality (R1)
+         - [ ] 1.4.1.5. Define quality loop visibility in Gate 3 handoff (R5)
+
+     - [ ] 1.4.2. **Delivery workflow — swc_deliver**
+         - [ ] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
+         - [ ] 1.4.2.2. Gate 2 — write test spec, human approves
+         - [ ] 1.4.2.3. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
+         - [ ] 1.4.2.4. Gate 3 — human review handoff (tests passing, quality cleared, summary)
+         - [ ] 1.4.2.5. Commit and push on satisfaction
+
+     - [ ] 1.4.3. **Agent spawning — swc_implement**
+         - [ ] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
+         - [ ] 1.4.3.2. Build swc_implement skill
+
+     - [-] 1.4.4. **Implementation workflow**
+         - [ ] 1.4.4.1. Define the implementation workflow — what the agent follows
+         - [ ] 1.4.4.2. Define context.md format — append-only per pass, required sections
+         - [ ] 1.4.4.3. Define the rich summary artifact format
+         - [ ] 1.4.4.4. Build the implementation workflow skill
+
+     - [ ] 1.4.5. **Review integration**
+         - [ ] 1.4.5.1. Define structured findings format for code-reviewer
+         - [ ] 1.4.5.2. Wire code-reviewer into delivery workflow quality loop
+
+     - [ ] 1.4.6. **To consider**
+         - [ ] 1.4.6.1. Implementation agent reflection — does this live in context.md or the summary artifact?
+         - [ ] 1.4.6.2. Agent identity — surface clear agent name to user so role boundary is always visible
+         - [ ] 1.4.6.3. "Approach needs revisiting" signal — explicit flag in summary artifact that triggers Gate 1 again
 
 
 - [ ] **2. Advanced improvements**
