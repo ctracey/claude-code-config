@@ -1,12 +1,12 @@
 ---
 name: swc_init
-description: Scaffold a new .swc/<folder>/ with stub planning docs. Use when starting a fresh piece of work after the folder has been resolved by swc_resolver.
+description: Scaffold a new .swc/<folder>/ with stub planning docs. Use when starting a fresh piece of work after the folder has been located by swc_lookup.
 allowed-tools: Write
 ---
 
 # SWC Init
 
-Create the stub planning docs for a new workload folder. Called by `swc_workflow_plan-context` after `swc_resolver` has confirmed the folder path.
+Create the stub planning docs for a new workload folder. Called by `swc_workflow_plan-context` after `swc_lookup` has confirmed the folder path.
 
 ## Arguments
 

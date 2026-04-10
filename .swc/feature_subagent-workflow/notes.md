@@ -448,3 +448,42 @@ Decision not yet made — captured here as task 1.3.3.2. Explore before adding m
 | Hook | Purpose |
 |---|---|
 | Pre-commit / pre-push | Confirm user is ready before git operations |
+
+## Deliver workflow — stage design
+
+### Stage split
+
+| Stage | Content |
+|---|---|
+| **Requirements** | Intent clarification + high-level solution design |
+| **Specs** | Spec scenarios + finalise solution design |
+
+Requirements exits with agreed intent and a rough approach direction. Specs takes that and works out how to verify it — forcing the solution design to firm up before implementation starts.
+
+### Requirements stage behaviour
+
+**Context loading** — two reads, both unconditional, no separate skill needed:
+1. SWC workload docs: `plan.md`, `architecture.md`, `notes.md` from the active workload folder
+2. Codebase context: derived from the work item description — grep for relevant symbols, read related files
+
+**Opening move** — summarise what is already understood from the docs, invite the user to clarify or elaborate. If the work item description is thin (one line), flag this explicitly and ask for more detail before proceeding.
+
+**Conversation flow:**
+1. Summarise known intent from docs, invite elaboration
+2. Ask questions until intent is clearly understood
+3. Explore high-level solution direction — approach confirmation, not technical design
+4. Confirm and write to task-specific requirements doc
+
+**Scope boundary** — requirements covers *what and why* plus rough approach direction. Technical design details belong in specs or architecture.md.
+
+### New task scenario
+
+If the user triggers the deliver workflow for something not yet on the workload, the entry-point skill (`swc_workflow_deliver`) catches this before any stage runs. A work item is added and confirmed before proceeding. Requirements never starts without a resolved work item.
+
+### Per-task document path
+
+Task-specific files live at: `.swc/<folder>/workitems/<N>/`
+
+No existing pattern — this is established fresh by the requirements stage. First file: `requirements.md`.
+
+A skill for per-task doc naming, location, and format is planned but not yet built. Requirements will be the first thing to write into that path and will establish the convention used by specs and the implementation workflow.

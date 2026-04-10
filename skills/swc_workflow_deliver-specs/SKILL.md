@@ -19,6 +19,8 @@ This stage is about pinning down the **how we know it's done**, not the **how we
 
 ## Exit criteria
 
-**Done when:** (to be defined)
+**Done when:**
+- User has been informed this stage is not yet implemented
+- Control returned to the orchestrator
 
 **Return control to the calling skill.**

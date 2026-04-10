@@ -1,18 +1,18 @@
 ---
-name: swc_resolver
-description: Resolve or create the active SWC workload folder for the current branch. Single source of truth for branch→folder naming. Use when you need to find the active workload, or when invoked via /swc-resolver.
+name: swc_lookup
+description: Locate or create the active SWC workload folder for the current branch. Single source of truth for branch→folder naming. Use when you need to find the active workload, or when invoked via /swc-lookup.
 allowed-tools: Read, Glob, Bash, Write
 ---
 
-# SWC Resolver
+# SWC Lookup
 
 Determine the `.swc/<folder>/` path for the current (or specified) branch. Handles git setup if needed. In create mode, also creates the folder and updates `_meta.json`.
 
 ## Arguments
 
-- `/swc-resolver` — resolve existing workload for the current branch
-- `/swc-resolver <branch>` — resolve existing workload for a specific branch
-- `/swc-resolver --create` — resolve or create the workload folder for the current branch (used by planning skills)
+- `/swc-lookup` — locate existing workload for the current branch
+- `/swc-lookup <branch>` — locate existing workload for a specific branch
+- `/swc-lookup --create` — locate or create the workload folder for the current branch (used by planning skills)
 
 ## Steps
 
@@ -64,7 +64,7 @@ Read `.swc/_meta.json`.
 
 List all folders under `.swc/` (exclude `_meta.json`). Compare against the derived folder name from step 2.
 
-**No folders found — resolve mode:**
+**No folders found — locate mode:**
 ```
 No workload found under .swc/. Run /swc-workflow-plan to start one.
 ```
@@ -80,7 +80,7 @@ Found one workload: .swc/<branch-subfolder>/workload.md
 Use this? [Y/n]:
 ```
 If the user declines:
-- Resolve mode: stop.
+- Locate mode: stop.
 - Create mode: use the derived folder name from step 2 and treat as a new workload.
 
 **Multiple folders found:** list them all, flag matches, and ask which to use:
@@ -109,11 +109,11 @@ Write the updated file. Print nothing — this is a silent side-effect.
 
 ### 6. Return
 
-**Resolve mode:** print the resolved path:
+**Locate mode:** print the located path:
 ```
-Resolved: .swc/<folder>/workload.md
+Located: .swc/<folder>/workload.md
 ```
 
-**Create mode:** return the resolved folder path to the calling skill. Do not print a confirmation — the calling skill handles that.
+**Create mode:** return the located folder path to the calling skill. Do not print a confirmation — the calling skill handles that.
 
 > **Goal:** single source of truth for branch→folder naming. Never silently load the wrong workload. When in doubt, ask.

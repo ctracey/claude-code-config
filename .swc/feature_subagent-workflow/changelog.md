@@ -4,6 +4,19 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — deliver workflow requirements stage and entry point `2026-04-10`
+
+- Implemented `swc_workflow_deliver-requirements` — full stage with SWC/codebase context load, intent clarification conversation, intent confirmation gate before solution direction, and `requirements.md` output to `.swc/<folder>/workitems/<N>/`
+- Updated `swc_workflow_deliver` entry point — work item status check (in-progress recap, not-started+docs info, done handling), new task scenario, explicit Skill tool invocation for orchestrator, `Skill` added to allowed-tools
+- Fixed orchestrator bypass — deliver skill now explicitly guards against inline stage execution
+- Added stub exit criteria to `swc_workflow_deliver-specs` so orchestrator gate check has something to verify
+- Refactored `swc_resolver` → `swc_lookup` (user-led); deliver and requirements skills updated to match
+- Documented deliver workflow stage design in `notes.md` — stage split rationale, per-task doc path, new task scenario ownership
+- Added workload items 1.4.2.6 (status updates during delivery) and 1.4.5.3 (broader doc updates on acceptance)
+- Marked 1.4.2.1 done — Gate 1 approach is addressed by the requirements stage context-loading and solution direction steps
+
+---
+
 ## Session — swc_workflow_deliver skill scaffold `2026-04-09`
 
 - Created `swc_workflow_deliver` orchestrator skill — resolves work item, confirms with user, delegates to `swc-workflow-orchestrator` with 2-stage deliver definition

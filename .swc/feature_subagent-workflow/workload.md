@@ -48,11 +48,12 @@
 
      - [-] 1.4.2. **Delivery workflow — swc_deliver**
          - [x] 1.4.2.0. Build `swc_workflow_deliver` skill — entry-point skill that resolves the target work item, confirms with the user, and delegates to `swc-workflow-orchestrator` with the deliver stage definitions (stub created; needs full stage wiring)
-         - [ ] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
+         - [x] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
          - [ ] 1.4.2.2. Gate 2 — write test spec, human approves
          - [ ] 1.4.2.3. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
          - [ ] 1.4.2.4. Gate 3 — human review handoff (tests passing, quality cleared, summary)
          - [ ] 1.4.2.5. Commit and push on satisfaction
+         - [ ] 1.4.2.6. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
 
      - [ ] 1.4.3. **Agent spawning — swc_implement**
          - [ ] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
@@ -67,6 +68,7 @@
      - [ ] 1.4.5. **Review integration**
          - [ ] 1.4.5.1. Define structured findings format for code-reviewer
          - [ ] 1.4.5.2. Wire code-reviewer into delivery workflow quality loop
+         - [ ] 1.4.5.3. On acceptance, ensure broader docs are updated — architecture.md, tests, inline code comments, and any other artefacts affected by the work item, not just task-specific docs
 
      - [ ] 1.4.6. **To consider**
          - [ ] 1.4.6.1. Implementation agent reflection — does this live in context.md or the summary artifact?
