@@ -56,50 +56,50 @@ Check whether any other workload docs need updating:
 
 Make only changes that reflect what actually happened. Don't pad.
 
-### 5. PR comment
+### 5. Confirm ready to commit and push
 
-First check whether the branch has a remote:
+Show the user what was written to the docs, then ask:
+> "Docs updated. Ready to commit and push?"
+
+Wait for confirmation. If they say no or want to make changes, address their feedback and re-confirm before proceeding.
+
+### 6. PR comment
+
+Once the user has confirmed they're ready to commit and push, check for a remote and open PR:
 
 ```bash
 git remote get-url origin 2>/dev/null
+gh pr view --json number,title 2>/dev/null
 ```
 
 If no remote is configured, ask:
 > "No remote configured — would you like to create one (e.g. a GitHub repo with a PR), or keep this local for now?"
 
-- If they want a remote: help them create one (e.g. `gh repo create`) and continue to the PR check below.
-- If they want to stay local: acknowledge briefly ("Keeping it local — no problem.") and skip the rest of this step.
+- If they want a remote: help them create one and continue to the PR check.
+- If they want to stay local: acknowledge briefly and skip the rest of this step.
 
-If a remote exists, check for an open PR:
+If a PR exists, draft a short comment (3–5 bullets, no preamble) and show it to the user:
+> "Here's a draft PR comment — want me to post it?
+>
+> [draft comment]"
 
-```bash
-gh pr view --json number,title 2>/dev/null
-```
-
-If a PR exists, ask:
-> "Want to add a comment to the PR summarising this session's changes?"
-
-If yes, draft a short comment (3–5 bullets, no preamble) and post it:
+If yes, post it:
 
 ```bash
 gh pr comment <number> --body "$(cat <<'EOF'
-<session summary bullets>
+<draft comment>
 EOF
 )"
 ```
 
 If no PR exists, or user says no, skip silently.
 
-### 6. Confirm ready
-
-Show the user what was written, then say:
-> "Docs updated. Ready to commit and push."
-
-Stop here. Git delivery is the user's next step — they can commit manually or say "commit and push".
+Stop here. The user does the actual commit and push.
 
 ## Key principles
 
 - This skill covers content, not git. Do not commit, push, or create PRs.
 - Changelog entries are session-level — one entry per session, even if multiple tasks touched.
-- PR comment is optional and user-confirmed — never post without asking.
+- PR comment is always drafted after the user confirms ready to commit and push — never before.
+- PR comment is optional and user-confirmed — never post without showing the draft and getting approval.
 - If no workload is active, write the changelog entry to the most recently modified `.swc/` folder and note it.

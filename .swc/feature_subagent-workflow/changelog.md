@@ -4,6 +4,11 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — swc_push PR comment ordering fix `2026-04-11`
+
+- Reordered `swc_push` flow: PR comment is now drafted and posted only after the user confirms ready to commit and push — previously it fired during doc prep before any git confirmation
+- Draft is shown to the user for approval before posting; skill never posts without explicit confirmation
+
 ## Session — implement stage + orchestrator gate behavior `2026-04-11`
 
 - Built `swc_workflow_deliver-implement` — new third stage in the deliver workflow; spawns a placeholder agent with work item identifier only, evaluates four exit criteria, reports pass/fail, returns control to orchestrator
