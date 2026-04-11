@@ -29,7 +29,7 @@ Locate the active workload via `swc_lookup`. Read `workload.md`.
 
 #### Status check — once the work item is resolved
 
-Check the item's current status marker and any existing task-specific docs at `.swc/<folder>/workitems/<N>/`.
+Check the item's current status marker and any existing task-specific docs at `.swc/<folder>/workitems/<N>/`. `<N>` is the **full work item number** — e.g. `1.1`, `2.3`, not just the top-level number.
 
 **`[-]` In progress:**
 Read any existing task docs (e.g. `requirements.md`, `context.md`) and summarise what has already been captured:

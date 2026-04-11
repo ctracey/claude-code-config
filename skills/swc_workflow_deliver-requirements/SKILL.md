@@ -18,7 +18,7 @@ Read in parallel from the active workload folder (located via `swc_lookup`):
 - `notes.md`
 - The specific work item entry from `workload.md`
 
-Also check for existing task-specific docs at `.swc/<folder>/workitems/<N>/`. If files exist there (e.g. a prior `requirements.md`), read them. This is a resumption — summarise what was previously captured and ask the user whether to continue from it or start fresh.
+Also check for existing task-specific docs at `.swc/<folder>/workitems/<N>/`. `<N>` is the **full work item number** — e.g. `1.1`, `2.3`, not just the top-level number. If files exist there (e.g. a prior `requirements.md`), read them. This is a resumption — summarise what was previously captured and ask the user whether to continue from it or start fresh.
 
 ### 2. Load codebase context
 
