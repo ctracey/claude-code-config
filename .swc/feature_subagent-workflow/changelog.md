@@ -4,6 +4,17 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — specs stage implementation + BA requirements methodology `2026-04-11`
+
+- Implemented `swc_workflow_deliver-specs` — full stage replacing the previous stub; two-path routing (lightweight vs full) based on complexity signals
+- Lightweight path: two questions (success condition + explicit failure cases), writes bullet-list `specs.md`; no personas, no EARS, no Gherkin — fast exit for simple work items
+- Full path: personas → user journeys (happy/alternative/error) → EARS requirements (REQ-NN IDs, typed by pattern) → Gherkin acceptance scenarios (one per requirement) → validation rules (conditional); writes structured `specs.md` as TDD brief for implementation agent
+- Default bias: AI-unsupervised implementation always signals full path unless work item is clearly trivial
+- Created `hooks/ways/swc/planning/requirements/way.md` — BA requirements lens for planning conversations; fires as child of planning way; adds stakeholder, customer journey, scope-edge, NFR, assumptions, dependencies, and risks questions to Intent and Solution stages without adding a new stage
+- Marked 1.4.2.2 in-progress (specs stage WIP — stage is built, not yet validated end-to-end)
+
+---
+
 ## Session — deliver workflow requirements stage and entry point `2026-04-10`
 
 - Implemented `swc_workflow_deliver-requirements` — full stage with SWC/codebase context load, intent clarification conversation, intent confirmation gate before solution direction, and `requirements.md` output to `.swc/<folder>/workitems/<N>/`

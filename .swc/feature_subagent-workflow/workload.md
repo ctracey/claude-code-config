@@ -49,7 +49,7 @@
      - [-] 1.4.2. **Delivery workflow — swc_deliver**
          - [x] 1.4.2.0. Build `swc_workflow_deliver` skill — entry-point skill that resolves the target work item, confirms with the user, and delegates to `swc-workflow-orchestrator` with the deliver stage definitions (stub created; needs full stage wiring)
          - [x] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
-         - [ ] 1.4.2.2. Gate 2 — write test spec, human approves
+         - [-] 1.4.2.2. Gate 2 — write test spec, human approves
          - [ ] 1.4.2.3. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
          - [ ] 1.4.2.4. Gate 3 — human review handoff (tests passing, quality cleared, summary)
          - [ ] 1.4.2.5. Commit and push on satisfaction
