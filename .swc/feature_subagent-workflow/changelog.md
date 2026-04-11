@@ -4,6 +4,13 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — implement stage + orchestrator gate behavior `2026-04-11`
+
+- Built `swc_workflow_deliver-implement` — new third stage in the deliver workflow; spawns a placeholder agent with work item identifier only, evaluates four exit criteria, reports pass/fail, returns control to orchestrator
+- Updated `swc_workflow-orchestrator` stage gate: replaced silent auto-retry with an explicit user prompt listing unmet criteria and offering re-invoke / skip / stop
+- Wired `implement` as third stage in `swc_workflow_deliver` workflow JSON; `on_complete` updated to "Ready for review"
+- Workflow tested and confirmed behaving as expected
+
 ## Session — specs stage implementation + BA requirements methodology `2026-04-11`
 
 - Implemented `swc_workflow_deliver-specs` — full stage replacing the previous stub; two-path routing (lightweight vs full) based on complexity signals

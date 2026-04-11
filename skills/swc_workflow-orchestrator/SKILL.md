@@ -59,7 +59,23 @@ For each stage in `stages`:
 
 2. **Invoke the stage skill** — call the skill named in `skill`, passing `args` if provided. Wait for it to return.
 
-3. **Stage gate** — before advancing, evaluate whether the stage skill's own exit criteria have been met by inspecting its behaviour: check that expected outputs are present (e.g. docs written, decisions captured, playback confirmed). Prefer to derive the answer from what the stage skill did — only involve the user if the criteria cannot be determined without their input. If criteria are not met, re-invoke the stage skill and pass a note identifying what is outstanding. Do not advance until the gate is cleared. **Once the gate is cleared, emit a confirmation message in the format `✔ Stage('<stage name>'): <exit criteria met>`.** The next stage must not begin until this message has been emitted.
+3. **Stage gate** — before advancing, evaluate whether the stage skill's own exit criteria have been met by inspecting its behaviour: check that expected outputs are present (e.g. docs written, decisions captured, playback confirmed). Prefer to derive the answer from what the stage skill did — only involve the user if the criteria cannot be determined without their input.
+
+   **If criteria ARE met:** emit a confirmation message in the format `✔ Stage('<stage name>'): <exit criteria met>`. The next stage must not begin until this message has been emitted.
+
+   **If criteria are NOT met:** present the unmet criteria clearly to the user and offer three options:
+   > "The following criteria were not met for stage **'<stage name>'**:
+   > - [unmet criterion 1]
+   > - [unmet criterion 2]
+   >
+   > How would you like to proceed?
+   > 1. **Re-invoke** — run the stage again with a note on what is outstanding
+   > 2. **Skip** — advance to the next stage without clearing these criteria
+   > 3. **Stop** — halt the workflow here"
+
+   - **Re-invoke:** call the stage skill again, passing a note identifying the outstanding criteria. Evaluate the gate again afterward.
+   - **Skip:** treat as user-confirmed skip (see Skipping constraint below) and advance.
+   - **Stop:** emit a clear stop message and halt — do not advance to the next stage.
 
 4. **Advance** — move to the next stage and repeat.
 

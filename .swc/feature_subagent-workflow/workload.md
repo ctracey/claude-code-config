@@ -49,11 +49,12 @@
      - [-] 1.4.2. **Delivery workflow — swc_deliver**
          - [x] 1.4.2.0. Build `swc_workflow_deliver` skill — entry-point skill that resolves the target work item, confirms with the user, and delegates to `swc-workflow-orchestrator` with the deliver stage definitions (stub created; needs full stage wiring)
          - [x] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
-         - [-] 1.4.2.2. Gate 2 — write test spec, human approves
-         - [ ] 1.4.2.3. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
-         - [ ] 1.4.2.4. Gate 3 — human review handoff (tests passing, quality cleared, summary)
-         - [ ] 1.4.2.5. Commit and push on satisfaction
-         - [ ] 1.4.2.6. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
+         - [x] 1.4.2.2. Gate 2 — write test spec, human approves
+         - [-] 1.4.2.3. Spawn implementation agent — assemble brief and delegate to swc_implement
+         - [ ] 1.4.2.4. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
+         - [ ] 1.4.2.5. Gate 3 — human review handoff (tests passing, quality cleared, summary)
+         - [ ] 1.4.2.6. Commit and push on satisfaction
+         - [ ] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
 
      - [ ] 1.4.3. **Agent spawning — swc_implement**
          - [ ] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
@@ -84,3 +85,7 @@
   - [ ] 2.4. **MCP service for todo list management**
      - [-] 2.4.1. Design MCP service interface — expose todo file read/write/query operations as MCP tools so any agent or skill can manage todos via a standard protocol rather than direct file I/O
      - [ ] 2.4.2 Implement MCP service
+  - [ ] 2.5. **Deliver batching**
+     - [ ] 2.5.1. Consider delivering multiple work items in a single session — how batching interacts with gates, quality loops, and user attention
+  - [ ] 2.6. **Deliver analysis mode**
+     - [ ] 2.6.1. Consider a read-only analysis pass before delivery — understand codebase impact, surface risks, inform approach agreement at Gate 1
