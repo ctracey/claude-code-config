@@ -4,6 +4,11 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — swc_push end-to-end flow `2026-04-11`
+
+- Rewrote `swc_push` to handle commit and push directly — previously stopped after updating docs and left git ops to the user
+- PR comment now happens after the push, not before; draft shown for approval before posting
+
 ## Session — swc_push PR comment ordering fix `2026-04-11`
 
 - Reordered `swc_push` flow: PR comment is now drafted and posted only after the user confirms ready to commit and push — previously it fired during doc prep before any git confirmation

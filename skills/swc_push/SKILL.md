@@ -1,12 +1,12 @@
 ---
 name: swc_push
-description: Prepare a SWC workload session for commit and push — summarise local changes, update changelog and docs, offer a PR comment, confirm ready to push. Mid-session hygiene before git delivery. Use when the user says "update docs & changelog", "wrap up this session", "prep to commit", "push this", or invokes /swc-push.
+description: Summarise session changes, update changelog and docs, commit, push, and optionally comment on the PR. Use when the user says "update docs & changelog", "wrap up this session", "prep to commit", "push this", or invokes /swc-push.
 allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
 # SWC Push
 
-Prepare the session's changes for commit and push. Covers content — what changed and why — not git delivery. After this, the user commits and pushes.
+End-to-end session wrap-up: summarise changes, update docs, commit, push, and optionally comment on the PR.
 
 ## Steps
 
@@ -63,20 +63,30 @@ Show the user what was written to the docs, then ask:
 
 Wait for confirmation. If they say no or want to make changes, address their feedback and re-confirm before proceeding.
 
-### 6. PR comment
+### 6. Commit and push
 
-Once the user has confirmed they're ready to commit and push, check for a remote and open PR:
+Stage all modified tracked files and the workload docs, then commit and push:
 
 ```bash
-git remote get-url origin 2>/dev/null
+git add -u
+git commit -m "<conventional commit message>"
+git push
+```
+
+Write the commit message following the conventional commit format: `type(scope): description`. Focus on the why, not the what. Keep it one line unless a short body is genuinely needed.
+
+Report the result:
+> "Committed and pushed. [short sha] on [branch]."
+
+### 7. PR comment
+
+After pushing, check for an open PR:
+
+```bash
 gh pr view --json number,title 2>/dev/null
 ```
 
-If no remote is configured, ask:
-> "No remote configured — would you like to create one (e.g. a GitHub repo with a PR), or keep this local for now?"
-
-- If they want a remote: help them create one and continue to the PR check.
-- If they want to stay local: acknowledge briefly and skip the rest of this step.
+If no remote is configured or no PR exists, skip silently.
 
 If a PR exists, draft a short comment (3–5 bullets, no preamble) and show it to the user:
 > "Here's a draft PR comment — want me to post it?
@@ -92,14 +102,12 @@ EOF
 )"
 ```
 
-If no PR exists, or user says no, skip silently.
-
-Stop here. The user does the actual commit and push.
+If no, skip silently.
 
 ## Key principles
 
-- This skill covers content, not git. Do not commit, push, or create PRs.
 - Changelog entries are session-level — one entry per session, even if multiple tasks touched.
-- PR comment is always drafted after the user confirms ready to commit and push — never before.
+- Commit happens only after the user confirms in step 5 — never before.
+- PR comment is always drafted and posted after the push — never before.
 - PR comment is optional and user-confirmed — never post without showing the draft and getting approval.
 - If no workload is active, write the changelog entry to the most recently modified `.swc/` folder and note it.
