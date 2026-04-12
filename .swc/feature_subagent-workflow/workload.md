@@ -26,6 +26,7 @@
      - [x] 1.2.10. Move .swc to root of repo instead of inside .claude and consider tracking decoupling — the `todo-*` prefix ties skills to a specific file format; evaluate whether the skills should be renamed to reflect the workflow concept rather than the storage mechanism, and whether tracking (the todo files) should be decoupled from the workflow skills themselves
      - [ ] 1.2.11. Resolve workload guard / skill conflict — the guard hook fires on any direct edit to workload.md, including edits made by swc_workload-update itself; the guard and skill need a shared mechanism (e.g. a CLI tool or detectable marker) so sanctioned edits are not flagged
      - [ ] 1.2.12. Rename `workloads` key to `workloadContexts` in `_meta.json` schema — update all skills and docs that read/write this key
+     - [-] 1.2.13. Build a workload rendering script — parse and display workload.md reliably via script (like progress.py for the banner) so swc_workload doesn't rely on manual LLM parsing, which drops sub-items at scale
 
       
   - [x] 1.3. **Planning workflow for new project**
@@ -55,10 +56,11 @@
          - [ ] 1.4.2.5. Gate 3 — human review handoff (tests passing, quality cleared, summary)
          - [ ] 1.4.2.6. Commit and push on satisfaction
          - [ ] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
+         - [x] 1.4.2.8. Add solution design stage to deliver workflow — insert a pre-spawn stage between specs and implement where implementation-level questions are resolved with the user before the agent brief is sealed
 
-     - [ ] 1.4.3. **Agent spawning — swc_implement**
-         - [ ] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
-         - [ ] 1.4.3.2. Build swc_implement skill
+     - [x] 1.4.3. **Agent spawning — swc_implement**
+         - [x] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
+         - [x] 1.4.3.2. Build swc_implement skill
 
      - [-] 1.4.4. **Implementation workflow**
          - [ ] 1.4.4.1. Define the implementation workflow — what the agent follows

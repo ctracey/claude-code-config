@@ -19,39 +19,14 @@ Read the active workload file and display work items using visual status symbols
 
 Follow the `swc_lookup` skill to get the path to `workload.md`. If the lookup fails or the user declines, stop.
 
-Read the resolved file.
+### 2. Render via script
 
-### 2. Parse work items
+Run:
 
-Read every work item line — both parent items and sub-items. Preserve the hierarchy.
+```bash
+echo '{"path": "<absolute path to workload.md>"}' | python3 ~/.claude/skills/swc_workload/workload.py
+```
 
-Status is determined by the checkbox:
-- `[x]` → done
-- `[-]` → in progress
-- `[ ]` → not started
+The script outputs either `{"output": "..."}` or `{"error": "..."}`.
 
-### 3. Output the list
-
-For each work item, apply the symbol and formatting below. Output as plain text (no markdown code block, no backticks).
-
-| Status | Symbol | Text treatment |
-|--------|--------|----------------|
-| Done | `✔` | Apply Unicode combining strikethrough (U+0336 after every character) |
-| In progress | `▣` | Plain text |
-| Not started | `□` | Plain text |
-
-Indent sub-items with two spaces.
-
-**Example output:**
-
-WORKLOAD  .swc/<branch-subfolder>/workload.md
-✔ 1̶.̶ ̶P̶a̶r̶e̶n̶t̶ ̶w̶o̶r̶k̶ ̶i̶t̶e̶m̶ ̶o̶n̶e̶
-  ✔ 1̶.̶1̶.̶ ̶C̶o̶m̶p̶l̶e̶t̶e̶d̶ ̶s̶u̶b̶-̶i̶t̶e̶m̶
-  ▣ 1.2. In progress sub-item
-  □ 1.3. Not started sub-item
-▣ 2. Parent work item two
-  □ 2.1. Not started sub-item
-□ 3. Parent work item three
-  □ 3.1. Not started sub-item
-
-Output nothing else — no preamble, no trailing summary.
+The script outputs either `{"output": "..."}` or `{"error": "..."}`. If `output`, emit it as your text response. If `error`, emit the error message. Do not add preamble or trailing text.

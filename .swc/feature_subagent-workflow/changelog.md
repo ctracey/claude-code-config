@@ -264,6 +264,17 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Skill stops before git ops — commit/push is user's next step
 - Distinction from `/ship`: push = content hygiene mid-PR; ship = git delivery at merge moment
 
+## Session — solution design stage `2026-04-13`
+
+- Built `swc_workflow_deliver-solution-design` skill: new fourth stage in the deliver workflow, inserted between specs and implement
+- Stage reads requirements + specs, thinks forward through what the agent will encounter, surfaces specific technical questions or challenges for this work item only
+- Offers a gentle depth invite but defaults to brief if the user is satisfied with the directional approach
+- Writes `solution.md` to `workitems/<N>/` — even when no blockers found, so the brief reference is consistent
+- Updated `swc_workflow_deliver` workflow JSON: requirements → specs → solution-design → implement
+- Updated `swc_workflow_deliver-implement`: `solution.md` added as a brief reference doc (by path, not inlined); phase number corrected to fourth
+- Updated `notes.md`: deliver stage split documentation expanded to include solution-design with rationale
+- Rationale: the agent is fully autonomous once spawned; unresolved implementation questions become silent deviations or a stuck agent; this stage seals the brief with hard guesses already answered
+
 ## Session — planning workflow UX improvements `2026-04-02`
 
 - `swc_workflow_plan`: added step 0 — offers a workflow summary and confirms the user wants to proceed before starting; guards against false-positive skill triggers

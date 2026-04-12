@@ -76,10 +76,11 @@ Findings trigger another implementation pass (via `swc_implement`) to address qu
   ├── [GATE 1] Propose approach → human agrees
   ├── Write test spec (scenario-based, agreed harness)
   ├── [GATE 2] Present spec → human approves
+  ├── [GATE 3] Solution design — surface implementation questions → human resolves
   │
   ├── /swc-implement (main session — spawns agent)
-  │     Brief: work item + agreed approach + approved spec + plan.md + architecture.md
-  │     + context.md from prior passes (if any) + review findings (if any)
+  │     Brief: work item + plan.md + architecture.md + requirements.md + specs.md
+  │     + solution.md + context.md from prior passes (if any) + review findings (if any)
   │     └── Implementation agent (autonomous — follows implementation workflow)
   │           ├── Reads prior context.md passes to understand what was tried and why
   │           ├── Implements against approved spec until tests pass
@@ -166,6 +167,9 @@ Reference docs live in the `.swc/` workload folder for the branch. All scoped to
 | `.swc/<folder>/architecture.md` | Tech stack decisions, folder structure, architectural constraints. Also records agreed test harness approach per language/framework. |
 | `.swc/<folder>/notes.md` | Conventions, agreements, decisions that apply across tasks |
 | `.swc/<folder>/changelog.md` | Append-only per-task record of what happened and why |
+| `.swc/<folder>/workitems/<N>/requirements.md` | Per-item: intent, constraints, approach direction. Written during requirements stage. |
+| `.swc/<folder>/workitems/<N>/specs.md` | Per-item: acceptance criteria and scenarios. Written during specs stage. |
+| `.swc/<folder>/workitems/<N>/solution.md` | Per-item: resolved implementation decisions and technical guidance. Written during solution-design stage. |
 | `.swc/<folder>/workitems/<N>/context.md` | Per-item: agreed approach, decisions made, open questions. Written by the implementation subagent during execution. |
 
 ### `workload.md` task format
@@ -208,7 +212,7 @@ The implementation agent is expected to make decisions autonomously — data str
 
 The agent stops only when no reasonable forward path exists within the agreed brief. This is a narrow exception, not the default.
 
-User control is exercised at the three gates — not mid-implementation. See the implementation decision guide in `notes.md`.
+User control is exercised at the four gates — not mid-implementation. See the implementation decision guide in `notes.md`.
 
 ---
 ## Key design principles
@@ -219,7 +223,7 @@ User control is exercised at the three gates — not mid-implementation. See the
 
 **Spec-driven TDD** — tests are written before implementation. The test file is the spec. The agent does not write implementation code until the user has approved the test spec. Done means tests pass — not "looks right".
 
-**Three human gates** — approach agreement, spec approval, and satisfaction/correctness review. Every gate is blocking. The human satisfaction gate (Gate 3) can trigger a full feedback pass — back to Gate 1 with context, not a patch.
+**Four human gates** — approach agreement, spec approval, solution design, and satisfaction/correctness review. Every gate is blocking. The solution design gate surfaces implementation-specific questions before the brief is sealed. The human satisfaction gate (Gate 4) can trigger a full feedback pass — back to Gate 1 with context, not a patch.
 
 **Review agent is a quality pre-filter, not a correctness judge** — the `code-reviewer` agent runs autonomously before the human sees the result. It ensures code quality and SOLID compliance. Correctness — did we build the right thing? — is the human's judgement at Gate 3 only.
 

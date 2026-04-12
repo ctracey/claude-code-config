@@ -80,9 +80,10 @@ If yes, proceed. If no, ask what they actually need and stop here.
 {
   "title": "deliver",
   "stages": [
-    { "name": "requirements", "skill": "swc-workflow-deliver-requirements", "args": "" },
-    { "name": "specs",        "skill": "swc-workflow-deliver-specs",        "args": "" },
-    { "name": "implement",    "skill": "swc-workflow-deliver-implement",    "args": "" }
+    { "name": "requirements",    "skill": "swc-workflow-deliver-requirements",    "args": "" },
+    { "name": "specs",           "skill": "swc-workflow-deliver-specs",           "args": "" },
+    { "name": "solution-design", "skill": "swc-workflow-deliver-solution-design", "args": "" },
+    { "name": "implement",       "skill": "swc-workflow-deliver-implement",       "args": "" }
   ],
   "on_complete": "Delivery workflow complete. Ready for review."
 }

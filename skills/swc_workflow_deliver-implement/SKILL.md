@@ -1,6 +1,6 @@
 ---
 name: swc_workflow_deliver-implement
-description: Spawn implementation agent for a work item — assemble brief and delegate to a placeholder agent, then evaluate and report exit criteria. Third phase of the delivery conversation. Use when spawning an implementation agent, or when invoked via /swc-workflow-deliver-implement.
+description: Spawn implementation agent for a work item — assemble brief and delegate to a placeholder agent, then evaluate and report exit criteria. Fourth phase of the delivery conversation. Use when spawning an implementation agent, or when invoked via /swc-workflow-deliver-implement.
 allowed-tools: Bash, Read, Write, Edit, Glob, Agent
 ---
 
@@ -23,6 +23,11 @@ Display the work item being handed to the implementation agent:
 ### 2. Spawn the implementation agent
 
 Use the Agent tool to spawn a general-purpose agent. Pass **only** the work item number and name — no file paths, no doc contents. The implementation workflow is responsible for discovering its own context via naming conventions.
+
+The agent brief should reference (by path, not inline) the following docs from `.swc/<folder>/workitems/<N>/`:
+- `requirements.md` — intent and approach direction
+- `specs.md` — acceptance criteria
+- `solution.md` — resolved implementation decisions and any technical guidance (if present)
 
 Agent prompt:
 

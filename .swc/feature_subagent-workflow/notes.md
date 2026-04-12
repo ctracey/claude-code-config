@@ -455,10 +455,14 @@ Decision not yet made — captured here as task 1.3.3.2. Explore before adding m
 
 | Stage | Content |
 |---|---|
-| **Requirements** | Intent clarification + high-level solution design |
-| **Specs** | Spec scenarios + finalise solution design |
+| **Requirements** | Intent clarification + high-level solution direction |
+| **Specs** | Spec scenarios + acceptance criteria |
+| **Solution design** | Implementation-level questions resolved with the user before the brief is sealed |
+| **Implement** | Agent spawned with sealed brief — fully autonomous |
 
-Requirements exits with agreed intent and a rough approach direction. Specs takes that and works out how to verify it — forcing the solution design to firm up before implementation starts.
+Requirements exits with agreed intent and a rough approach direction. Specs locks down acceptance criteria. Solution design is the final pre-spawn gate where implementation-level questions (design choices, ambiguities, integration decisions) are answered with the user — since the agent is fully autonomous once spawned and cannot ask mid-implementation.
+
+**Rationale for solution design stage:** The implementation agent cannot converse with the user during execution. Any unresolved implementation question becomes either a silent deviation or a stuck agent. The solution design stage surfaces these questions explicitly before the brief is sealed, so the agent can proceed with confidence.
 
 ### Requirements stage behaviour
 
