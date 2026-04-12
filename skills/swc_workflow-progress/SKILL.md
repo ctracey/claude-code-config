@@ -23,7 +23,7 @@ Emit a workflow progress banner framed with horizontal rules.
 Parse `title`, `stages`, and `active` from the arguments, then run:
 
 ```
-echo '{"title": "...", "stages": "...", "active": "..."}' | python3 ~/.claude/skills/swc-workflow-progress/progress.py
+echo '{"title": "...", "stages": "...", "active": "..."}' | python3 ~/.claude/skills/swc_workflow-progress/progress.py
 ```
 
 The script outputs either `{"output": "..."}` or `{"error": "..."}`. If `output`, emit it as your text response. If `error`, emit the error message. Do not add preamble or trailing text.

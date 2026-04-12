@@ -4,6 +4,10 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — progress skill path fix `2026-04-12`
+
+- Fixed script path in `swc_workflow-progress` example command — was referencing `swc-workflow-progress` (hyphen) instead of `swc_workflow-progress` (underscore), causing the invocation example to point at a non-existent directory
+
 ## Session — swc_push end-to-end flow `2026-04-11`
 
 - Rewrote `swc_push` to handle commit and push directly — previously stopped after updating docs and left git ops to the user
