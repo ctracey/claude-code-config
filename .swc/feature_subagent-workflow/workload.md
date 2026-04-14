@@ -64,8 +64,8 @@
          - [x] 1.4.3.2. Build swc_implement skill
 
      - [-] 1.4.4. **Implementation workflow**
-         - [-] 1.4.4.1. Define the implementation workflow — what the agent follows
-         - [ ] 1.4.4.2. Define context.md format — append-only per pass, required sections
+         - [x] 1.4.4.1. Define the implementation workflow — what the agent follows
+         - [x] 1.4.4.2. Define context.md format — append-only per pass, required sections
          - [ ] 1.4.4.3. Define the rich summary artifact format
          - [ ] 1.4.4.4. Build the implementation workflow skill
 

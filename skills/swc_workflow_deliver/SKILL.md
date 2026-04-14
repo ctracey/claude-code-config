@@ -74,16 +74,16 @@ If yes, proceed. If no, ask what they actually need and stop here.
 
 ### 2. Run the workflow
 
-**Use the Skill tool to invoke `swc-workflow-orchestrator`.** Do not run stages inline — the orchestrator manages the progress banner, stage gates, and exit criteria checks. Pass the following workflow definition as the args:
+**Use the Skill tool to invoke `swc_workflow-orchestrator`.** Do not run stages inline — the orchestrator manages the progress banner, stage gates, and exit criteria checks. Pass the following workflow definition as the args:
 
 ```json
 {
   "title": "deliver",
   "stages": [
-    { "name": "requirements",    "skill": "swc-workflow-deliver-requirements",    "args": "" },
-    { "name": "specs",           "skill": "swc-workflow-deliver-specs",           "args": "" },
-    { "name": "solution-design", "skill": "swc-workflow-deliver-solution-design", "args": "" },
-    { "name": "implement",       "skill": "swc-workflow-deliver-implement",       "args": "" }
+    { "name": "requirements",    "skill": "swc_workflow_deliver-requirements",    "args": "" },
+    { "name": "specs",           "skill": "swc_workflow_deliver-specs",           "args": "" },
+    { "name": "solution-design", "skill": "swc_workflow_deliver-solution-design", "args": "" },
+    { "name": "implement",       "skill": "swc_workflow_deliver-implement",       "args": "" }
   ],
   "on_complete": "Delivery workflow complete. Ready for review."
 }

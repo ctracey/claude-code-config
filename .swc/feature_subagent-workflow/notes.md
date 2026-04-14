@@ -136,31 +136,37 @@ Each work item executed by the implementation subagent gets its own context docu
 
 ### context.md format
 
+`context.md` is the running log of what the implementation agent did that wasn't obvious from the code, tests, or agreed brief. It's the memory that travels between fresh agent sessions. Lightweight and append-only — each agent run adds a new dated pass section, never overwrites prior content.
+
+**Written at decision points throughout execution — not at the end.**
+
+**Structure:**
+
 ```markdown
-# Work item <N> — <title>
+# Context — <N>: <title>
 
-## Agreed approach
-[What was agreed with the user before implementation began]
+## Pass <n> — <YYYY-MM-DD>
 
-## Pass <n> — <date>
-
-### Decisions made
-[Choices made during this pass and why — include assumptions behind each decision]
-
-### Scope flags
-[Anything noticed that is out of scope — recommendation for Gate 3]
-
-### Open questions
-[Anything unresolved — surface in summary artifact]
+- [entry]
+- [entry]
 ```
 
-`context.md` is append-only across passes — each implementation agent adds a new `## Pass N` section. It is never overwritten. This gives the next agent a full picture of what was tried, what was decided, and what assumptions were made.
+**What belongs in a pass entry** (self-labelled bullets, no mandatory subsections):
 
-**Written throughout execution, not at the end.** If the session ends unexpectedly, context.md should reflect everything up to that point.
+- **Decision:** chose X over Y — wasn't in solution.md — here's why
+- **Assumption:** assumed A, which shaped B — user should verify
+- **Blocker (guessed):** hit X, made a low-risk call to proceed with Y — flag for user review
+- **Blocker (stopped):** hit X, cannot proceed without user input — [describe what's needed]
+- **Added:** included X beyond scope — good practice, here's why
+- **Tried:** attempted X — didn't work because Y — moved to Z instead
+- **State:** currently at [point] — [what's done, what's next, what's incomplete]
 
-**context.md is the memory that travels between fresh agent sessions.** When `swc_deliver` assembles the brief for a new implementation agent, it includes context.md from all prior passes alongside the review findings. The agent reads what was tried before acting.
+**Enforcement:**
+- One entry minimum per pass — if nothing diverged, write: `- Implemented per spec — no deviations.`
+- The summarise stage verifies a pass section exists and has at least one entry before the agent exits
+- The orient stage opens a new pass section at the start of each agent run
 
-**Flawed assumptions surface through context.md.** When a reviewer asks "why did you do X?", the answer is in context.md. If the assumption behind the decision was wrong, that explains the finding — and may justify revisiting the approach at Gate 1 rather than patching the implementation.
+**Why this matters:** a new agent picking up a subsequent pass reads context.md to understand what was tried, what assumptions were made, and what dead ends to avoid — without re-examining all the code or re-asking the user.
 
 ## Execution workflow layers
 

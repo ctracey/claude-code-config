@@ -5,6 +5,7 @@
 !.swc/
 !.swc/_meta.json
 !.swc/*/
+!.swc/**/
 !.swc/**/*.md
 
 # Track these directories

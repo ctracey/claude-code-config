@@ -4,6 +4,14 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — context.md format definition `2026-04-14`
+
+- Replaced draft context.md sketch in `notes.md` with canonical format: append-only, dated pass sections, self-labelled bullet entries (Decision, Assumption, Blocker, Added, Tried, State), one entry minimum per pass
+- Implemented context.md pass-opening in `swc_workflow_implement-orient` — checks prior passes, appends new dated section header
+- Implemented context.md enforcement in `swc_workflow_implement-summarise` — blocks exit until at least one entry exists in current pass
+- Fixed skill name references in `swc_workflow_deliver` and `swc_workflow-orchestrator` (hyphen → underscore); added `Skill` to orchestrator allowed-tools
+- Work item scope deliberately bounded: broader orient/summarise logic deferred to 1.4.4.4
+
 ## Session — progress skill path fix `2026-04-12`
 
 - Fixed script path in `swc_workflow-progress` example command — was referencing `swc-workflow-progress` (hyphen) instead of `swc_workflow-progress` (underscore), causing the invocation example to point at a non-existent directory
