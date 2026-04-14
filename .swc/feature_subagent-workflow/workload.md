@@ -57,13 +57,14 @@
          - [ ] 1.4.2.6. Commit and push on satisfaction
          - [ ] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
          - [x] 1.4.2.8. Add solution design stage to deliver workflow — insert a pre-spawn stage between specs and implement where implementation-level questions are resolved with the user before the agent brief is sealed
+         - [ ] 1.4.2.9. Add quality baseline stage to deliver workflow — run health checks after solution design, surface failures with scope relevance assessment, capture decisions in quality-baseline.md for the implementation agent brief
 
      - [x] 1.4.3. **Agent spawning — swc_implement**
          - [x] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
          - [x] 1.4.3.2. Build swc_implement skill
 
      - [-] 1.4.4. **Implementation workflow**
-         - [ ] 1.4.4.1. Define the implementation workflow — what the agent follows
+         - [-] 1.4.4.1. Define the implementation workflow — what the agent follows
          - [ ] 1.4.4.2. Define context.md format — append-only per pass, required sections
          - [ ] 1.4.4.3. Define the rich summary artifact format
          - [ ] 1.4.4.4. Build the implementation workflow skill

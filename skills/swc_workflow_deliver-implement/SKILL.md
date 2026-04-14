@@ -1,16 +1,16 @@
 ---
 name: swc_workflow_deliver-implement
-description: Spawn implementation agent for a work item — assemble brief and delegate to a placeholder agent, then evaluate and report exit criteria. Fourth phase of the delivery conversation. Use when spawning an implementation agent, or when invoked via /swc-workflow-deliver-implement.
-allowed-tools: Bash, Read, Write, Edit, Glob, Agent
+description: Spawn implementation agent for a work item — pass work item number only, then evaluate and report exit criteria. Fourth stage of the delivery workflow. Use when spawning an implementation agent, or when invoked via /swc-workflow-deliver-implement.
+allowed-tools: Bash, Read, Glob, Agent
 ---
 
 # Deliver — Implement Stage
 
-Spawns a fresh implementation agent for the active work item, then evaluates and reports exit criteria. This is the third stage of the deliver workflow.
+Spawns a fresh implementation agent for the active work item, then evaluates and reports exit criteria.
 
 ## Context
 
-The work item number and name are available from the calling context (set by `swc_workflow_deliver` before the workflow started). If not available, read the active workload via `swc_lookup` and ask the user which item to implement.
+The work item number is available from the calling context (set by `swc_workflow_deliver` before the workflow started). If not available, read the active workload via `swc_lookup` and ask the user which item to implement. The implementation agent is responsible for discovering its own folder and work item name via `swc_lookup`.
 
 ## Steps
 
@@ -22,32 +22,40 @@ Display the work item being handed to the implementation agent:
 
 ### 2. Spawn the implementation agent
 
-Use the Agent tool to spawn a general-purpose agent. Pass **only** the work item number and name — no file paths, no doc contents. The implementation workflow is responsible for discovering its own context via naming conventions.
-
-The agent brief should reference (by path, not inline) the following docs from `.swc/<folder>/workitems/<N>/`:
-- `requirements.md` — intent and approach direction
-- `specs.md` — acceptance criteria
-- `solution.md` — resolved implementation decisions and any technical guidance (if present)
-
-Agent prompt:
+Use the Agent tool to spawn a general-purpose agent. Pass only the work item number — the agent uses `swc_lookup` to discover the workload folder and `swc_workload` to find the work item name.
 
 ```
-You are an implementation agent for work item [N]: [name].
+Agent(
+  subagent_type: "general-purpose",
+  mode: "bypassPermissions",
+  description: "Implement work item [N]",
+  prompt: "You are an implementation agent for work item [N].
 
-This is a placeholder agent. Announce that you are a placeholder implementation agent for work item [N]: [name], confirm the work item you received, and complete without implementing anything.
+Use the swc_lookup skill to find the active workload folder, then read workload.md to confirm the work item name.
+
+Follow the swc_workflow_implement skill to complete this work item.
+
+CONSTRAINTS — you may NOT:
+- Run git commit, git push, git tag, or any variant
+- Run gh commands (pull requests, issues, releases)
+- Push or publish anything to a remote
+
+You MAY: read and write files, run build/test/lint commands, invoke skills, spawn subagents for review.
+Delivery and git operations happen after user review — your job ends at a working, tested implementation."
+)
 ```
 
 Wait for the agent to return.
 
 ### 3. Evaluate exit criteria
 
-After the agent completes, evaluate all four exit criteria. Check `.swc/<folder>/workitems/<N>/` for any outputs the agent produced.
+After the agent completes, check `.swc/<folder>/workitems/<N>/` for outputs.
 
 | Criterion | How to evaluate |
 |-----------|----------------|
 | Agent completed | Did the agent return without error? |
 | Agent documented its progress | Does `context.md` exist at `.swc/<folder>/workitems/<N>/context.md`? |
-| Summary report exists | Does a summary artifact exist at `.swc/<folder>/workitems/<N>/summary.md`? |
+| Summary report exists | Does `summary.md` exist at `.swc/<folder>/workitems/<N>/summary.md`? |
 | Work item ready for review | Does `context.md` contain a completed pass section and no unresolved blockers? |
 
 ### 4. Report results
@@ -56,13 +64,9 @@ Display all four criteria with pass/fail status:
 
 > **Implement stage — exit criteria:**
 > - [pass/fail] Agent completed
-> - [pass/fail] Agent documented its progress
-> - [pass/fail] Summary report of implementation progress exists
-> - [pass/fail] Work item implementation is ready for review
-
-If using the placeholder agent, all four will be unmet — surface this explicitly:
-
-> "The placeholder agent produced no outputs. These criteria will be met once the implementation workflow (1.4.4) is built."
+> - [pass/fail] Agent documented its progress (`context.md`)
+> - [pass/fail] Summary report exists (`summary.md`)
+> - [pass/fail] Work item ready for review
 
 ### 5. Return control
 

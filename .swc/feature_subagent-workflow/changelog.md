@@ -264,6 +264,12 @@ Append-only. One section per task. Records what was decided, changed, or learned
 - Skill stops before git ops — commit/push is user's next step
 - Distinction from `/ship`: push = content hygiene mid-PR; ship = git delivery at merge moment
 
+## Session — tighten implement-stage agent interface `2026-04-14`
+
+- `swc_workflow_deliver-implement`: agent brief reduced to work item number only — name and folder were redundant since the agent uses `swc_lookup` to discover both
+- Replaced placeholder agent prompt with real Agent tool invocation block including explicit git/gh constraints
+- Removed Write and Edit from the skill's allowed-tools (skill only spawns an agent and evaluates outputs)
+
 ## Session — solution design stage `2026-04-13`
 
 - Built `swc_workflow_deliver-solution-design` skill: new fourth stage in the deliver workflow, inserted between specs and implement
