@@ -16,7 +16,7 @@ Use the `swc_lookup` skill to find the active workload folder. This gives you th
 
 Read `.swc/<folder>/workload.md`. Find the entry for the work item number passed in the calling context. Note the name and description — these define the scope of this pass.
 
-Mark the work item in-progress by invoking `swc_workload-update <N> in-progress`. This is idempotent — safe to run on pass 1, 2, or 3.
+Mark the work item in-progress by invoking `swc_workload-item-start <N>`. This is idempotent — safe to run on pass 1, 2, or 3.
 
 ### 3. Read the brief
 
@@ -59,7 +59,7 @@ Do not pre-fill entries — entries are written during the implement stage at de
 
 - Workload folder resolved
 - Work item name and description confirmed from workload.md
-- Work item marked `[-]` in-progress via swc_workload-update
+- Work item marked `[-]` in-progress via swc_workload-item-start
 - All brief docs read: requirements.md, specs.md, solution.md, plan.md, architecture.md
 - quality-baseline.md read if present; absence noted
 - Prior context understood, or confirmed as pass 1

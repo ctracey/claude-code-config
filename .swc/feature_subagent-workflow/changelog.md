@@ -4,6 +4,14 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — deliver-implement exit criteria + orient skill refinements `2026-04-16`
+
+- Added `## Exit criteria` to `swc_workflow_deliver-implement` — `summary.md` existence gates the orchestrator, confirming full workflow completion through the summarise stage
+- Orient skill updated to use `swc_workload-item-start` (silent programmatic skill) instead of `swc_workload-update` — cleaner separation between agent-internal and interactive status changes
+- Added work item 1.6.1 — swc_push local repo support (commit-only when no remote)
+
+---
+
 ## Session — orient status tracking + workload additions `2026-04-16`
 
 - Orient stage now marks work item `[-]` in-progress via `swc_workload-update` after confirming the item (1.4.4.5) — closes the gap where status required manual update after agent pickup

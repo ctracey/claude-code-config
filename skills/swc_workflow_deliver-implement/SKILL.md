@@ -71,3 +71,13 @@ Display all four criteria with pass/fail status:
 ### 5. Return control
 
 Return to the orchestrator with the criteria evaluation result. Do not attempt to self-advance if criteria are unmet — the orchestrator handles the gate decision.
+
+## Exit criteria
+
+**Done when:**
+- Agent returned without error
+- `context.md` exists with at least one completed pass section — confirms orient ran
+- `summary.md` exists — confirms the agent reached and completed the summarise stage (full workflow ran to completion)
+- No unresolved blockers in `context.md`
+
+**Return control to the calling skill.**
