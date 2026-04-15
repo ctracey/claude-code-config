@@ -68,7 +68,7 @@
          - [x] 1.4.4.2. Define context.md format — append-only per pass, required sections
          - [x] 1.4.4.3. Define the rich summary artifact format
          - [x] 1.4.4.4. Build the implementation workflow skill
-         - [ ] 1.4.4.5. Implementation workflow — mark work item as in-progress at start of orient stage, done on successful summarise
+         - [x] 1.4.4.5. Implementation workflow — mark work item as in-progress at start of orient stage, done on successful summarise
          - [ ] 1.4.4.6. Doc updates during implementation — agent updates README and relevant docs as part of each pass; define what belongs in README and consider a way to guide this
          - [ ] 1.4.4.7. Consider agent progress messages to main session — milestone transparency for workflow stages, feedback loops, and loop iteration count (e.g. implement cycle 2/3)
 
@@ -85,6 +85,9 @@
 
 - [ ] **1.5. Batch skill acceptance**
      - [ ] 1.5.1. Walk through all swc skills and verify each against its acceptance criteria — identify gaps, inconsistencies, or stale placeholder content
+
+- [ ] **1.6. swc_push improvements**
+     - [ ] 1.6.1. Improve swc_push to handle local repos — detect when no remote is configured and commit only (skip push and PR comment steps)
 
 - [ ] **2. Advanced improvements**
   - [ ] 2.2. **Ways hygiene**

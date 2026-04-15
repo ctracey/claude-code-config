@@ -4,6 +4,15 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — orient status tracking + workload additions `2026-04-16`
+
+- Orient stage now marks work item `[-]` in-progress via `swc_workload-update` after confirming the item (1.4.4.5) — closes the gap where status required manual update after agent pickup
+- Added `Edit` to `swc_workflow_implement-orient` allowed-tools — required for `swc_workload-update` to function
+- Added 1.6 / 1.6.1: improve `swc_push` to handle local repos (commit only, no push)
+- Committed prior session's workitem artefacts for 1.4.4.3 and 1.4.4.4 that were untracked
+
+---
+
 ## Session — implementation workflow skill build `2026-04-15`
 
 - Completed `swc_workflow_implement-orient`: full brief-reading logic — resolves workload via `swc_lookup`, reads all brief docs in parallel, reads prior context.md passes, extracts test approach from `solution.md`, greps codebase for relevant files, opens new dated pass section

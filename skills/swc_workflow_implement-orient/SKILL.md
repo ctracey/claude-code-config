@@ -1,7 +1,7 @@
 ---
 name: swc_workflow_implement-orient
 description: Orient stage of the implementation workflow — read the full brief, understand the starting point, open a new pass section in context.md. First stage of the implementation workflow. Use when invoked by swc_workflow_implement or via /swc-workflow-implement-orient.
-allowed-tools: Read, Write, Glob, Bash
+allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
 # Implement — Orient Stage
@@ -15,6 +15,8 @@ Use the `swc_lookup` skill to find the active workload folder. This gives you th
 ### 2. Confirm the work item
 
 Read `.swc/<folder>/workload.md`. Find the entry for the work item number passed in the calling context. Note the name and description — these define the scope of this pass.
+
+Mark the work item in-progress by invoking `swc_workload-update <N> in-progress`. This is idempotent — safe to run on pass 1, 2, or 3.
 
 ### 3. Read the brief
 
@@ -57,6 +59,7 @@ Do not pre-fill entries — entries are written during the implement stage at de
 
 - Workload folder resolved
 - Work item name and description confirmed from workload.md
+- Work item marked `[-]` in-progress via swc_workload-update
 - All brief docs read: requirements.md, specs.md, solution.md, plan.md, architecture.md
 - quality-baseline.md read if present; absence noted
 - Prior context understood, or confirmed as pass 1
