@@ -124,13 +124,18 @@ If it shaped the direction, it belongs in the docs. Write to them throughout the
 Each work item executed by the implementation subagent gets its own context document:
 
 ```
-.swc/<folder>/workitems/
-└── <item-number>/
-    └── context.md      ← agreed approach, decisions, open questions for this item
+.swc/<folder>/
+├── pipeline.md              ← project-level verification config (agreed during planning)
+└── workitems/
+    └── <item-number>/
+        ├── context.md       ← agreed approach, decisions, open questions (per pass, append-only)
+        └── summary.md       ← handoff artifact written by the implementation agent
 ```
 
 - Folder name matches the work item number exactly (e.g. `1.4.2`)
 - `context.md` is written by the implementation subagent during execution, not after
+- `summary.md` is written during the Summarise stage and travels intact to the deliver workflow
+- `pipeline.md` is project-level — agreed once during planning, not per work item
 - The test file lives in the codebase alongside the code it describes — not here
 - This folder is the reasoning record; the test file is the spec artifact
 
@@ -167,6 +172,90 @@ Each work item executed by the implementation subagent gets its own context docu
 - The orient stage opens a new pass section at the start of each agent run
 
 **Why this matters:** a new agent picking up a subsequent pass reads context.md to understand what was tried, what assumptions were made, and what dead ends to avoid — without re-examining all the code or re-asking the user.
+
+### summary.md format
+
+`summary.md` is the handoff artifact the implementation agent writes at the end of each pass. It travels intact to the deliver workflow — the agent does not editorially filter it. Written during the Summarise stage; read by the deliver workflow quality gate and the human at Gate 3.
+
+**Purpose:** make it easy for the human to accept or reject the work. Leads with what changed, then evidence it works.
+
+**Structure:**
+
+```markdown
+# Summary — <N>: <title> — Pass <n> — <YYYY-MM-DD>
+
+## Changes
+
+[Bulleted list of what was done — one bullet per logical change. Be specific: file names, function names, what changed and why.]
+
+## Testing
+
+[What was tested and how — automation run (framework, command, outcome) and any manual scenarios walked through.]
+
+## Test results
+
+[Pass/fail counts, command output summary, or "no automated tests — verified by [method]".]
+
+## Pipeline
+
+[Results of running the project pipeline as defined in pipeline.md. For each check: what was run, what was expected, what happened. Omit if no pipeline.md defined.]
+
+## Build confidence
+
+[One or two sentences: overall confidence the build is working and why. Flag any caveats.]
+
+## Review findings
+
+[Structured findings from the Refine stage code-reviewer. Each finding: severity (info/warn/error), location, description. Write "None" if the reviewer found nothing.]
+
+## Scope flags
+
+[Work observations that are outside the agreed brief — not acted on, but raised for Gate 3. Write "None" if nothing to flag.]
+
+## Approach needs revisiting
+
+[If the agreed approach proved unworkable mid-implementation, describe what was encountered and what a better approach would be. This flag triggers Gate 1 again. Write "No" if approach held.]
+```
+
+**What goes where:**
+- `Changes` is always present — if nothing changed, something is wrong
+- `Review findings` carries the Refine stage output intact — do not summarise or omit findings
+- `Approach needs revisiting` is a gate signal — if set to anything other than "No", the deliver workflow must surface it to the user before Gate 3
+
+---
+
+### pipeline.md format
+
+`pipeline.md` is a project-level doc that defines what verification looks like for this project. Agreed once during planning (solution stage); used by the implementation agent during Summarise and by the deliver workflow at Gate 3.
+
+**Location:** `.swc/<folder>/pipeline.md` — alongside `plan.md` and `architecture.md`.
+
+**Purpose:** remove tech-stack bias from the summary format. The summary reports against whatever this file defines, so the format works for any project type (web app, CLI, skill/docs, service).
+
+**Structure:**
+
+```markdown
+# Pipeline — <project name>
+
+## Build
+
+**Command:** `<command to run>`
+**Expected outcome:** <what a passing build looks like — exit code, key output, artefact produced>
+
+## Dev environment
+
+**Start command:** `<command to start>`
+**Health check:** <URL to hit, port to probe, signal to look for, or "not applicable">
+**Stop command:** `<command to stop cleanly, or "ctrl-c">`
+
+## Acceptance
+
+<What the human needs to see to accept the work. Narrative — not automated. E.g. "Load localhost:3000, navigate to X, confirm Y renders correctly." Or "Run `cli-tool --help` and confirm output matches spec." Or "Not applicable — verified by test suite only.">
+```
+
+**Filling it in:** during `swc_workflow_plan-solution`, the user and Claude agree on what verification looks like for the project and write it here. Work items do not override it — if a work item needs something different, that is a project-level change discussed with the user.
+
+**If `pipeline.md` is absent:** the implementation agent skips the Pipeline section in `summary.md` and notes its absence. The deliver workflow does not attempt to run a pipeline at Gate 3.
 
 ## Execution workflow layers
 

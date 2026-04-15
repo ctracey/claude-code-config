@@ -4,6 +4,18 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — implementation workflow skill build `2026-04-15`
+
+- Completed `swc_workflow_implement-orient`: full brief-reading logic — resolves workload via `swc_lookup`, reads all brief docs in parallel, reads prior context.md passes, extracts test approach from `solution.md`, greps codebase for relevant files, opens new dated pass section
+- Completed `swc_workflow_implement-implement`: scenario-driven TDD loop — Full TDD (write test → red → implement → green → update docs per scenario) or Lightweight (checklist only); 3-cycle limit per scenario; clean blocked path writes state to context.md + partial summary.md and stops
+- `swc_workflow_implement-summarise`: removed placeholder markers, wired pipeline collection and full summary.md writing (was deferred to 1.4.4.4 — completed here)
+- `swc_workflow_deliver-solution-design`: added TDD preference confirmation step; `## Test approach` field added to solution.md template; travels to agent via solution.md
+- `swc_workflow_deliver-specs`: fixed description ("writing tests" removed); added explicit "captures scenarios only — no test code" boundary at top of skill
+- `swc_workflow_plan-solution`: added step 5a — prompts user to define pipeline.md verification config during planning; writes to `.swc/<folder>/pipeline.md`
+- `swc_init`: added pipeline.md stub to the scaffolding set (now six docs, not five)
+- `notes.md`: added canonical summary.md and pipeline.md format definitions
+- Added workload items 1.4.4.5–7 and 1.5 (batch skill acceptance); marked 1.4.4.4 done
+
 ## Session — context.md format definition `2026-04-14`
 
 - Replaced draft context.md sketch in `notes.md` with canonical format: append-only, dated pass sections, self-labelled bullet entries (Decision, Assumption, Blocker, Added, Tried, State), one entry minimum per pass

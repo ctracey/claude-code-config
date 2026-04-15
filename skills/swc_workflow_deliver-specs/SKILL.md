@@ -1,6 +1,6 @@
 ---
 name: swc_workflow_deliver-specs
-description: Define test strategy, test spec, and acceptance criteria for a work item. Second phase of the delivery conversation. Use when writing tests, defining acceptance criteria, or when invoked via /swc-workflow-deliver-specs.
+description: Define acceptance scenarios and criteria for a work item — document what must be true, not how to test it. Second phase of the delivery conversation. Use when defining acceptance criteria, capturing test scenarios, or when invoked via /swc-workflow-deliver-specs.
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
@@ -8,7 +8,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 
 Define how the work item will be verified before any implementation begins.
 
-This stage has two paths — **lightweight** and **full** — chosen based on the complexity of the work item. The implementation agent uses the output to write tests first, then implements until they pass.
+**This stage captures scenarios only — it does not write test code.** The output is a `specs.md` doc describing what must be true. The implementation agent reads this doc and writes the tests.
+
+This stage has two paths — **lightweight** and **full** — chosen based on the complexity of the work item.
 
 ---
 

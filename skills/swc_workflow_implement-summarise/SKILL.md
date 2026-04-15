@@ -6,27 +6,89 @@ allowed-tools: Read, Write, Glob, Bash
 
 # Implement — Summarise Stage
 
-**Partial implementation** — context.md pass enforcement is implemented. Summary artifact writing is deferred to 1.4.4.4.
-
 ## Steps
 
 ### 1. Announce stage entry
 
-> "Summarise stage — Work item: [N]: [name]. Verifying context.md pass section."
+> "Summarise stage — Work item: [N]: [name]. Verifying context.md and writing summary."
 
 ### 2. Verify context.md pass section
 
 Read `.swc/<folder>/workitems/<N>/context.md`. Find the current pass section (the last `## Pass` header).
 
-If the current pass section has no bullet entries, surface this before exiting:
+If the current pass section has no bullet entries, surface this before continuing:
 
 > "The context.md pass section for this run has no entries. Before wrapping up, capture what happened — even briefly: what was done, any decision or assumption made, or where things were left. This is the record a future agent relies on."
 
-Do not return control to the orchestrator until at least one bullet entry exists under the current pass section.
+Do not continue until at least one bullet entry exists under the current pass section.
 
-### 3. Placeholder — remainder of summarise stage
+### 3. Collect pipeline results
 
-The following logic is deferred to 1.4.4.4:
-- Write summary artifact to `.swc/<folder>/workitems/<N>/summary.md`
+Check if `.swc/<folder>/pipeline.md` exists.
+
+- **If it exists:** read it. Run the build command defined in `## Build`. Capture the outcome (exit code, key output). Note whether the dev environment start command was verified (run it, check the health check signal, then stop it). Populate the Pipeline section of the summary with these results.
+- **If absent:** note "No pipeline.md defined — pipeline verification skipped."
+
+### 4. Write summary.md
+
+Gather from context.md: scope flags, open questions, and any review findings surfaced during the Refine stage.
+
+Write `.swc/<folder>/workitems/<N>/summary.md`:
+
+```markdown
+# Summary — <N>: <title> — Pass <n> — <YYYY-MM-DD>
+
+## Changes
+
+[Bulleted list of what was done — one bullet per logical change. Be specific: file names, function names, what changed and why.]
+
+## Testing
+
+[What was tested and how — automation run (framework, command, outcome) and any manual scenarios walked through.]
+
+## Test results
+
+[Pass/fail counts, command output summary, or "no automated tests — verified by [method]".]
+
+## Pipeline
+
+[Results of running the project pipeline as defined in pipeline.md. For each check: what was run, what was expected, what happened. Write "No pipeline.md defined — skipped." if absent.]
+
+## Build confidence
+
+[One or two sentences: overall confidence the build is working and why. Flag any caveats.]
+
+## Review findings
+
+[Structured findings from the Refine stage code-reviewer. Each finding: severity (info/warn/error), location, description. Write "None" if the reviewer found nothing or Refine was skipped.]
+
+## Scope flags
+
+[Work observations outside the agreed brief — not acted on, raised for Gate 3. Write "None" if nothing to flag.]
+
+## Approach needs revisiting
+
+[If the agreed approach proved unworkable mid-implementation, describe what was encountered and what a better approach would be. This flag triggers Gate 1 again. Write "No" if approach held.]
+```
+
+### 5. Check "Approach needs revisiting"
+
+Read the `## Approach needs revisiting` section of the summary just written.
+
+If it contains anything other than "No", surface it to the user immediately before returning:
+
+> "The implementation agent flagged that the agreed approach needs revisiting: [content]. This will trigger Gate 1 again in the deliver workflow."
+
+### 6. Return
 
 Return control to the orchestrator.
+
+## Exit criteria
+
+**Done when:**
+- context.md pass section has at least one entry
+- Pipeline checks run (or absence noted)
+- `summary.md` written to `.swc/<folder>/workitems/<N>/`
+- "Approach needs revisiting" surfaced to user if set
+
+**Return control to the calling skill.**

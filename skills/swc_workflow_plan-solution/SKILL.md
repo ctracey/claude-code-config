@@ -55,6 +55,19 @@ Update `plan.md`:
 - `## Features` — what we're building
 - `## Out of scope` — what we're not doing
 
+### 5a. Define the verification pipeline
+
+Ask the user what verification looks like for this project:
+
+> "Before we move on — what does a passing build look like for this project? And is there a dev environment that needs to be running to verify changes? This goes into `pipeline.md` so the implementation agent knows what to run."
+
+Cover:
+- **Build** — command to run, what a passing outcome looks like
+- **Dev environment** — start command, how to confirm it's up, stop command (or "not applicable")
+- **Acceptance** — what the human needs to see to accept the work (can be "test suite only" for non-UI work)
+
+Write the answers to `.swc/<folder>/pipeline.md`. The stub is already there from `swc_init` — fill it in with what was agreed. If the user wants to skip or fill it in later, leave the stub as-is and note it as a deferred decision.
+
 ### 6. Present and check
 
 Run `swc-report-plan` and `swc-report-notes` to show the current state of the plan and decisions. Then ask:
@@ -71,6 +84,7 @@ Transition: *"Good — before we get into individual work items, let's talk abou
 - `architecture.md` has Tech stack, Folder structure, Constraints
 - `notes.md` has Solution decisions, Open questions, Deferred decisions
 - `plan.md` has Features and Out of scope
+- `pipeline.md` filled in or deferred decision recorded
 - User confirmed the playback is correct
 
 **Return control to `swc-workflow-plan`.**

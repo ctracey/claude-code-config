@@ -6,34 +6,59 @@ allowed-tools: Read, Write, Glob, Bash
 
 # Implement — Orient Stage
 
-**Partial implementation** — context.md pass opening is implemented. Broader brief-reading logic is deferred to 1.4.4.4.
-
 ## Steps
 
-### 1. Announce stage entry
+### 1. Resolve the workload folder
 
-> "Orient stage — Work item: [N]: [name]. Opening context.md pass section."
+Use the `swc_lookup` skill to find the active workload folder. This gives you the `<folder>` path (e.g. `.swc/feature_subagent-workflow/`).
 
-### 2. Open context.md pass section
+### 2. Confirm the work item
 
-Locate `.swc/<folder>/workitems/<N>/context.md`.
+Read `.swc/<folder>/workload.md`. Find the entry for the work item number passed in the calling context. Note the name and description — these define the scope of this pass.
 
-If it exists, read it to understand prior passes — what was tried, decided, and where things were left. Count existing `## Pass` headers to determine the next pass number.
+### 3. Read the brief
 
-If it does not exist, this is pass 1.
+Read in parallel from `.swc/<folder>/`:
+- `plan.md`
+- `architecture.md`
 
-Append to context.md (create the file if needed):
+Read in parallel from `.swc/<folder>/workitems/<N>/`:
+- `requirements.md`
+- `specs.md`
+- `solution.md`
+- `quality-baseline.md` — skip silently if absent
+
+### 4. Read prior context
+
+Check `.swc/<folder>/workitems/<N>/context.md`:
+
+- **Exists:** read it in full. Count `## Pass` headers to determine the next pass number. Understand what was tried, what decisions were made, and where things were left. This is the memory that carries across sessions — treat it as ground truth for what has already happened.
+- **Does not exist:** this is pass 1. No prior context.
+
+### 5. Understand the starting point
+
+With the brief and prior context loaded, establish:
+- **Test approach** — read the `## Test approach` section of `solution.md`. This is the agreed approach: either `Full TDD` (write test per scenario, implement, update docs) or `Lightweight` (implement directly against spec checklist). If absent, default to Full TDD. The implement stage follows this.
+- What does the spec require, and what does "passing" look like for this work item type?
+- Which files and areas of the codebase are in scope? Grep for symbols, file names, or concepts from the work item description.
+- If this is a subsequent pass: what was the state at the end of the last pass? What scenarios remain? Was there a blocker?
+
+### 6. Open a new pass section in context.md
+
+Append to `.swc/<folder>/workitems/<N>/context.md` (create the file if absent):
 
 ```markdown
 ## Pass <N> — <YYYY-MM-DD>
 ```
 
-Do not pre-fill entries — this section is filled during the implement stage at decision points.
+Do not pre-fill entries — entries are written during the implement stage at decision points.
 
-### 3. Placeholder — remainder of orient stage
+## Exit criteria
 
-The following logic is deferred to 1.4.4.4:
-- Read all brief docs (requirements, specs, solution, quality-baseline, plan, architecture)
-- Understand the starting point from prior context and codebase state
-
-Return control to the orchestrator.
+- Workload folder resolved
+- Work item name and description confirmed from workload.md
+- All brief docs read: requirements.md, specs.md, solution.md, plan.md, architecture.md
+- quality-baseline.md read if present; absence noted
+- Prior context understood, or confirmed as pass 1
+- Codebase starting point understood — relevant files located
+- New pass section opened in context.md
