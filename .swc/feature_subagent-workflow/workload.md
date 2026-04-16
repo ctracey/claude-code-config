@@ -63,14 +63,14 @@
          - [x] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
          - [x] 1.4.3.2. Build swc_implement skill
 
-     - [-] 1.4.4. **Implementation workflow**
+     - [x] 1.4.4. **Implementation workflow**
          - [x] 1.4.4.1. Define the implementation workflow — what the agent follows
          - [x] 1.4.4.2. Define context.md format — append-only per pass, required sections
          - [x] 1.4.4.3. Define the rich summary artifact format
          - [x] 1.4.4.4. Build the implementation workflow skill
          - [x] 1.4.4.5. Implementation workflow — mark work item as in-progress at start of orient stage, done on successful summarise
          - [x] 1.4.4.6. Doc updates during implementation — agent updates README and relevant docs as part of each pass; define what belongs in README and consider a way to guide this
-         - [ ] 1.4.4.7. Consider agent progress messages to main session — milestone transparency for workflow stages, feedback loops, and loop iteration count (e.g. implement cycle 2/3)
+         - [x] 1.4.4.7. Consider agent progress messages to main session — milestone transparency for workflow stages, feedback loops, and loop iteration count (e.g. implement cycle 2/3)
 
      - [ ] 1.4.5. **Review integration**
          - [ ] 1.4.5.1. Define structured findings format for code-reviewer
@@ -96,7 +96,8 @@
      - [ ] 2.3.1. Consider story mapping as a complement to task breakdown — logical user journey vs delivery roadmap with outcome/learning milestones
   - [ ] 2.4. **MCP service for todo list management**
      - [-] 2.4.1. Design MCP service interface — expose todo file read/write/query operations as MCP tools so any agent or skill can manage todos via a standard protocol rather than direct file I/O
-     - [ ] 2.4.2 Implement MCP service
+     - [ ] 2.4.2. Implement MCP service
+     - [ ] 2.4.3. Consider agent progress transparency via MCP — how workflow stage milestones, feedback loops, and loop iteration count are surfaced through the MCP interface rather than direct session messages
   - [ ] 2.5. **Deliver batching**
      - [ ] 2.5.1. Consider delivering multiple work items in a single session — how batching interacts with gates, quality loops, and user attention
   - [ ] 2.6. **Deliver analysis mode**

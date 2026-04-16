@@ -4,6 +4,12 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — complete 1.4.4, add 2.4.3 `2026-04-16`
+
+- Marked 1.4.4.7 done (agent progress messages deferred — considered but not built)
+- 1.4.4 Implementation workflow fully complete
+- Added 2.4.3: consider agent progress transparency via MCP interface — how stage milestones and loop counts are surfaced once the MCP service exists
+
 ## Session — README way + impl doc maintenance policy `2026-04-16`
 
 - Expanded `docs/readme/way.md` — full standard structure (what/who/why overview formula, Architecture, Environment Setup, Operations, CI/CD, Contributing, License), added `files: README\.md$` trigger, aligned `docs/` layout to project conventions, added agent update guidance scoped to affected sections only
