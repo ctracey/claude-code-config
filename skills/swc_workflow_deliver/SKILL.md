@@ -83,9 +83,10 @@ If yes, proceed. If no, ask what they actually need and stop here.
     { "name": "requirements",    "skill": "swc_workflow_deliver-requirements",    "args": "" },
     { "name": "specs",           "skill": "swc_workflow_deliver-specs",           "args": "" },
     { "name": "solution-design", "skill": "swc_workflow_deliver-solution-design", "args": "" },
-    { "name": "implement",       "skill": "swc_workflow_deliver-implement",       "args": "" }
+    { "name": "implement",       "skill": "swc_workflow_deliver-implement",       "args": "" },
+    { "name": "refine",          "skill": "swc_workflow_deliver-refine",          "args": "" }
   ],
-  "on_complete": "Delivery workflow complete. Ready for review."
+  "on_complete": "Delivery workflow complete. Ready for Gate 3."
 }
 ```
 

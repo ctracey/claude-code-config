@@ -1,6 +1,6 @@
 ---
 name: swc_workflow_implement
-description: Implementation workflow — drives an implementation agent through orient, implement, refine, and summarise stages. Entry point for the agent-side workflow. Use when an implementation agent receives a work item and needs to execute it, or when invoked via /swc-workflow-implement.
+description: Implementation workflow — drives an implementation agent through orient, implement, and summarise stages. Entry point for the agent-side workflow. Use when an implementation agent receives a work item and needs to execute it, or when invoked via /swc-workflow-implement.
 allowed-tools: Bash, Read, Write, Edit, Glob, Agent
 ---
 
@@ -33,7 +33,6 @@ Invoke `swc_workflow-orchestrator` with the implementation stage definitions:
   "stages": [
     { "name": "orient",    "skill": "swc_workflow_implement-orient",    "args": "" },
     { "name": "implement", "skill": "swc_workflow_implement-implement",  "args": "" },
-    { "name": "refine",    "skill": "swc_workflow_implement-refine",     "args": "" },
     { "name": "summarise", "skill": "swc_workflow_implement-summarise",  "args": "" }
   ],
   "on_complete": "Implementation workflow complete. Summary artifact written."

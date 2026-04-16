@@ -4,6 +4,15 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — build 1.4.5 review integration `2026-04-16`
+
+- New `agents/swc_code-reviewer.md` — swc-aware reviewer; reads work item docs + code, writes structured findings (BLOCK/WARN/PASS verdict) to `code-review-findings.md`
+- New `skills/swc_workflow_deliver-refine/` — deliver stage that spawns reviewer, presents findings to user per-finding (resolve or tech debt), loops implementation up to 2 passes, appends deferred findings to workload-level `tech-debt.md`
+- Refine stage moved from implement workflow to deliver workflow — implementation agent now has 3 stages (orient → implement → summarise), review loop sits in main session where user can participate
+- `summary.md` changed to append-per-pass model — each pass adds a dated `## Pass N` section, no overwriting; review findings removed from summary (now in separate `code-review-findings.md`)
+- `swc_workflow_implement-refine` placeholder deleted — superseded by deliver-side refine
+- `plan.md` and `notes.md` updated to reflect new workflow sequence and artifact formats
+
 ## Session — complete 1.4.4, add 2.4.3 `2026-04-16`
 
 - Marked 1.4.4.7 done (agent progress messages deferred — considered but not built)

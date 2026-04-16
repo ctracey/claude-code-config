@@ -175,52 +175,69 @@ Each work item executed by the implementation subagent gets its own context docu
 
 ### summary.md format
 
-`summary.md` is the handoff artifact the implementation agent writes at the end of each pass. It travels intact to the deliver workflow — the agent does not editorially filter it. Written during the Summarise stage; read by the deliver workflow quality gate and the human at Gate 3.
+`summary.md` is the handoff artifact the implementation agent writes at the end of each pass. It is **append-only** — each pass adds a new dated section; earlier passes are never overwritten. Written during the Summarise stage; read by the deliver workflow refine stage and the human at Gate 3.
 
-**Purpose:** make it easy for the human to accept or reject the work. Leads with what changed, then evidence it works.
+**Purpose:** make it easy for the human to accept or reject the work across all passes. Leads with what changed each pass, then evidence it works.
 
-**Structure:**
+**Code review findings are separate.** Review findings live in `code-review-findings.md` (written by `swc_code-reviewer`), not in summary.md. Gate 3 reads both.
+
+**Structure — first pass (creates file):**
 
 ```markdown
-# Summary — <N>: <title> — Pass <n> — <YYYY-MM-DD>
+# Summary — <N>: <title>
 
-## Changes
+## Pass 1 — <YYYY-MM-DD>
+
+### Changes
 
 [Bulleted list of what was done — one bullet per logical change. Be specific: file names, function names, what changed and why.]
 
-## Testing
+### Testing
 
 [What was tested and how — automation run (framework, command, outcome) and any manual scenarios walked through.]
 
-## Test results
+### Test results
 
 [Pass/fail counts, command output summary, or "no automated tests — verified by [method]".]
 
-## Pipeline
+### Pipeline
 
-[Results of running the project pipeline as defined in pipeline.md. For each check: what was run, what was expected, what happened. Omit if no pipeline.md defined.]
+[Results of running the project pipeline as defined in pipeline.md. Write "No pipeline.md defined — skipped." if absent.]
 
-## Build confidence
+### Build confidence
 
 [One or two sentences: overall confidence the build is working and why. Flag any caveats.]
 
-## Review findings
+### Scope flags
 
-[Structured findings from the Refine stage code-reviewer. Each finding: severity (info/warn/error), location, description. Write "None" if the reviewer found nothing.]
+[Work observations outside the agreed brief — not acted on, raised for Gate 3. Write "None" if nothing to flag.]
 
-## Scope flags
+### Approach needs revisiting
 
-[Work observations that are outside the agreed brief — not acted on, but raised for Gate 3. Write "None" if nothing to flag.]
+[If the agreed approach proved unworkable, describe what was encountered and what a better approach would be. Write "No" if approach held.]
+```
 
-## Approach needs revisiting
+**Subsequent passes — append only:**
 
-[If the agreed approach proved unworkable mid-implementation, describe what was encountered and what a better approach would be. This flag triggers Gate 1 again. Write "No" if approach held.]
+```markdown
+
+---
+
+## Pass <n> — <YYYY-MM-DD>
+
+### Changes
+
+[What changed in this pass relative to the previous — focus on what was fixed or improved.]
+
+### Testing / Test results / Pipeline / Build confidence / Scope flags / Approach needs revisiting
+
+[Same sections — updated for this pass only.]
 ```
 
 **What goes where:**
 - `Changes` is always present — if nothing changed, something is wrong
-- `Review findings` carries the Refine stage output intact — do not summarise or omit findings
-- `Approach needs revisiting` is a gate signal — if set to anything other than "No", the deliver workflow must surface it to the user before Gate 3
+- `Approach needs revisiting` is a gate signal — if set to anything other than "No", the deliver workflow surfaces it to the user before Gate 3
+- Review findings → `code-review-findings.md` (separate file, fresh each review pass)
 
 ---
 

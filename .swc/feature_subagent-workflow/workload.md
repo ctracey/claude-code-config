@@ -72,10 +72,10 @@
          - [x] 1.4.4.6. Doc updates during implementation — agent updates README and relevant docs as part of each pass; define what belongs in README and consider a way to guide this
          - [x] 1.4.4.7. Consider agent progress messages to main session — milestone transparency for workflow stages, feedback loops, and loop iteration count (e.g. implement cycle 2/3)
 
-     - [ ] 1.4.5. **Review integration**
-         - [ ] 1.4.5.1. Define structured findings format for code-reviewer
-         - [ ] 1.4.5.2. Wire code-reviewer into delivery workflow quality loop
-         - [ ] 1.4.5.3. On acceptance, ensure broader docs are updated — architecture.md, tests, inline code comments, and any other artefacts affected by the work item, not just task-specific docs
+     - [x] 1.4.5. **Review integration**
+         - [x] 1.4.5.1. Define structured findings format for code-reviewer
+         - [x] 1.4.5.2. Wire code-reviewer into delivery workflow quality loop
+         - [x] 1.4.5.3. On acceptance, ensure broader docs are updated — architecture.md, tests, inline code comments, and any other artefacts affected by the work item, not just task-specific docs
 
      - [ ] 1.4.6. **To consider**
          - [ ] 1.4.6.1. Implementation agent reflection — does this live in context.md or the summary artifact?

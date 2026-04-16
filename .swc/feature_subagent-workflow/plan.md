@@ -86,12 +86,16 @@ Findings trigger another implementation pass (via `swc_implement`) to address qu
   │           ├── Implements against approved spec until tests pass
   │           ├── Documents decisions and assumptions in context.md (appends new pass)
   │           ├── Flags scope concerns in summary, continues on original scope
-  │           └── Returns rich summary artifact
+  │           └── Appends pass section to summary.md, returns
   │
-  ├── code-reviewer agent (autonomous — quality pre-filter)
-  │     ├── Code quality, SOLID, refactoring suggestions
-  │     └── Findings → /swc-implement again to address quality issues
-  │           └── Loop until quality bar met
+  ├── swc_code-reviewer agent (autonomous — quality pre-filter)
+  │     ├── Reads requirements.md, specs.md, summary.md, code files
+  │     ├── Reviews: quality, SOLID, security, test coverage
+  │     └── Writes structured findings to code-review-findings.md (BLOCK/WARN/PASS)
+  │
+  ├── [REFINE] User decides per finding: resolve or tech debt
+  │     ├── Resolve → /swc-implement again with findings in brief (max 2 loops)
+  │     └── Tech debt → appended to tech-debt.md, advance
   │
   └── [GATE 3] Human review — correctness and satisfaction (blocking gate)
         Human sees: tests passing, code quality cleared, summary artifact
