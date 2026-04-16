@@ -4,6 +4,13 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — README way + impl doc maintenance policy `2026-04-16`
+
+- Expanded `docs/readme/way.md` — full standard structure (what/who/why overview formula, Architecture, Environment Setup, Operations, CI/CD, Contributing, License), added `files: README\.md$` trigger, aligned `docs/` layout to project conventions, added agent update guidance scoped to affected sections only
+- Updated `swc_workflow_implement-implement` step 6 — replaced one-liner with explicit per-file doc maintenance policy; agent updates docs as it goes, not batched at the end
+- Discussed README structure against industry standards — confirmed contributing and license as additions; operations detail moved to `docs/operations.md`
+- Marked 1.4.4.6 done
+
 ## Session — deliver-implement exit criteria + orient skill refinements `2026-04-16`
 
 - Added `## Exit criteria` to `swc_workflow_deliver-implement` — `summary.md` existence gates the orchestrator, confirming full workflow completion through the summarise stage

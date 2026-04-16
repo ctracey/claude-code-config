@@ -69,7 +69,7 @@
          - [x] 1.4.4.3. Define the rich summary artifact format
          - [x] 1.4.4.4. Build the implementation workflow skill
          - [x] 1.4.4.5. Implementation workflow — mark work item as in-progress at start of orient stage, done on successful summarise
-         - [ ] 1.4.4.6. Doc updates during implementation — agent updates README and relevant docs as part of each pass; define what belongs in README and consider a way to guide this
+         - [x] 1.4.4.6. Doc updates during implementation — agent updates README and relevant docs as part of each pass; define what belongs in README and consider a way to guide this
          - [ ] 1.4.4.7. Consider agent progress messages to main session — milestone transparency for workflow stages, feedback loops, and loop iteration count (e.g. implement cycle 2/3)
 
      - [ ] 1.4.5. **Review integration**

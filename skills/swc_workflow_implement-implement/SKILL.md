@@ -39,7 +39,16 @@ For each scenario:
    - `- **Decision:** [what was chosen and why]`
    - `- **Assumption:** [what was assumed, should be verified]`
    - `- **Tried:** [what didn't work and why]`
-6. **Update docs** — if observable behaviour changed: update README. If a convention was clarified: update the relevant `.swc/` doc.
+6. **Update docs** — keep docs current as you go; do not batch all doc updates to the end.
+   - `README.md` — update only the section(s) directly affected by this scenario:
+     - New or changed components → Architecture section
+     - New or changed commands → Operations section (or `docs/operations.md`)
+     - Pipeline changes → CI/CD section
+     - Do not rewrite sections unrelated to this work item
+   - `docs/operations.md` — if run/build/test commands changed
+   - `docs/environment.md` — if setup steps or prerequisites changed
+   - `docs/architecture.md` — if the design or component relationships changed
+   - `.swc/` docs — if a convention, constraint, or decision was clarified
 
 #### Skill / Way / Agent work items
 
