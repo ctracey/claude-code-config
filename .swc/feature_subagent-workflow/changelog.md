@@ -4,6 +4,16 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — deliver review stage (Gate 3) `2026-04-16`
+
+- New `skills/swc_workflow_deliver-review/` — final review stage: presents implementation summary, QA evidence (agent-reported), code review findings; offers to run dev server if pipeline.md defines one; accept path returns to orchestrator, feedback path writes `feedback.md` and re-launches delivery workflow from requirements
+- Updated `swc_workflow_deliver` — `review` added as 6th stage, `on_complete` updated
+- Updated `swc_workflow_deliver-refine` — "Ready for Gate 3" replaced with "Advancing to review"
+- Work item docs for 1.4.2.5: `requirements.md` and `specs.md` capturing intent, constraints, 8 EARS requirements, 11 Gherkin scenarios
+- New `skills/swc_workload-item-start/` — silent in-progress marker for agent workflows (from prior session)
+- Work item docs for 1.4.4.5 (from prior session)
+- 1.4.2.5 marked done
+
 ## Session — workload housekeeping `2026-04-16`
 
 - Marked 1.1.5 done — doc update timing is defined (post-task, on handoff)

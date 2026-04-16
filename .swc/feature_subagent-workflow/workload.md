@@ -25,8 +25,7 @@
      - [x] 1.2.9. Rename this skillset
      - [x] 1.2.10. Move .swc to root of repo instead of inside .claude and consider tracking decoupling — the `todo-*` prefix ties skills to a specific file format; evaluate whether the skills should be renamed to reflect the workflow concept rather than the storage mechanism, and whether tracking (the todo files) should be decoupled from the workflow skills themselves
      - [ ] 1.2.11. Resolve workload guard / skill conflict — the guard hook fires on any direct edit to workload.md, including edits made by swc_workload-update itself; the guard and skill need a shared mechanism (e.g. a CLI tool or detectable marker) so sanctioned edits are not flagged
-     - [ ] 1.2.12. Rename `workloads` key to `workloadContexts` in `_meta.json` schema — update all skills and docs that read/write this key
-     - [-] 1.2.13. Build a workload rendering script — parse and display workload.md reliably via script (like progress.py for the banner) so swc_workload doesn't rely on manual LLM parsing, which drops sub-items at scale
+     - [x] 1.2.13. Build a workload rendering script — parse and display workload.md reliably via script (like progress.py for the banner) so swc_workload doesn't rely on manual LLM parsing, which drops sub-items at scale
 
       
   - [x] 1.3. **Planning workflow for new project**
@@ -53,7 +52,7 @@
          - [x] 1.4.2.2. Gate 2 — write test spec, human approves
          - [x] 1.4.2.3. Spawn implementation agent — assemble brief and delegate to swc_implement
          - [x] 1.4.2.4. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
-         - [ ] 1.4.2.5. Gate 3 — human review handoff (tests passing, quality cleared, summary)
+         - [x] 1.4.2.5. Gate 3 — human review handoff (tests passing, quality cleared, summary)
          - [ ] 1.4.2.6. Commit and push on satisfaction
          - [ ] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
          - [x] 1.4.2.8. Add solution design stage to deliver workflow — insert a pre-spawn stage between specs and implement where implementation-level questions are resolved with the user before the agent brief is sealed
@@ -98,6 +97,7 @@
      - [-] 2.4.1. Design MCP service interface — expose todo file read/write/query operations as MCP tools so any agent or skill can manage todos via a standard protocol rather than direct file I/O
      - [ ] 2.4.2. Implement MCP service
      - [ ] 2.4.3. Consider agent progress transparency via MCP — how workflow stage milestones, feedback loops, and loop iteration count are surfaced through the MCP interface rather than direct session messages
+     - [ ] 2.4.4. Rename `workloads` key in `_meta.json` schema — update all skills and docs that read/write this key; decide on the new name as part of MCP schema design
   - [ ] 2.5. **Deliver batching**
      - [ ] 2.5.1. Consider delivering multiple work items in a single session — how batching interacts with gates, quality loops, and user attention
   - [ ] 2.6. **Deliver analysis mode**

@@ -55,7 +55,7 @@ Extract:
 
 **PASS** — no action needed. Announce and advance:
 
-> "Review complete — no issues found. Ready for Gate 3."
+> "Review complete — no issues found. Advancing to review."
 
 Return control to the orchestrator.
 
@@ -142,7 +142,7 @@ Wait for the user's choice and act accordingly.
 
 Once all findings are resolved or deferred, announce:
 
-> "Refine complete. [N] finding(s) resolved, [N] deferred to tech-debt.md. Ready for Gate 3."
+> "Refine complete. [N] finding(s) resolved, [N] deferred to tech-debt.md. Advancing to review."
 
 Return control to the orchestrator.
 
