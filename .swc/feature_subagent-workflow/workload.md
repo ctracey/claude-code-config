@@ -8,7 +8,7 @@
      - [x] 1.1.2. Build the todo-begin skill (scaffold todo + plan + architecture from a documented plan)
      - [x] 1.1.3. Explicitly check and confirm git repo state with user as the first step of planning — branch, remote, open PRs — in a streamlined single exchange before proceeding
      - [x] 1.1.4. Split _notes and _changelog into separate docs
-     - [-] 1.1.5. Define when and how notes/docs are updated in the workflow (post-task, post-review, or on handoff)
+     - [x] 1.1.5. Define when and how notes/docs are updated in the workflow (post-task, post-review, or on handoff)
      - [x] 1.1.6. Switch from todo-pr tracking to .swc workload tracking, Decide tracking strategy (branch-only vs always vs never)
      - [ ] 1.1.7. Add cleanup step to ship flow if branch-only approach adopted
 
@@ -51,8 +51,8 @@
          - [x] 1.4.2.0. Build `swc_workflow_deliver` skill — entry-point skill that resolves the target work item, confirms with the user, and delegates to `swc-workflow-orchestrator` with the deliver stage definitions (stub created; needs full stage wiring)
          - [x] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
          - [x] 1.4.2.2. Gate 2 — write test spec, human approves
-         - [-] 1.4.2.3. Spawn implementation agent — assemble brief and delegate to swc_implement
-         - [ ] 1.4.2.4. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
+         - [x] 1.4.2.3. Spawn implementation agent — assemble brief and delegate to swc_implement
+         - [x] 1.4.2.4. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
          - [ ] 1.4.2.5. Gate 3 — human review handoff (tests passing, quality cleared, summary)
          - [ ] 1.4.2.6. Commit and push on satisfaction
          - [ ] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
@@ -77,17 +77,17 @@
          - [x] 1.4.5.2. Wire code-reviewer into delivery workflow quality loop
          - [x] 1.4.5.3. On acceptance, ensure broader docs are updated — architecture.md, tests, inline code comments, and any other artefacts affected by the work item, not just task-specific docs
 
-     - [ ] 1.4.6. **To consider**
+     - [-] 1.4.6. **To consider**
          - [ ] 1.4.6.1. Implementation agent reflection — does this live in context.md or the summary artifact?
-         - [ ] 1.4.6.2. Agent identity — surface clear agent name to user so role boundary is always visible
+         - [x] 1.4.6.2. Agent identity — surface clear agent name to user so role boundary is always visible
          - [ ] 1.4.6.3. "Approach needs revisiting" signal — explicit flag in summary artifact that triggers Gate 1 again
 
 
 - [ ] **1.5. Batch skill acceptance**
      - [ ] 1.5.1. Walk through all swc skills and verify each against its acceptance criteria — identify gaps, inconsistencies, or stale placeholder content
 
-- [ ] **1.6. swc_push improvements**
-     - [ ] 1.6.1. Improve swc_push to handle local repos — detect when no remote is configured and commit only (skip push and PR comment steps)
+- [x] **1.6. swc_push improvements**
+     - [x] 1.6.1. Improve swc_push to handle local repos — detect when no remote is configured and commit only (skip push and PR comment steps)
 
 - [ ] **2. Advanced improvements**
   - [ ] 2.2. **Ways hygiene**

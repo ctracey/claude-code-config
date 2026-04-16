@@ -4,6 +4,13 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — workload housekeeping `2026-04-16`
+
+- Marked 1.1.5 done — doc update timing is defined (post-task, on handoff)
+- Marked 1.4.2.3 and 1.4.2.4 done — spawn implementation agent and quality loop stages complete
+- Marked 1.4.6.2 done — agent identity (surfacing clear role boundary) addressed; 1.4.6 now in-progress
+- Marked 1.6 done (+ 1.6.1) — swc_push local repo support considered complete
+
 ## Session — build 1.4.5 review integration `2026-04-16`
 
 - New `agents/swc_code-reviewer.md` — swc-aware reviewer; reads work item docs + code, writes structured findings (BLOCK/WARN/PASS verdict) to `code-review-findings.md`
