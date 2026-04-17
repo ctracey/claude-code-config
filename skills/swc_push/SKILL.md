@@ -34,7 +34,13 @@ Then ask:
 
 Wait for confirmation or corrections.
 
-### 3. Update workload changelog
+### 3. Test check
+
+If tests have been run and are passing since the last changes — continue without asking.
+
+If unknown, or tests were run before the most recent changes: ask the user whether tests are passing before proceeding.
+
+### 4. Update workload changelog
 
 Append a new session entry to `changelog.md` in the active workload folder:
 
@@ -47,7 +53,7 @@ Append a new session entry to `changelog.md` in the active workload folder:
 
 Date is today. Description is a short phrase (not a sentence). Bullets are factual — what changed and why, not a restatement of file names.
 
-### 4. Update other docs if needed
+### 5. Update other docs if needed
 
 Check whether any other workload docs need updating:
 - `notes.md` — if a decision or convention was settled this session
@@ -56,19 +62,19 @@ Check whether any other workload docs need updating:
 
 Make only changes that reflect what actually happened. Don't pad.
 
-### 5. Confirm ready to commit and push
+### 6. Confirm ready to commit and push
 
 Show the user what was written to the docs, then ask:
 > "Docs updated. Ready to commit and push?"
 
 Wait for confirmation. If they say no or want to make changes, address their feedback and re-confirm before proceeding.
 
-### 6. Commit and push
+### 7. Commit and push
 
-Stage all modified tracked files and the workload docs, then commit and push:
+Stage all changes (tracked and untracked), then commit and push:
 
 ```bash
-git add -u
+git add .
 git commit -m "<conventional commit message>"
 git push
 ```
@@ -78,7 +84,7 @@ Write the commit message following the conventional commit format: `type(scope):
 Report the result:
 > "Committed and pushed. [short sha] on [branch]."
 
-### 7. PR comment
+### 8. PR comment
 
 After pushing, check for an open PR:
 
@@ -107,7 +113,7 @@ If no, skip silently.
 ## Key principles
 
 - Changelog entries are session-level — one entry per session, even if multiple tasks touched.
-- Commit happens only after the user confirms in step 5 — never before.
+- Commit happens only after the user confirms in step 7 — never before.
 - PR comment is always drafted and posted after the push — never before.
 - PR comment is optional and user-confirmed — never post without showing the draft and getting approval.
 - If no workload is active, write the changelog entry to the most recently modified `.swc/` folder and note it.

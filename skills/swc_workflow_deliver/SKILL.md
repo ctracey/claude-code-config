@@ -72,7 +72,11 @@ Before starting, read the `stages` array from the JSON config in step 2. For eac
 
 If yes, proceed. If no, ask what they actually need and stop here.
 
-### 2. Run the workflow
+### 2. Mark work item in-progress
+
+Before starting the workflow, silently mark the work item `[-]` by invoking `swc_workload-item-start` with the work item number. Emit no output — this is a silent side-effect.
+
+### 3. Run the workflow
 
 **Use the Skill tool to invoke `swc_workflow-orchestrator`.** Do not run stages inline — the orchestrator manages the progress banner, stage gates, and exit criteria checks. Pass the following workflow definition as the args:
 
@@ -85,7 +89,8 @@ If yes, proceed. If no, ask what they actually need and stop here.
     { "name": "solution-design", "skill": "swc_workflow_deliver-solution-design", "args": "" },
     { "name": "implement",       "skill": "swc_workflow_deliver-implement",       "args": "" },
     { "name": "refine",          "skill": "swc_workflow_deliver-refine",          "args": "" },
-    { "name": "review",          "skill": "swc_workflow_deliver-review",          "args": "" }
+    { "name": "review",          "skill": "swc_workflow_deliver-review",          "args": "" },
+    { "name": "accept",          "skill": "swc_workflow_deliver-accept",          "args": "" }
   ],
   "on_complete": "Delivery workflow complete."
 }

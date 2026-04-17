@@ -53,8 +53,8 @@
          - [x] 1.4.2.3. Spawn implementation agent — assemble brief and delegate to swc_implement
          - [x] 1.4.2.4. Quality loop — orchestrate review agent + fresh impl agent until quality cleared
          - [x] 1.4.2.5. Gate 3 — human review handoff (tests passing, quality cleared, summary)
-         - [ ] 1.4.2.6. Commit and push on satisfaction
-         - [ ] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
+         - [x] 1.4.2.6. Commit and push on satisfaction
+         - [x] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
          - [x] 1.4.2.8. Add solution design stage to deliver workflow — insert a pre-spawn stage between specs and implement where implementation-level questions are resolved with the user before the agent brief is sealed
          - [ ] 1.4.2.9. Add quality baseline stage to deliver workflow — run health checks after solution design, surface failures with scope relevance assessment, capture decisions in quality-baseline.md for the implementation agent brief
 

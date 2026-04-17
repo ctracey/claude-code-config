@@ -4,6 +4,14 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — accept stage + work item status wiring + swc_push test check `2026-04-17`
+
+- New `skills/swc_workflow_deliver-accept/` — accept stage: commits and pushes on user satisfaction, marks work item `[x]` via swc_workload-update
+- New `hooks/swc_pre-commit` — pre-commit hook tracked in git for reference; removed from git hook wrapper (too harsh as a blocker)
+- Updated `swc_workflow_deliver` — added mark-in-progress step before workflow starts; wired `accept` as 7th stage (1.4.2.6, 1.4.2.7)
+- Updated `swc_workflow_deliver-review` — fixed "final stage" wording; success message now hands off to accept rather than implying commit
+- Updated `swc_push` — `git add -u` → `git add .`; added test check step (step 3) before doc updates — skips if tests already known passing, asks user if unknown
+
 ## Session — deliver review stage (Gate 3) `2026-04-16`
 
 - New `skills/swc_workflow_deliver-review/` — final review stage: presents implementation summary, QA evidence (agent-reported), code review findings; offers to run dev server if pipeline.md defines one; accept path returns to orchestrator, feedback path writes `feedback.md` and re-launches delivery workflow from requirements

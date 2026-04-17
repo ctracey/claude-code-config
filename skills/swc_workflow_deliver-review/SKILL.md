@@ -1,6 +1,6 @@
 ---
 name: swc_workflow_deliver-review
-description: Review stage of the delivery workflow — present implementation summary and QA evidence to the human for acceptance or feedback. Sixth and final stage of the delivery workflow. Use when invoked by swc_workflow_deliver or via /swc-workflow-deliver-review.
+description: Review stage of the delivery workflow — present implementation summary and QA evidence to the human for acceptance or feedback. Sixth stage of the delivery workflow. Use when invoked by swc_workflow_deliver or via /swc-workflow-deliver-review.
 allowed-tools: Read, Write, Bash, Skill, Glob
 ---
 
@@ -88,7 +88,7 @@ Wait for the developer's response.
 
 Confirm and return:
 
-> "Great — ready for commit and push."
+> "Great — moving to accept."
 
 Return control to the orchestrator.
 
