@@ -78,9 +78,14 @@ Findings trigger another implementation pass (via `swc_implement`) to address qu
   ├── [GATE 2] Present spec → human approves
   ├── [GATE 3] Solution design — surface implementation questions → human resolves
   │
+  ├── [PRE-FLIGHT] Optional health check (opt-in, main session)
+  │     User confirms → commands sourced from solution.md (fallback: architecture.md)
+  │     → findings presented with scope relevance → user decides on failures
+  │     → quality-baseline.md written → included in brief
+  │
   ├── /swc-implement (main session — spawns agent)
   │     Brief: work item + plan.md + architecture.md + requirements.md + specs.md
-  │     + solution.md + context.md from prior passes (if any) + review findings (if any)
+  │     + solution.md + quality-baseline.md (if exists) + context.md from prior passes (if any) + review findings (if any)
   │     └── Implementation agent (autonomous — follows implementation workflow)
   │           ├── Reads prior context.md passes to understand what was tried and why
   │           ├── Implements against approved spec until tests pass
@@ -174,6 +179,7 @@ Reference docs live in the `.swc/` workload folder for the branch. All scoped to
 | `.swc/<folder>/workitems/<N>/requirements.md` | Per-item: intent, constraints, approach direction. Written during requirements stage. |
 | `.swc/<folder>/workitems/<N>/specs.md` | Per-item: acceptance criteria and scenarios. Written during specs stage. |
 | `.swc/<folder>/workitems/<N>/solution.md` | Per-item: resolved implementation decisions and technical guidance. Written during solution-design stage. |
+| `.swc/<folder>/workitems/<N>/quality-baseline.md` | Per-item: pre-flight health check results — commands run, findings with scope relevance, and user decisions. Written by the implement stage before spawning the agent; read by the agent during orient. Optional — only written if the user opts in. |
 | `.swc/<folder>/workitems/<N>/context.md` | Per-item: agreed approach, decisions made, open questions. Written by the implementation subagent during execution. |
 
 ### `workload.md` task format

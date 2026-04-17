@@ -4,6 +4,13 @@ Append-only. One section per task. Records what was decided, changed, or learned
 
 ---
 
+## Session — quality baseline pre-flight block `2026-04-17`
+
+- Updated `skills/swc_workflow_deliver-implement/SKILL.md` — added opt-in pre-flight health check block (step 2) before agent spawn; sources check commands from `solution.md` (fallback: `architecture.md`); surfaces findings with scope relevance; open-ended user decision on failures; writes `quality-baseline.md`; agent prompt conditionally references it when present
+- Updated `plan.md` — workflow diagram and reference docs table updated to document `quality-baseline.md`
+- New `workitems/1.4.2.9/requirements.md` — revised from "new stage" to "block inside implement stage"; opt-in confirmation; decision log capturing the scope reduction rationale
+- Scope decision: dropped the separate stage approach in favour of a lightweight pre-flight block — same value, less ceremony
+
 ## Session — accept stage + work item status wiring + swc_push test check `2026-04-17`
 
 - New `skills/swc_workflow_deliver-accept/` — accept stage: commits and pushes on user satisfaction, marks work item `[x]` via swc_workload-update

@@ -20,9 +20,53 @@ Display the work item being handed to the implementation agent:
 
 > "Spawning implementation agent for **[N]: [name]**."
 
-### 2. Spawn the implementation agent
+### 2. Pre-flight health check (opt-in)
+
+Ask the user:
+> "Want to run a quick health check before spawning the agent? (y/n)"
+
+**If no:** skip to step 3.
+
+**If yes:**
+
+1. Read `.swc/<folder>/workitems/<N>/solution.md` for check commands. If none found, read `architecture.md`. If still none, inform the user and skip:
+   > "No check commands found in solution.md or architecture.md — skipping pre-flight."
+
+2. Run each command and collect output.
+
+3. Present results to the user — for each failure, include an assessment of whether it is in scope for this work item or pre-existing noise:
+   > "Pre-flight results:
+   > ✔ [command] — passed
+   > ✗ [command] — [failure summary] _(in scope / pre-existing)_"
+
+4. If any failures: ask the user how they want to proceed:
+   > "Some checks failed. How would you like to proceed?"
+
+   Wait for their response and capture it.
+
+5. Write `.swc/<folder>/workitems/<N>/quality-baseline.md`:
+
+   ```markdown
+   # Quality Baseline — [N]: [name]
+
+   ## Commands run
+
+   - `[command]` — pass / fail: [brief result]
+
+   ## Findings
+
+   [Failure details and scope relevance assessment. Omit section if all passed.]
+
+   ## Decisions
+
+   [User's decision on each failure. Omit section if no failures.]
+   ```
+
+### 3. Spawn the implementation agent
 
 Use the Agent tool to spawn a general-purpose agent. Pass only the work item number — the agent uses `swc_lookup` to discover the workload folder and `swc_workload` to find the work item name.
+
+If `quality-baseline.md` was written in step 2, include a note in the prompt so the agent reads it during orient.
 
 ```
 Agent(
@@ -34,6 +78,11 @@ Agent(
 Use the swc_lookup skill to find the active workload folder, then read workload.md to confirm the work item name.
 
 Follow the swc_workflow_implement skill to complete this work item.
+
+[Include only if quality-baseline.md exists:]
+A quality-baseline.md exists at .swc/<folder>/workitems/<N>/quality-baseline.md — read it during orient.
+It records the pre-flight check results and user decisions on any failures.
+Use the same commands to verify you have not introduced new failures before completing your pass.
 
 CONSTRAINTS — you may NOT:
 - Run git commit, git push, git tag, or any variant
@@ -47,7 +96,7 @@ Delivery and git operations happen after user review — your job ends at a work
 
 Wait for the agent to return.
 
-### 3. Evaluate exit criteria
+### 4. Evaluate exit criteria
 
 After the agent completes, check `.swc/<folder>/workitems/<N>/` for outputs.
 
@@ -58,7 +107,7 @@ After the agent completes, check `.swc/<folder>/workitems/<N>/` for outputs.
 | Summary report exists | Does `summary.md` exist at `.swc/<folder>/workitems/<N>/summary.md`? |
 | Work item ready for review | Does `context.md` contain a completed pass section and no unresolved blockers? |
 
-### 4. Report results
+### 5. Report results
 
 Display all four criteria with pass/fail status:
 
@@ -68,7 +117,7 @@ Display all four criteria with pass/fail status:
 > - [pass/fail] Summary report exists (`summary.md`)
 > - [pass/fail] Work item ready for review
 
-### 5. Return control
+### 6. Return control
 
 Return to the orchestrator with the criteria evaluation result. Do not attempt to self-advance if criteria are unmet — the orchestrator handles the gate decision.
 

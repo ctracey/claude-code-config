@@ -46,7 +46,7 @@
          - [x] 1.4.1.4. Define how swc_deliver grounds Gate 1 in codebase reality (R1)
          - [x] 1.4.1.5. Define quality loop visibility in Gate 3 handoff (R5)
 
-     - [-] 1.4.2. **Delivery workflow — swc_deliver**
+     - [x] 1.4.2. **Delivery workflow — swc_deliver**
          - [x] 1.4.2.0. Build `swc_workflow_deliver` skill — entry-point skill that resolves the target work item, confirms with the user, and delegates to `swc-workflow-orchestrator` with the deliver stage definitions (stub created; needs full stage wiring)
          - [x] 1.4.2.1. Gate 1 — propose approach with codebase context, human agrees
          - [x] 1.4.2.2. Gate 2 — write test spec, human approves
@@ -56,7 +56,7 @@
          - [x] 1.4.2.6. Commit and push on satisfaction
          - [x] 1.4.2.7. Update work item status during delivery workflow — mark `[-]` when delivery starts, `[x]` on successful completion
          - [x] 1.4.2.8. Add solution design stage to deliver workflow — insert a pre-spawn stage between specs and implement where implementation-level questions are resolved with the user before the agent brief is sealed
-         - [ ] 1.4.2.9. Add quality baseline stage to deliver workflow — run health checks after solution design, surface failures with scope relevance assessment, capture decisions in quality-baseline.md for the implementation agent brief
+         - [x] 1.4.2.9. Add quality baseline stage to deliver workflow — run health checks after solution design, surface failures with scope relevance assessment, capture decisions in quality-baseline.md for the implementation agent brief
 
      - [x] 1.4.3. **Agent spawning — swc_implement**
          - [x] 1.4.3.1. Define brief assembly (work item + approach + spec + plan.md + architecture.md + context.md from prior passes + review findings)
