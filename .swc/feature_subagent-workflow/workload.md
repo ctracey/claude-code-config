@@ -11,6 +11,7 @@
      - [x] 1.1.5. Define when and how notes/docs are updated in the workflow (post-task, post-review, or on handoff)
      - [x] 1.1.6. Switch from todo-pr tracking to .swc workload tracking, Decide tracking strategy (branch-only vs always vs never)
      - [ ] 1.1.7. Add cleanup step to ship flow if branch-only approach adopted
+     - [ ] 1.1.8. Add `.swc/` to `.gitignore` during swc init — when `swc_init` scaffolds a new workload folder, check whether a `.gitignore` exists in the project root and append a `.swc/` entry if not already present, so workload tracking files are not accidentally committed to the project repo
 
 
   - [-] 1.2. **Workload management**
@@ -82,8 +83,9 @@
          - [ ] 1.4.6.3. "Approach needs revisiting" signal — explicit flag in summary artifact that triggers Gate 1 again
 
 
-- [ ] **1.5. Batch skill acceptance**
+- [-] **1.5. Batch skill acceptance**
      - [ ] 1.5.1. Walk through all swc skills and verify each against its acceptance criteria — identify gaps, inconsistencies, or stale placeholder content
+     - [-] 1.5.2. Streamline permissions for swc usage — reduce or eliminate permission prompts when swc skills run
 
 - [x] **1.6. swc_push improvements**
      - [x] 1.6.1. Improve swc_push to handle local repos — detect when no remote is configured and commit only (skip push and PR comment steps)
