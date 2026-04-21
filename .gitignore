@@ -1,6 +1,13 @@
 # Ignore everything by default
 *
 
+# SWC workload tracking (persistent cross-session planning docs)
+!.swc/
+!.swc/_meta.json
+!.swc/*/
+!.swc/**/
+!.swc/**/*.md
+
 # Track these directories
 !.gitignore
 !CLAUDE.md

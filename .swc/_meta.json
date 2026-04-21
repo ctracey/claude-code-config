@@ -1,0 +1,5 @@
+{
+  "workloads": {
+    "feature/subagent-workflow": "feature_subagent-workflow"
+  }
+}
